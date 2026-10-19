@@ -13,6 +13,7 @@ use App\Models\OrderRequest;
 use App\Models\Product;
 use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
+use App\Services\Finance\PaymentProofService;
 use App\Services\Finance\PaymentService;
 use App\Services\Pricing\PricingService;
 use App\Support\Money;
@@ -188,5 +189,14 @@ class PortalController extends Controller
         }
 
         return response()->json(['data' => $chat->list($item, (int) $request->query('after', 0)), 'meta' => ['locked' => $chat->isLocked($item), 'can_send' => ! $chat->isLocked($item), 'label' => 'العميل']]);
+    }
+
+    public function proof(Request $request, Order $order): RedirectResponse
+    {
+        $this->orderOf($request, $order);
+        $d = $request->validate(['file' => ['required', 'file'], 'amount_minor' => ['required', 'integer', 'min:1', 'max:100000000'], 'method' => ['required', 'in:CASH,BANK_TRANSFER,WALLET,CARD'], 'reference' => ['nullable', 'string', 'max:100']]);
+        app(PaymentProofService::class)->submit($order, $request->file('file'), (int) $d['amount_minor'], $d['method'], $d['reference'] ?? null, 'customer', $this->me($request)->id);
+
+        return back()->with('success', 'تم إرسال إثبات الدفع للمراجعة. لن يُحتسب إلا بعد تأكيد المطبعة.');
     }
 }

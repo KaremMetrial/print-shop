@@ -10,8 +10,10 @@ use App\Models\OrderItem;
 use App\Models\OrderLink;
 use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
+use App\Services\Finance\PaymentProofService;
 use App\Services\Orders\OrderLinkService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -135,5 +137,17 @@ class PublicLinkController extends Controller
         }
 
         return response()->json(['data' => $chat->list($item, (int) $request->query('after', 0)), 'meta' => ['locked' => $chat->isLocked($item), 'can_send' => ! $chat->isLocked($item), 'label' => 'العميل']]);
+    }
+
+    public function proof(Request $request, string $token): RedirectResponse|Response
+    {
+        $link = $this->resolve($token);
+        if (! $link instanceof OrderLink) {
+            return $this->unavailable();
+        }
+        $d = $request->validate(['file' => ['required', 'file'], 'amount_minor' => ['required', 'integer', 'min:1', 'max:100000000'], 'method' => ['required', 'in:CASH,BANK_TRANSFER,WALLET,CARD'], 'reference' => ['nullable', 'string', 'max:100']]);
+        app(PaymentProofService::class)->submit(Order::findOrFail($link->order_id), $request->file('file'), (int) $d['amount_minor'], $d['method'], $d['reference'] ?? null, 'link', $link->id);
+
+        return back()->with('success', 'تم إرسال إثبات الدفع للمراجعة. لن يُحتسب إلا بعد تأكيد المطبعة.');
     }
 }

@@ -36,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
 
                 return $item && ($item->designer_id === $actor->id || $actor->hasPermission('orders.files.view'));
             });
+            // إثبات الدفع: المراجع المالي فقط (العميل لا يعيد تنزيله)
+            $r->register('payment_proof', fn ($file, $actor) => $actor instanceof User && $actor->hasPermission('payments.proofs.review'));
         });
         //
     }

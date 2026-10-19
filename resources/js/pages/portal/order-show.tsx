@@ -1,6 +1,8 @@
+import { ProofDialog } from '@/components/finance/proof-dialog';
 import { CustomerLayout } from '@/components/shell/customer-layout';
 import { formatDate, formatMoneyFixed } from '@/lib/money';
 import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface Props {
     order: {
@@ -29,6 +31,7 @@ const KV = ({ k, v }: { k: string; v: string }) => (
 
 /** S-085 — تفاصيل الأوردر للعميل المسجّل: بنود، مدفوعات، تسليم. */
 export default function PortalOrderShow({ order: o }: Props) {
+    const [proof, setProof] = useState(false);
     return (
         <CustomerLayout>
             <Head title={`الأوردر ${o.number}`} />
@@ -62,6 +65,10 @@ export default function PortalOrderShow({ order: o }: Props) {
                     <KV k="الإجمالي" v={formatMoneyFixed(o.grand_total_minor)} />
                     <KV k="المدفوع المؤكد" v={formatMoneyFixed(o.paid_minor)} />
                     <KV k="المتبقي عليك" v={formatMoneyFixed(o.remaining_minor)} />
+                    {o.remaining_minor > 0 && (
+                        <button type="button" onClick={() => setProof(true)} className="text-right text-[13px] font-[700] text-[var(--primary)]">إرسال إثبات دفع</button>
+                    )}
+                    {proof && <ProofDialog url={`/portal/orders/${o.id}/proofs`} remainingMinor={o.remaining_minor} onClose={() => setProof(false)} />}
                     {o.payments.map((p) => (
                         <div key={p.number} className="flex justify-between text-[12px] text-[var(--muted-foreground)]">
                             <span>{formatMoneyFixed(p.amount_minor)}</span>

@@ -1,3 +1,4 @@
+import { ProofDialog } from '@/components/finance/proof-dialog';
 import { LinkLayout } from '@/components/shell/link-layout';
 import { formatDate, formatMoneyFixed } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -50,6 +51,7 @@ const itemBadge = (s: string, a: boolean): [string, string, string] => (a ? ['م
 /** S-086 (مرحلة التصميم) + S-089..092 (حالات التنفيذ) — تجربة الأوردر عبر الرابط. */
 export default function LinkShow({ token, order: o }: Props) {
     const [open, setOpen] = useState(false);
+    const [proof, setProof] = useState(false);
     const idx = ORDER.indexOf(o.status === 'READY_FOR_PICKUP' ? 'READY_FOR_DELIVERY' : o.status);
     const [title, sub] = MSG[o.status] ?? ['', ''];
     const designStage = o.status === 'DESIGN_STAGE';
@@ -93,6 +95,7 @@ export default function LinkShow({ token, order: o }: Props) {
                         <div className="text-left text-[12px] leading-[normal] font-[400] text-[var(--muted-foreground)]">{sub}</div>
                     </div>
                 </div>
+                {proof && <ProofDialog url={`/l/${token}/proofs`} remainingMinor={o.remaining_minor} onClose={() => setProof(false)} />}
                 <div className="flex w-full shrink-0 items-start gap-[16px]">
                     <div className="flex w-[426px] shrink-0 flex-col items-end gap-[14px]">
                         <div className={card}>
@@ -103,6 +106,11 @@ export default function LinkShow({ token, order: o }: Props) {
                             </div>
                             <KV k="إجمالي الأوردر" v={formatMoneyFixed(o.grand_total_minor)} />
                             <KV k="المدفوع المؤكد" v={formatMoneyFixed(o.paid_minor)} />
+                            {o.remaining_minor > 0 && (
+                                <button type="button" onClick={() => setProof(true)} className="text-left text-[13px] leading-[normal] font-[700] text-[var(--primary)]">
+                                    إرسال إثبات دفع
+                                </button>
+                            )}
                             <button type="button" onClick={() => setOpen((v) => !v)} className="text-left text-[13px] leading-[normal] font-[700] text-[var(--primary)]">
                                 تفاصيل المدفوعات ⌄
                             </button>

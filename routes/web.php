@@ -19,6 +19,7 @@ use App\Http\Controllers\Operations\AccountingController;
 use App\Http\Controllers\Operations\AuditController;
 use App\Http\Controllers\Operations\DeliveryController;
 use App\Http\Controllers\Operations\PaymentDetailsController;
+use App\Http\Controllers\Operations\PaymentProofController;
 use App\Http\Controllers\Operations\ReportsController;
 use App\Http\Controllers\Operations\SearchController;
 use App\Http\Controllers\Operations\SettingsController;
@@ -123,6 +124,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/system', [SettingsController::class, 'index'])->name('settings.system');
     Route::patch('settings/system', [SettingsController::class, 'update'])->name('settings.system.update');
     Route::prefix('accounting')->name('accounting.')->controller(AccountingController::class)->group(function () {
+        Route::get('proofs', [PaymentProofController::class, 'index'])->name('proofs');
+        Route::post('proofs/{id}/approve', [PaymentProofController::class, 'approve'])->name('proofs.approve')->middleware('idempotent');
+        Route::post('proofs/{id}/reject', [PaymentProofController::class, 'reject'])->name('proofs.reject')->middleware('idempotent');
         Route::get('payments/{payment}', [PaymentDetailsController::class, 'show'])->name('payments.show');
         Route::get('payments/{payment}/receipt', [PaymentDetailsController::class, 'receipt'])->name('payments.receipt');
         Route::get('payments/{payment}/receipt/pdf', [PaymentDetailsController::class, 'receiptPdf'])->name('payments.receipt.pdf');
@@ -187,6 +191,7 @@ Route::prefix('l/{token}')->middleware(['throttle:link-access'])->name('link.')-
     Route::post('items/{item}/approve', 'approve')->name('approve');
     Route::get('files/{file}', 'file')->name('file');
     Route::match(['get', 'post'], 'items/{item}/chat', 'chat')->name('chat');
+    Route::post('proofs', 'proof')->name('proof')->middleware('idempotent');
 });
 
 // بوابة العميل المسجّل (جلسة منفصلة)
@@ -211,6 +216,7 @@ Route::prefix('portal')->name('portal.')->group(function () {
             Route::get('orders/{order}/items/{item}', 'item')->name('orders.item');
             Route::post('orders/{order}/items/{item}/approve', 'approve')->name('orders.approve')->middleware('idempotent');
             Route::get('files/{file}', 'file')->name('files');
+            Route::post('orders/{order}/proofs', 'proof')->name('orders.proof')->middleware('idempotent');
             Route::match(['get', 'post'], 'orders/{order}/items/{item}/chat', 'chat')->name('orders.chat');
             Route::get('account', 'account')->name('account');
         });
