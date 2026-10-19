@@ -1,0 +1,16 @@
+# 09 — سجل القرارات التقنية (ADR مختصر)
+
+| # | القرار | السبب | الأثر |
+|---|---|---|---|
+| ADR-01 | MySQL 8.4 بدل PostgreSQL | طلب المالك | لا vector index → البحث بالصورة بخدمة منفصلة؛ الـunique الجزئي بعمود nullable؛ trigger للـaudit يحتاج `log_bin_trust_function_creators=1` أو صلاحية TRIGGER |
+| ADR-02 | الفلوس BIGINT قروش + `Money` (HALF_UP) | تجنب float (§30.13) | قرار التقريب D1 مبدئي ويُراجع قبل Phase 2 |
+| ADR-03 | **mPDF** لكل PDF (فاتورة/إيصال/تذكرة طباعة) | spike 18/10: يدعم تشكيل العربي وRTL والجداول بدون Chrome أو Node في الـserver، نقي PHP | الأرقام المركبة (`#2026-0100`) تنعكس في سياق RTL → لف أي رقم/كود بـ `<bdi dir="ltr">` أو LRM. خط dejavusans مؤقت؛ نعتمد Cairo (ملف TTF مرخّص) عند بناء الفواتير |
+| ADR-04 | الملفات: disk خاص (`storage/app/private`)، نوع الملف من المحتوى (finfo)، default-deny عبر `FileAccessRegistry` | §35.6/35.7 | كل Module يسجل قواعد الوصول لنوع الأب؛ لا public URL؛ SVG/HTML مرفوضة؛ الحدود مبدئية (D2) |
+| ADR-05 | Idempotency بجدول `idempotency_keys` + رأس `Idempotency-Key` | منع تكرار الدفع/القبول/الاعتماد | الواجهة تولّد UUID لكل نموذج حساس وترسله؛ لازم job تنظيف لاحقًا |
+| ADR-06 | Outbox + `outbox:dispatch` كل دقيقة | فشل الإشعار لا يكسر العملية (BR-089) | المستمعون idempotent باستخدام `outbox.id` |
+| ADR-07 | Reverb للـrealtime، قنوات private بصلاحية على مستوى القناة | §35.8 | إعادة التحقق عند إعادة إسناد المصمم تُبنى في Phase 6 |
+| ADR-08 | أكواد الأخطاء في `ErrorCode` + توليد `generated.ts` | استقرار الأكواد بين الـBackend والـFrontend | `php artisan ts:generate --check` في الـCI |
+| ADR-09 | مطابقة الـUI لـ pendev/untitled.pen إلزامية | طلب المالك | القاعدة في CLAUDE.md |
+
+## قرارات معلّقة (من المالك)
+D1 التقريب · D2 حدود الملفات · D3 مزود WhatsApp · D4 مراجعة محجوزة · D5 الاحتفاظ/النسخ · D6 معيار البحث بالصورة · D7 فواتير قانونية · D8 الاستضافة

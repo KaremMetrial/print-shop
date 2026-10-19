@@ -4,10 +4,10 @@
 نفّذ بالترتيب داخل كل Phase. كل Task تُقفل فقط عند تحقق "Definition of Done" (ملف 05).
 
 ## Phase 0 — Foundation
-- [ ] T-0.1 DO: Docker Compose (php-fpm, nginx, pg16+pgvector, redis, minio, mailpit, reverb) — M
-- [ ] T-0.2 BE: `laravel new` + React/Inertia starter + TS strict — S
+- [~] T-0.1 DO: Docker Compose (php-fpm, nginx, mysql 8.4, redis, minio, mailpit, reverb) — M  (تم: mysql, redis, mailpit, app, queue, vite. ناقص: MinIO, Reverb, nginx)
+- [x] T-0.2 BE: `laravel new` + React/Inertia starter + TS strict — S
 - [ ] T-0.3 DO: CI (Pint, Larastan, Pest, tsc, eslint, vitest, build) — M
-- [ ] T-0.4 FE: RTL + Tailwind tokens + خط عربي + `<html dir=rtl lang=ar>` — S
+- [x] T-0.4 FE: RTL + Tailwind tokens + خط عربي + `<html dir=rtl lang=ar>` — S
 - [ ] T-0.5 FE: مكتبة UI (Button/Input/Select/Dialog/Toast/Table→Card/StatusBadge/Money/Date/Skeleton/EmptyState) — L
 - [ ] T-0.6 FE: Layouts الست + Sidebar ديناميكي من permissions — M
 - [ ] T-0.7 BE: `Money` VO + casts + helper EGP — S
@@ -105,8 +105,8 @@
 - [ ] T-8.2 BE: NotificationService + ActionService (claim/complete rules) + listeners لكل Event — L
 - [ ] T-8.3 FE: S-004/005/006 + bell realtime — M
 - [ ] T-8.4 BE/FE: Password recovery handling flow — M
-- [ ] T-8.5 BE/FE: Global search S-062 (pg_trgm/FTS) — M
-- [ ] T-8.6 DO/BE: Image-embedding service + pgvector + IndexingJob + eval harness — L
+- [ ] T-8.5 BE/FE: Global search S-062 (MySQL FULLTEXT + ngram للعربي / LIKE مفهرس على الهاتف) — M
+- [ ] T-8.6 DO/BE: Image-embedding service (Python + FAISS/Qdrant) + IndexingJob + eval harness — L
 - [ ] T-8.7 FE: S-063/064 camera/upload/results — M
 - [ ] T-8.8 BE/FE: WhatsApp manual templates + provider adapter (flagged) + failure→Action — M
 - [ ] T-8.9 QA: TC-090..096 + تقرير تقييم الصور — M

@@ -1,6 +1,7 @@
 # 05 — Checklists
 
 ## 1. Definition of Done — Task/Feature
+- [ ] **مطابقة UI:** الشاشة/المكوّن مطابق لـframe الـpen المحدد (لقطة مقارنة) + tokens فقط + لا مكوّن مخترع (القاعدة في CLAUDE.md)
 - [ ] Business rule مطبّقة وتطابق BR/REQ المرتبطين
 - [ ] Migration + constraints (FK, CHECK, UNIQUE) وليس منطق PHP فقط
 - [ ] FormRequest validation + Policy + اختبار 403

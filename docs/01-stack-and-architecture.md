@@ -9,7 +9,7 @@
 | Backend | Laravel 12 (PHP 8.3+) | Modular Monolith |
 | Frontend | React 19 + TypeScript + **Inertia.js** | بدون API منفصل للشاشات الداخلية |
 | UI | Tailwind + shadcn/ui (Radix) | RTL عبر `dir="rtl"` + logical properties |
-| DB | PostgreSQL 16 | معاملات مالية + `pgvector` للبحث بالصورة |
+| DB | **MySQL 8.4** (InnoDB, utf8mb4_unicode_ci) | معاملات مالية بـ `SELECT … FOR UPDATE` + CHECK constraints (مدعومة من 8.0.16) |
 | Queue/Cache | Redis + Laravel Horizon | Outbox + jobs |
 | Realtime | Laravel Reverb + Echo | شات + إشعارات + Actions |
 | Storage | S3-compatible خاص (MinIO محليًا) | لا public URLs |
@@ -18,7 +18,7 @@
 | PDF | mPDF أو Browsershot | لازم يدعم Arabic shaping + RTL (اختبره مبكرًا) |
 | Money | Integer minor units (قرش) + `brick/money` | ممنوع float |
 | Tests | Pest + Playwright (E2E) + Vitest | |
-| Image search | خدمة Python صغيرة (CLIP embeddings) + pgvector | Async عبر queue |
+| Image search | خدمة Python صغيرة (CLIP embeddings) تحتفظ بالـ index (FAISS/Qdrant) وMySQL يحفظ المرجع فقط | Async عبر queue؛ MySQL لا يدعم vector index |
 | Quality | Pint, Larastan (lvl 8), ESLint, Prettier, tsc strict | CI gate |
 
 ## 2. قرارات خاصة بـ Inertia (مهمة)
@@ -69,4 +69,15 @@ app/
 - UUID v7 أو bigint (القرار: **bigint داخليًا + ulid عام للروابط**؛ التوكن العام منفصل).
 - Enums لكل الحالات (PHP backed enums ↔ TS union types مولّدة بـ `spatie/laravel-typescript-transformer`).
 - كل نص واجهة في `lang/ar` (+ `resources/js/i18n`)، رسائل أخطاء بالأكواد من §33.20.
-- Audit: `AuditService::record()` من داخل الـ Action، append-only (DB trigger يمنع UPDATE/DELETE).
+- Audit: `AuditService::record()` من داخل الـ Action، append-only (MySQL trigger يمنع UPDATE/DELETE + مستخدم DB بصلاحية INSERT/SELECT فقط على الجدول).
+
+## 6. قرارات MySQL (بدل PostgreSQL)
+- **الفلوس:** أعمدة `BIGINT` (قروش) — لا DECIMAL/FLOAT في الحسابات.
+- **الأقفال:** `lockForUpdate()` داخل `DB::transaction` للدفعات/الاعتماد/Start Review؛ مستوى العزل الافتراضي REPEATABLE READ — اختبر سيناريو 40.21 صراحةً.
+- **Unique جزئي غير مدعوم:** "رابط نشط واحد لكل أوردر" و `dedupe_key where present` يُنفَّذان بـ generated column / عمود `active_flag` nullable + UNIQUE (القيم NULL لا تتعارض).
+- **CHECK constraints** (amount > 0, quantity > 0) موجودة ومُنفَّذة من MySQL 8.0.16+.
+- **JSON:** snapshots (`*_snapshot`) كـ `JSON`؛ لا تُفهرَس إلا بعمود مولَّد.
+- **البحث النصي:** FULLTEXT مع `WITH PARSER ngram` للاسم العربي، وبحث الهاتف/رقم الأوردر بفهرس عادي على `phone_normalized` و `order_number`.
+- **Audit append-only:** TRIGGER `BEFORE UPDATE/DELETE` يرمي خطأ (`SIGNAL SQLSTATE '45000'`).
+- **Collation:** `utf8mb4_unicode_ci`؛ المنطقة الزمنية للـ DB = UTC والتحويل لـ Africa/Cairo في التطبيق.
+- **البحث بالصورة:** MySQL لا يدعم vector index → الـ embeddings تعيش في خدمة الصور (FAISS أو Qdrant) والجدول `image_search_references` يحتفظ بـ `embedding_ref` + الحالة.

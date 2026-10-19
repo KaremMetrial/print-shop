@@ -2,12 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -30,6 +32,41 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function role(Role $role): static
+    {
+        return $this->state(fn () => ['role_id' => \App\Models\Role::firstOrCreate(['code' => $role->value], ['name' => $role->label()])->id]);
+    }
+
+    public function superAdmin(): static
+    {
+        return $this->role(Role::SuperAdmin);
+    }
+
+    public function admin(): static
+    {
+        return $this->role(Role::Admin);
+    }
+
+    public function dataEntry(): static
+    {
+        return $this->role(Role::DataEntry);
+    }
+
+    public function designer(): static
+    {
+        return $this->role(Role::Designer);
+    }
+
+    public function accountant(): static
+    {
+        return $this->role(Role::Accountant);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => ['status' => 'INACTIVE']);
     }
 
     /**

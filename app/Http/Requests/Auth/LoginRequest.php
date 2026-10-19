@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
+use App\Services\Audit\AuditService;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +26,7 @@ class LoginRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -35,27 +39,41 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $audit = app(AuditService::class);
+        $user = User::where('email', $this->string('email')->lower()->toString())->first();
 
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
+        if (! $user || ! Hash::check($this->string('password')->toString(), $user->password)) {
+            RateLimiter::hit($this->throttleKey());
+            $audit->record('auth.login_failed', null, [], ['email' => $this->string('email')->toString()]);
+
+            throw ValidationException::withMessages(['email' => __('auth.failed')]);
         }
 
+        // بعد صحة كلمة المرور فقط نكشف حالة الحساب (S-001: الحساب معطّل / بلا دور).
+        if (! $user->isActive() || ! $user->role_id) {
+            $audit->record('auth.login_blocked', $user, [], ['reason' => $user->isActive() ? 'no_role' : 'inactive']);
+
+            throw ValidationException::withMessages(['email' => 'حساب معطّل: تواصل مع مسؤول النظام لتفعيله.']);
+        }
+
+        Auth::guard('staff')->login($user);
         RateLimiter::clear($this->throttleKey());
+
+        $user->forceFill(['last_login_at' => now()])->save();
+        $this->session()->put('session_version', $user->session_version);
+        $audit->record('auth.login', $user);
     }
 
     /**
      * Ensure the login request is not rate limited.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void
     {

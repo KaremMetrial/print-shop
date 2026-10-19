@@ -1,0 +1,325 @@
+[
+ {
+  "id": "e3h27",
+  "path": "/login",
+  "name": "S-001 دخول الموظفين"
+ },
+ {
+  "id": "Xqpp0",
+  "path": "/dashboard?fixture=pen",
+  "as": "superadmin@pbms.test",
+  "name": "S-007 لوحة التحكم"
+ },
+ {
+  "id": "gcUp5",
+  "path": "/employees?fixture=pen",
+  "as": "superadmin@pbms.test",
+  "name": "S-065 قائمة الموظفين"
+ },
+ {
+  "id": "OsQkz",
+  "path": "/employees/create",
+  "as": "superadmin@pbms.test",
+  "name": "S-066-01 إضافة موظف"
+ },
+ {
+  "id": "y3bVrL",
+  "path": "/employees/4/edit",
+  "as": "superadmin@pbms.test",
+  "name": "S-066-02 تعديل موظف"
+ },
+ {
+  "id": "o4kGfo",
+  "path": "/employees/3/permissions",
+  "as": "superadmin@pbms.test",
+  "name": "S-067 الصلاحيات"
+ },
+ {
+  "id": "Kngwu",
+  "path": "/customers?fixture=pen",
+  "as": "superadmin@pbms.test",
+  "name": "S-022 العملاء"
+ },
+ {
+  "id": "YjRKg",
+  "path": "/customers/create",
+  "as": "superadmin@pbms.test",
+  "name": "S-023 إضافة عميل"
+ },
+ {
+  "id": "cCUUY",
+  "path": "/customers/104",
+  "as": "superadmin@pbms.test",
+  "name": "S-024 ملف العميل"
+ },
+ {
+  "id": "IfJS9",
+  "path": "/customers/104/access",
+  "as": "superadmin@pbms.test",
+  "name": "S-031 دخول المنصة"
+ },
+ {
+  "id": "wIzzt",
+  "path": "/customers/104/activity?days=365",
+  "as": "superadmin@pbms.test",
+  "name": "S-032 نشاط العميل"
+ },
+ {
+  "id": "hxHrw",
+  "path": "/products",
+  "as": "superadmin@pbms.test",
+  "name": "S-033 المنتجات"
+ },
+ {
+  "id": "PuR7a",
+  "path": "/products/1/edit",
+  "as": "superadmin@pbms.test",
+  "name": "S-034 البيانات الأساسية"
+ },
+ {
+  "id": "UZ6XL",
+  "path": "/products/1/specs",
+  "as": "superadmin@pbms.test",
+  "name": "S-034 المواصفات"
+ },
+ {
+  "id": "Fn6Qe",
+  "path": "/products/1/pricing",
+  "as": "superadmin@pbms.test",
+  "name": "S-034 التسعير"
+ },
+ {
+  "id": "WCn4U",
+  "path": "/products/1/routing",
+  "as": "superadmin@pbms.test",
+  "name": "S-034 توزيع التصميم"
+ },
+ {
+  "id": "uJOy3",
+  "path": "/products/1/activity",
+  "as": "superadmin@pbms.test",
+  "name": "S-034 سجل النشاط"
+ },
+ {
+  "id": "xE9uj",
+  "path": "/products/3/options/7/edit",
+  "as": "superadmin@pbms.test",
+  "name": "S-035 خيارات المنتج"
+ },
+ {
+  "id": "d50eC",
+  "path": "/pricing",
+  "as": "superadmin@pbms.test",
+  "name": "S-036 الشرائح"
+ },
+ {
+  "id": "xgLxv",
+  "path": "/orders/create?fixture=pen&step=0",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-011-01 اختيار العميل"
+ },
+ {
+  "id": "o1gWv",
+  "path": "/orders/create?fixture=pen&step=1",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-011-02 بنود الأوردر"
+ },
+ {
+  "id": "IMiS7",
+  "path": "/orders/create?fixture=pen&step=2",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-011-03 التسعير"
+ },
+ {
+  "id": "mGocm",
+  "path": "/orders/create?fixture=pen&step=3",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-011-04 التسليم"
+ },
+ {
+  "id": "T4GkM",
+  "path": "/orders/create?fixture=pen&step=4",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-011-05 المراجعة"
+ },
+ {
+  "id": "Mo2G0",
+  "path": "/orders/152?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-012 نظرة عامة"
+ },
+ {
+  "id": "O2atww",
+  "path": "/orders/152?fixture=pen&tab=items",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-013 البنود"
+ },
+ {
+  "id": "knyLb",
+  "path": "/orders/152?fixture=pen&tab=payments",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-012 المدفوعات"
+ },
+ {
+  "id": "XyDHA",
+  "path": "/orders/152?fixture=pen&tab=delivery",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-012 التسليم"
+ },
+ {
+  "id": "rsbuP",
+  "path": "/orders/152?fixture=pen&tab=files",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-012 الملفات"
+ },
+ {
+  "id": "OkEyj",
+  "path": "/orders/152?fixture=pen&tab=activity",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-012 سجل النشاط"
+ },
+ {
+  "id": "Cd7FX",
+  "path": "/orders/152/edit?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-015 تعديل الأوردر"
+ },
+ {
+  "id": "QBHwi",
+  "path": "/order-requests?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-019 طلبات الأوردرات"
+ },
+ {
+  "id": "Vd6MM",
+  "path": "/order-requests/186?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-020-A بانتظار المراجعة"
+ },
+ {
+  "id": "LgN9R",
+  "path": "/order-requests/187?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-020-B مراجعة نشطة"
+ },
+ {
+  "id": "HgTHs",
+  "path": "/order-requests/188?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-021-A مقبول"
+ },
+ {
+  "id": "kYJTt",
+  "path": "/order-requests/189?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-021-B مرفوض"
+ },
+ {
+  "id": "FSGkX",
+  "path": "/designer/tasks?fixture=pen&tab=new",
+  "as": "mona@pbms.test",
+  "name": "S-043-01 مهام جديدة"
+ },
+ {
+  "id": "PM7wz",
+  "path": "/designer/tasks?fixture=pen&tab=in_progress",
+  "as": "mona@pbms.test",
+  "name": "S-043-02 قيد التنفيذ"
+ },
+ {
+  "id": "UOvaG",
+  "path": "/designer/tasks?fixture=pen&tab=revision",
+  "as": "mona@pbms.test",
+  "name": "S-043-03 مطلوب تعديل"
+ },
+ {
+  "id": "zCk7b",
+  "path": "/designer/tasks?fixture=pen&tab=awaiting",
+  "as": "mona@pbms.test",
+  "name": "S-043-04 بانتظار الاعتماد"
+ },
+ {
+  "id": "Y1f0aq",
+  "path": "/designer/tasks/4?fixture=pen&state=new&tab=specs",
+  "as": "mona@pbms.test",
+  "name": "S-044-01 تفاصيل مهمة جديدة"
+ },
+ {
+  "id": "r6g1bA",
+  "path": "/designer/tasks/4?fixture=pen&state=in_progress&tab=specs",
+  "as": "mona@pbms.test",
+  "name": "S-044-02 قيد التنفيذ"
+ },
+ {
+  "id": "L5E7x",
+  "path": "/designer/tasks/4?fixture=pen&state=versions&tab=versions",
+  "as": "mona@pbms.test",
+  "name": "S-044-03 نسخ التصميم"
+ },
+ {
+  "id": "n211M",
+  "path": "/designer/tasks/4?fixture=pen&state=revision&tab=specs",
+  "as": "mona@pbms.test",
+  "name": "S-044-04 مطلوب تعديل"
+ },
+ {
+  "id": "RhbvE",
+  "path": "/designer/versions/1?fixture=pen&state=first",
+  "as": "mona@pbms.test",
+  "name": "S-045-01 إضافة النسخة الأولى"
+ },
+ {
+  "id": "Qe2iZ",
+  "path": "/designer/versions/1?fixture=pen&state=edit",
+  "as": "mona@pbms.test",
+  "name": "S-045-02 تعديل نسخة غير معتمدة"
+ },
+ {
+  "id": "q72jlD",
+  "path": "/designer/versions/1?fixture=pen&state=revision",
+  "as": "mona@pbms.test",
+  "name": "S-045-03 إعداد نسخة معدلة"
+ },
+ {
+  "id": "xxcUy",
+  "path": "/design?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-039 إدارة التصميمات"
+ },
+ {
+  "id": "UnZgI",
+  "path": "/settings/profile?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-003 الملف الشخصي"
+ },
+ {
+  "id": "eM5xP",
+  "path": "/design/designers?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-040 المصممون"
+ },
+ {
+  "id": "XJ88N",
+  "path": "/design/designers/6?fixture=pen",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-041-01 نظرة عامة"
+ },
+ {
+  "id": "BIU7A",
+  "path": "/design/designers/6?fixture=pen&tab=active",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-041-02"
+ },
+ {
+  "id": "lKqz4",
+  "path": "/design/designers/6?fixture=pen&tab=awaiting",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-041-03"
+ },
+ {
+  "id": "FDQiS",
+  "path": "/design/designers/6?fixture=pen&tab=done",
+  "as": "ahmed.hassan@pbms.test",
+  "name": "S-041-04"
+ }
+]

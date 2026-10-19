@@ -1,36 +1,28 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+import { CircleAlert, CircleCheck, Info, TriangleAlert } from 'lucide-react';
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+const tones = {
+    success: { box: 'bg-success-soft text-[#15803D]', Icon: CircleCheck },
+    warning: { box: 'bg-warning-soft text-warning-text', Icon: TriangleAlert },
+    danger: { box: 'bg-danger-soft text-[#B91C1C]', Icon: CircleAlert },
+    info: { box: 'bg-primary-soft text-primary-hover', Icon: Info },
+} as const;
 
-const alertVariants = cva(
-    'relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
-    {
-        variants: {
-            variant: {
-                default: 'bg-background text-foreground',
-                destructive: 'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
-            },
-        },
-        defaultVariants: {
-            variant: 'default',
-        },
-    },
-);
+export type AlertTone = keyof typeof tones;
 
-const Alert = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>>(
-    ({ className, variant, ...props }, ref) => <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props} />,
-);
-Alert.displayName = 'Alert';
+/** Alert (pen: Alert / …): radius 10، p16، gap12؛ عنوان 15/700 + نص 13؛ أيقونة 20 */
+function Alert({ tone = 'info', title, children, className }: { tone?: AlertTone; title: string; children?: React.ReactNode; className?: string }) {
+    const { box, Icon } = tones[tone];
+    return (
+        <div role={tone === 'danger' ? 'alert' : 'status'} className={cn('flex items-start gap-3 rounded-control p-4', box, className)}>
+            <Icon className="mt-0.5 size-5 shrink-0" aria-hidden />
+            <div className="flex flex-1 flex-col gap-1">
+                <span className="text-[15px] font-bold">{title}</span>
+                {children && <span className="text-[13px]">{children}</span>}
+            </div>
+        </div>
+    );
+}
 
-const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(({ className, ...props }, ref) => (
-    <h5 ref={ref} className={cn('mb-1 font-medium leading-none tracking-tight', className)} {...props} />
-));
-AlertTitle.displayName = 'AlertTitle';
-
-const AlertDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('text-sm [&_p]:leading-relaxed', className)} {...props} />
-));
-AlertDescription.displayName = 'AlertDescription';
-
-export { Alert, AlertDescription, AlertTitle };
+export { Alert };

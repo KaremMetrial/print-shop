@@ -1,13 +1,12 @@
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
-import { type BreadcrumbItem } from '@/types';
+import { StaffLayout } from '@/components/shell/staff-layout';
+import { type ComponentProps } from 'react';
 
-interface AppLayoutProps {
-    children: React.ReactNode;
-    breadcrumbs?: BreadcrumbItem[];
+type Props = Pick<ComponentProps<typeof StaffLayout>, 'children' | 'shell' | 'active' | 'sidebarWidth' | 'nav'> & { breadcrumbs?: unknown };
+
+export default function AppLayout({ children, shell, active, sidebarWidth, nav }: Props) {
+    return (
+        <StaffLayout shell={shell} active={active} sidebarWidth={sidebarWidth} nav={nav}>
+            {children}
+        </StaffLayout>
+    );
 }
-
-export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
-    <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-        {children}
-    </AppLayoutTemplate>
-);

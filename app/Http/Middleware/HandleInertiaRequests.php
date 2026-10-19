@@ -42,9 +42,33 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'generated_password' => fn () => $request->session()->get('generated_password'),
+            ],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $this->authUser($request),
             ],
         ]);
+    }
+
+    /** @return array<string, mixed>|null */
+    private function authUser(Request $request): ?array
+    {
+        $u = $request->user();
+        if (! $u) {
+            return null;
+        }
+        $role = $u->roleEnum();
+
+        // لا نمرر إلا ما تحتاجه الواجهة. الصلاحيات هنا للـUX فقط — الـBackend هو المرجع.
+        return [
+            'id' => $u->id,
+            'name' => $u->name,
+            'email' => $u->email,
+            'role' => $role?->uiKey(),
+            'role_label' => $role?->label(),
+            'permissions' => $u->permissionCodes(),
+        ];
     }
 }

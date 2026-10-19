@@ -1,104 +1,97 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { FormEventHandler, useState } from 'react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import { type SharedData } from '@/types';
 
-interface LoginForm {
-    email: string;
-    password: string;
-    remember: boolean;
-}
-
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-}
-
-export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
-        email: '',
-        password: '',
-        remember: false,
-    });
+/**
+ * S-001 — تسجيل دخول الموظفين. مطابق حرفيًا لـ pendev/untitled.pen (frame e3h27) كما يُصدَّر html-css:
+ * التخطيط literal (LTR) مع text-align:right للنص العربي — نفس منطق الـpen تمامًا.
+ */
+export default function Login({ status }: { status?: string }) {
+    const { name } = usePage<SharedData>().props;
+    const { data, setData, post, processing, errors, reset } = useForm({ email: '', password: '' });
+    const [show, setShow] = useState(false);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        post(route('login'), { onFinish: () => reset('password') });
     };
+    const error = errors.email ?? errors.password;
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
+        <div dir="ltr" className="bg-background flex min-h-screen flex-col items-start gap-8 overflow-hidden p-12 font-[Cairo]">
+            <Head title="تسجيل دخول الموظفين" />
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
+            <div className="flex w-full items-center justify-between gap-3">
+                <div className="text-muted-foreground flex-1 text-right text-[13px] leading-[21px]">وصول آمن للموظفين فقط</div>
+                <div className="text-primary flex-1 text-right text-2xl leading-[34px] font-bold">PBMS / {name}</div>
+            </div>
+
+            <div className="flex w-full flex-1 items-center justify-center gap-3">
+                <form onSubmit={submit} noValidate className="bg-surface flex w-[480px] max-w-full shrink-0 flex-col gap-6 rounded-xl p-10 outline-1 -outline-offset-[0.5px] outline-border">
+                    <div className="flex w-full items-center justify-end gap-3">
+                        <ShieldCheck className="text-primary size-8" strokeWidth={2} aria-hidden />
                     </div>
+                    <h1 className="text-ink w-full text-right text-[28px] leading-[39px] font-bold">تسجيل دخول الموظفين</h1>
+                    <p className="text-muted-foreground w-full text-right text-sm leading-[22px]">ادخل إلى مساحة عملك الآمنة لمتابعة الطلبات وعمليات المطبعة اليومية.</p>
 
-                    <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
-                            {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
-                                </TextLink>
-                            )}
+                    {status && <div className="bg-success-soft text-success-text w-full rounded-[10px] p-3 text-right text-sm font-semibold">{status}</div>}
+                    {error && (
+                        <div role="alert" className="bg-danger-soft flex w-full flex-col gap-1 rounded-[10px] p-3 text-right">
+                            <span className="text-[14px] leading-[22px] font-bold text-[#B91C1C]">تعذر تسجيل الدخول</span>
+                            <span className="text-[13px] leading-[21px] text-[#B91C1C]">{error}</span>
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
+                    )}
+
+                    <div className="flex w-full flex-col items-start gap-2">
+                        <label htmlFor="email" className="text-ink w-full text-right text-sm leading-[22px] font-semibold">
+                            البريد الإلكتروني *
+                        </label>
+                        <div className="bg-background flex h-12 w-full items-center gap-3 rounded-[10px] px-3.5 outline-1 -outline-offset-[0.5px] outline-control-border focus-within:outline-2 focus-within:outline-primary">
+                            <input
+                                id="email"
+                                type="email"
+                                autoFocus
+                                autoComplete="email"
+                                placeholder="name@company.com"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                className="text-ink placeholder:text-ink min-w-0 flex-1 bg-transparent text-left text-sm leading-[22px] outline-hidden"
+                            />
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" tabIndex={3} />
-                        <Label htmlFor="remember">Remember me</Label>
+                    <div className="flex w-full flex-col items-start gap-2">
+                        <label htmlFor="password" className="text-ink w-full text-right text-sm leading-[22px] font-semibold">
+                            كلمة المرور *
+                        </label>
+                        <div className="bg-background flex h-12 w-full items-center gap-3 rounded-[10px] px-3.5 outline-1 -outline-offset-[0.5px] outline-control-border focus-within:outline-2 focus-within:outline-primary">
+                            <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="text-muted-foreground shrink-0">
+                                {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                            </button>
+                            <input
+                                id="password"
+                                type={show ? 'text' : 'password'}
+                                autoComplete="current-password"
+                                placeholder="أدخل كلمة المرور"
+                                dir="rtl"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                className="text-ink placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent text-right text-sm leading-[22px] outline-hidden"
+                            />
+                        </div>
                     </div>
 
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
-                    </Button>
-                </div>
+                    <button type="submit" disabled={processing} className="bg-primary hover:bg-primary-hover flex h-12 w-full items-center justify-center rounded-[10px] px-4 text-sm font-semibold whitespace-nowrap text-white disabled:opacity-70">
+                        {processing ? 'جارٍ التحقق…' : 'تسجيل الدخول'}
+                    </button>
 
-                <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div>
-            </form>
+                    <p className="text-muted-foreground w-full text-right text-xs leading-[19px]">للمساعدة في الوصول، تواصل مع مسؤول النظام.</p>
+                </form>
+            </div>
 
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
+            <div className="text-muted-foreground w-full text-center text-xs leading-[19px]">PBMS • نظام داخلي لإدارة مطبعة واحدة • جميع الاتصالات محمية</div>
+        </div>
     );
 }

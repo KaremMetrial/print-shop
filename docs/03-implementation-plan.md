@@ -11,7 +11,7 @@ P0 Setup ─► P1 Identity/Customers ─► P2 Catalog/Pricing ─► P3 Orders
 
 ## Phase 0 — Foundation & Tooling
 **الهدف:** مشروع يقلع، CI شغال، RTL يعمل.
-- Laravel 12 + React starter kit (Inertia, TS)، PostgreSQL، Redis، Reverb، Horizon، MinIO عبر Docker Compose/Sail.
+- Laravel 12 + React starter kit (Inertia, TS)، MySQL 8.4، Redis، Reverb، Horizon، MinIO عبر Docker Compose/Sail.
 - Pint/Larastan/ESLint/tsc/Pest/Vitest/Playwright + GitHub Actions.
 - Layouts (Auth/Staff/Designer/Accountant/Customer/Link) + RTL + خط Cairo/Tajawal + Design tokens + مكونات UI الأساسية (Button, Table→Cards, Dialog, StatusBadge, Money, FileUploader).
 - Base: `Money` VO، `AuditService`، `Idempotency` middleware، `Outbox`، error pages، i18n، enum→TS generator.
@@ -58,7 +58,7 @@ P0 Setup ─► P1 Identity/Customers ─► P2 Catalog/Pricing ─► P3 Orders
 
 ## Phase 8 — Notifications, Actions, Search, WhatsApp
 - Notifications/Actions (+ dedupe, claim, complete rules)، Password-recovery action flow.
-- Global search (Postgres FTS/trigram)، Image search service + indexing job + eval harness.
+- Global search (MySQL FULLTEXT ngram)، Image search service + indexing job + eval harness.
 - WhatsApp manual (templates, copy/open wa.me, confirm-sent) + provider adapter اختياري.
 - **Exit:** TC-090..096، تقرير تقييم الصور (Top-1/5/10) على عينة المطبعة.
 
