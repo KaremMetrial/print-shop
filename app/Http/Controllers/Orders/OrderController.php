@@ -218,7 +218,7 @@ class OrderController extends Controller
         return Inertia::render('orders/show', ['tab' => $tab, 'reasons' => self::CANCEL_REASONS, 'catalog' => $catalog] + $props);
     }
 
-    /** @return Collection<int, array<string, mixed>> */
+    /** @return Collection<int, mixed> */
     private function catalog(): Collection
     {
         return Product::where('is_active', true)->with(['optionGroups' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with(['values' => fn ($v) => $v->where('is_active', true)->orderBy('sort_order')])])
