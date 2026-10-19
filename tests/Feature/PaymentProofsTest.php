@@ -48,3 +48,10 @@ it('rejects non-image files, restricts the queue to reviewers', function () {
     $this->actingAs(User::factory()->designer()->create())->get('/accounting/proofs')->assertForbidden();
     $this->actingAs($a)->get('/accounting/proofs')->assertOk()->assertInertia(fn ($p) => $p->component('operations/proofs'));
 });
+
+it('renders the accountant dashboard with real pending proofs and denies designers', function () {
+    [$a, $o, $token] = proofSetup();
+    $this->post("/l/{$token}/proofs", ['file' => UploadedFile::fake()->createWithContent('t.png', base64_decode(PNG)), 'amount_minor' => 100, 'method' => 'CASH'], ['Idempotency-Key' => 'd1']);
+    $this->actingAs($a)->get('/accounting/dashboard')->assertOk()->assertInertia(fn ($p) => $p->component('operations/accountant-dashboard')->where('proofs_total', 1)->has('proofs', 1));
+    $this->actingAs(User::factory()->designer()->create())->get('/accounting/dashboard')->assertForbidden();
+});

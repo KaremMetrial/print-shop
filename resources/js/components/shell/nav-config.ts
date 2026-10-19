@@ -43,7 +43,7 @@ export const adminNav: ShellNavGroup[] = [
             { title: 'التسليم', href: '/delivery', icon: 'truck', permission: 'orders.view' },
         ],
     },
-    { title: 'الماليات', items: [{ title: 'المحاسبة', href: '/accounting', icon: 'wallet', permission: ['payments.view_all', 'dashboard.financial.view'] }, { title: 'إثباتات الدفع', href: '/accounting/proofs', icon: 'receipt', permission: 'payments.proofs.review' }] },
+    { title: 'الماليات', items: [{ title: 'لوحة الحسابات', href: '/accounting/dashboard', icon: 'layout-dashboard', permission: ['payments.view_all', 'payments.proofs.review'] }, { title: 'المحاسبة', href: '/accounting', icon: 'wallet', permission: ['payments.view_all', 'dashboard.financial.view'] }, { title: 'إثباتات الدفع', href: '/accounting/proofs', icon: 'receipt', permission: 'payments.proofs.review' }] },
     {
         title: 'المتابعة',
         items: [

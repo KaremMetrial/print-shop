@@ -16,6 +16,7 @@ use App\Http\Controllers\Employees\EmployeeController;
 use App\Http\Controllers\Files\FileController;
 use App\Http\Controllers\Link\PublicLinkController;
 use App\Http\Controllers\Notifications\NotificationController;
+use App\Http\Controllers\Operations\AccountantDashboardController;
 use App\Http\Controllers\Operations\AccountingController;
 use App\Http\Controllers\Operations\AuditController;
 use App\Http\Controllers\Operations\DeliveryController;
@@ -129,6 +130,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/system', [SettingsController::class, 'index'])->name('settings.system');
     Route::patch('settings/system', [SettingsController::class, 'update'])->name('settings.system.update');
     Route::prefix('accounting')->name('accounting.')->controller(AccountingController::class)->group(function () {
+        Route::get('dashboard', AccountantDashboardController::class)->name('dashboard');
         Route::get('proofs', [PaymentProofController::class, 'index'])->name('proofs');
         Route::post('proofs/{id}/approve', [PaymentProofController::class, 'approve'])->name('proofs.approve')->middleware('idempotent');
         Route::post('proofs/{id}/reject', [PaymentProofController::class, 'reject'])->name('proofs.reject')->middleware('idempotent');
