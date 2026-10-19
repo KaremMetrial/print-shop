@@ -5,7 +5,7 @@ use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Facades\Route;
 
 /** مسارات عامة مقصودة (كل ما عداها يجب أن يكون خلف auth). */
-const PUBLIC_ROUTES = ['home', 'login', 'password.request', 'password.email', 'password.reset', 'password.store', 'verification.verify', 'link.show', 'link.item', 'link.approve', 'link.file', 'portal.login', 'portal.login.store', 'portal.recover', 'portal.recover.store'];
+const PUBLIC_ROUTES = ['home', 'login', 'password.request', 'password.email', 'password.reset', 'password.store', 'verification.verify', 'link.show', 'link.item', 'link.approve', 'link.file', 'link.chat', 'portal.login', 'portal.login.store', 'portal.recover', 'portal.recover.store'];
 
 function appRoutes(): array
 {

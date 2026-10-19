@@ -8,8 +8,10 @@ use App\Models\File;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderLink;
+use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
 use App\Services\Orders\OrderLinkService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -116,5 +118,22 @@ class PublicLinkController extends Controller
                 'version_no' => DesignVersion::where('order_item_id', $i->id)->whereIn('status', ['SUBMITTED', 'APPROVED'])->max('version_no'),
             ])->all(),
         ];
+    }
+
+    public function chat(Request $request, string $token, OrderItem $item): JsonResponse|Response
+    {
+        $link = $this->resolve($token);
+        if (! $link instanceof OrderLink) {
+            return $this->unavailable();
+        }
+        abort_unless($item->order_id === $link->order_id && ! $item->cancelled_at, 404);
+        $chat = app(ChatService::class);
+        if ($request->isMethod('post')) {
+            $d = $request->validate(['body' => ['required', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64']]);
+
+            return response()->json(['data' => $chat->send($item, 'link', $link->id, 'العميل', $d['body'], $d['client_id'])], 201);
+        }
+
+        return response()->json(['data' => $chat->list($item, (int) $request->query('after', 0)), 'meta' => ['locked' => $chat->isLocked($item), 'can_send' => ! $chat->isLocked($item), 'label' => 'العميل']]);
     }
 }

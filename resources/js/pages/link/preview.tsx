@@ -1,6 +1,7 @@
 import { LinkLayout } from '@/components/shell/link-layout';
 import { formatDate, formatTime } from '@/lib/money';
 import { Icon } from '@/pen/icon';
+import { ChatPanel } from '@/components/chat/chat-panel';
 import { Head, Link, router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
@@ -18,6 +19,7 @@ export default function LinkPreview({ token, order, item, version: v }: Props) {
     const [cur, setCur] = useState(0);
     const [zoom, setZoom] = useState(1);
     const [confirm, setConfirm] = useState(false);
+    const [tab, setTab] = useState<'preview' | 'chat'>('preview');
     const key = useRef(crypto.randomUUID());
     const approved = v?.status === 'APPROVED';
     const label = v ? `${approved ? 'معتمد' : 'بانتظار اعتماد العميل'} • النسخة ${ORD[v.no] ?? v.no}` : 'لا توجد نسخة بعد';
@@ -40,13 +42,14 @@ export default function LinkPreview({ token, order, item, version: v }: Props) {
                     </div>
                 </div>
                 <div className="flex h-[47.5px] w-full shrink-0 rounded-[8px] bg-[var(--surface)] [border-bottom:1px_solid_var(--border)]">
-                    {[['المرفقات', false], ['المحادثة', false], ['معاينة التصميم', true]].map(([l, on]) => (
-                        <div key={l as string} className="flex flex-1 items-center justify-center text-left text-[13px] leading-[normal]" style={{ color: on ? '#2563EB' : '#475569', fontWeight: on ? 700 : 600, borderBottom: on ? '3px solid #2563EB' : undefined }}>
+                    {[['المرفقات', false, null], ['المحادثة', tab === 'chat', 'chat'], ['معاينة التصميم', tab === 'preview', 'preview']].map(([l, on, k]) => (
+                        <div key={l as string} onClick={() => k && setTab(k as 'chat' | 'preview')} className="flex flex-1 items-center justify-center cursor-pointer text-left text-[13px] leading-[normal]" style={{ color: on ? '#2563EB' : '#475569', fontWeight: on ? 700 : 600, borderBottom: on ? '3px solid #2563EB' : undefined }}>
                             {l as string}
                         </div>
                     ))}
                 </div>
-                <div className="flex w-full shrink-0 items-start gap-[18px]">
+                {tab === 'chat' && <ChatPanel url={`/l/${token}/items/${item.id}/chat`} mine={['link']} />}
+                <div className={`flex w-full shrink-0 items-start gap-[18px] ${tab === 'chat' ? 'hidden' : ''}`}>
                     <div className="flex w-[350px] shrink-0 flex-col items-end gap-[12px]">
                         <div className={`${box} gap-[12px] rounded-[9px] p-[18px]`}>
                             <div className="text-left text-[15px] leading-[normal] font-[700] text-[var(--ink)]">معلومات النسخة</div>

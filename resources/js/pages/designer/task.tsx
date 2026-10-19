@@ -1,6 +1,7 @@
 import { DesignerLayout } from '@/components/shell/designer-layout';
 import { arDigits, arNum, formatDateTimeShort } from '@/lib/money';
 import { Icon } from '@/pen/icon';
+import { ChatPanel } from '@/components/chat/chat-panel';
 import { Head, Link, router } from '@inertiajs/react';
 import { type ReactNode } from 'react';
 
@@ -275,7 +276,8 @@ export default function DesignerTask({ tab, designer, task: t, versions, can }: 
                     })}
                 </div>
             )}
-            {(tab === 'chat' || tab === 'files' || tab === 'activity') && <ReactPlaceholder tab={tab} />}
+            {tab === 'chat' && <ChatPanel url={`/chat/items/${t.id}`} mine={['staff']} />}
+            {(tab === 'files' || tab === 'activity') && <ReactPlaceholder tab={tab} />}
         </DesignerLayout>
     );
 }
@@ -283,7 +285,7 @@ export default function DesignerTask({ tab, designer, task: t, versions, can }: 
 function ReactPlaceholder({ tab }: { tab: Tab }): ReactNode {
     return (
         <div className={`${card} items-center p-[32px] text-[14px] text-[var(--muted-foreground)]`}>
-            {tab === 'chat' ? 'المحادثة تُفعَّل مع وحدة الشات.' : tab === 'files' ? 'ملفات العميل تظهر هنا.' : 'سجل النشاط يظهر هنا.'}
+            {tab === 'files' ? 'ملفات العميل تظهر هنا.' : 'سجل النشاط يظهر هنا.'}
         </div>
     );
 }

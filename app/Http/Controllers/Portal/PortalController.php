@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderRequest;
 use App\Models\Product;
+use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
 use App\Services\Finance\PaymentService;
 use App\Services\Pricing\PricingService;
@@ -173,5 +174,19 @@ class PortalController extends Controller
         $c = $this->me($request);
 
         return Inertia::render('portal/account', ['customer' => ['name' => $c->name, 'phone' => $c->phone_display, 'code' => $c->code(), 'tier' => $c->pricingTier->name, 'address' => $c->address]]);
+    }
+
+    public function chat(Request $request, Order $order, OrderItem $item): JsonResponse
+    {
+        $this->orderOf($request, $order);
+        abort_unless($item->order_id === $order->id && ! $item->cancelled_at, 404);
+        $chat = app(ChatService::class);
+        if ($request->isMethod('post')) {
+            $d = $request->validate(['body' => ['required', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64']]);
+
+            return response()->json(['data' => $chat->send($item, 'customer', $this->me($request)->id, 'العميل', $d['body'], $d['client_id'])], 201);
+        }
+
+        return response()->json(['data' => $chat->list($item, (int) $request->query('after', 0)), 'meta' => ['locked' => $chat->isLocked($item), 'can_send' => ! $chat->isLocked($item), 'label' => 'العميل']]);
     }
 }

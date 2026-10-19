@@ -4,6 +4,7 @@ use App\Http\Controllers\Catalog\OptionGroupController;
 use App\Http\Controllers\Catalog\PricingQuoteController;
 use App\Http\Controllers\Catalog\ProductController;
 use App\Http\Controllers\Catalog\TierController;
+use App\Http\Controllers\Chat\StaffChatController;
 use App\Http\Controllers\Customers\CustomerAccessController;
 use App\Http\Controllers\Customers\CustomerActivityController;
 use App\Http\Controllers\Customers\CustomerController;
@@ -122,6 +123,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('refunds/{id}/payout', 'payout')->name('refunds.payout')->middleware('idempotent');
     });
 
+    Route::get('chat/items/{item}', [StaffChatController::class, 'index'])->name('chat.index');
+    Route::post('chat/items/{item}', [StaffChatController::class, 'store'])->name('chat.store');
+
     Route::prefix('design')->name('design.')->controller(ManagementController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('items/{item}/assign', 'assign')->name('assign')->middleware('idempotent');
@@ -172,6 +176,7 @@ Route::prefix('l/{token}')->middleware(['throttle:link-access'])->name('link.')-
     Route::get('items/{item}', 'item')->name('item');
     Route::post('items/{item}/approve', 'approve')->name('approve');
     Route::get('files/{file}', 'file')->name('file');
+    Route::match(['get', 'post'], 'items/{item}/chat', 'chat')->name('chat');
 });
 
 // بوابة العميل المسجّل (جلسة منفصلة)
@@ -196,6 +201,7 @@ Route::prefix('portal')->name('portal.')->group(function () {
             Route::get('orders/{order}/items/{item}', 'item')->name('orders.item');
             Route::post('orders/{order}/items/{item}/approve', 'approve')->name('orders.approve')->middleware('idempotent');
             Route::get('files/{file}', 'file')->name('files');
+            Route::match(['get', 'post'], 'orders/{order}/items/{item}/chat', 'chat')->name('orders.chat');
             Route::get('account', 'account')->name('account');
         });
     });
