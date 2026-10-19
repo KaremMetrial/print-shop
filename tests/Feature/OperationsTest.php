@@ -4,11 +4,13 @@ use App\Actions\Orders\CancelOrder;
 use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderRequest;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Audit\AuditService;
 use App\Services\Finance\PaymentService;
+use App\Services\Notifications\NotificationService;
 use App\Services\Settings\Settings;
 use Illuminate\Support\Facades\DB;
 
@@ -104,4 +106,14 @@ it('shows real payments on the order payments tab', function () {
     $o = Order::factory()->create(['customer_id' => $c->id, 'grand_total' => 2000]);
     app(PaymentService::class)->record($admin, $c, 800, 'BANK_TRANSFER', $o);
     $this->get("/orders/{$o->id}?tab=payments")->assertInertia(fn ($p) => $p->where('order.paid_minor', 800)->where('order.remaining_minor', 1200)->has('payments', 1));
+});
+
+it('dashboard shows real numbers, not constants', function () {
+    $admin = User::factory()->admin()->create();
+    $this->actingAs($admin);
+    Order::factory()->count(2)->create(['status' => OrderStatus::IN_PRINTING]);
+    Order::factory()->create(['status' => OrderStatus::READY_FOR_PICKUP]);
+    OrderRequest::factory()->create();
+    app(NotificationService::class)->openAction('d1', 'OTHER', 'إجراء');
+    $this->get('/dashboard')->assertOk()->assertInertia(fn ($p) => $p->where('kpis.in_printing', 2)->where('kpis.ready', 1)->where('kpis.pending_requests', 1)->where('kpis.follow_up', 1)->where('actions.total', 1)->has('recent', 3));
 });
