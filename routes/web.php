@@ -22,6 +22,7 @@ use App\Http\Controllers\Operations\ReportsController;
 use App\Http\Controllers\Operations\SearchController;
 use App\Http\Controllers\Operations\SettingsController;
 use App\Http\Controllers\Orders\OrderController;
+use App\Http\Controllers\Orders\OrderItemController;
 use App\Http\Controllers\Orders\OrderLinkController;
 use App\Http\Controllers\Orders\OrderRequestController;
 use App\Http\Controllers\Portal\PortalAuthController;
@@ -87,6 +88,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('{order}/{step}', 'advance')->whereIn('step', ['complete-printing', 'out-for-delivery', 'complete'])->name('advance')->middleware('idempotent');
         Route::get('{order}/link', [OrderLinkController::class, 'show'])->name('link');
         Route::post('{order}/link/{action}', [OrderLinkController::class, 'act'])->whereIn('action', ['regenerate', 'suspend', 'reactivate'])->name('link.act')->middleware('idempotent');
+        Route::get('{order}/items/{item}', [OrderItemController::class, 'show'])->name('items.show');
+        Route::get('{order}/job-ticket', [OrderItemController::class, 'jobTicket'])->name('job-ticket');
+        Route::get('{order}/job-ticket/pdf', [OrderItemController::class, 'jobTicketPdf'])->name('job-ticket.pdf');
         Route::post('{order}/items', 'addItem')->name('items.add')->middleware('idempotent');
         Route::post('{order}/items/{item}/cancel', 'cancelItem')->name('items.cancel')->middleware('idempotent');
         Route::post('{order}/cancel', 'cancel')->name('cancel')->middleware('idempotent');
