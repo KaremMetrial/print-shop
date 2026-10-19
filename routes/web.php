@@ -87,6 +87,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('{order}/{step}', 'advance')->whereIn('step', ['complete-printing', 'out-for-delivery', 'complete'])->name('advance')->middleware('idempotent');
         Route::get('{order}/link', [OrderLinkController::class, 'show'])->name('link');
         Route::post('{order}/link/{action}', [OrderLinkController::class, 'act'])->whereIn('action', ['regenerate', 'suspend', 'reactivate'])->name('link.act')->middleware('idempotent');
+        Route::post('{order}/items', 'addItem')->name('items.add')->middleware('idempotent');
+        Route::post('{order}/items/{item}/cancel', 'cancelItem')->name('items.cancel')->middleware('idempotent');
         Route::post('{order}/cancel', 'cancel')->name('cancel')->middleware('idempotent');
     });
 

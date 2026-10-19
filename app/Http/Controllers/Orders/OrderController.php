@@ -5,18 +5,21 @@ namespace App\Http\Controllers\Orders;
 use App\Actions\Orders\AdvanceOrder;
 use App\Actions\Orders\CancelOrder;
 use App\Actions\Orders\CreateOrder;
+use App\Actions\Orders\ManageOrderItems;
 use App\Actions\Orders\UpdateOrder;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Orders\OrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\Orders\OrderPresenter;
 use App\Support\PenFixtures;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -30,14 +33,7 @@ class OrderController extends Controller
     {
         Gate::authorize('orders.create');
         $customer = $request->query('customer') ? Customer::with('pricingTier')->find($request->query('customer')) : null;
-        $products = Product::where('is_active', true)->with(['optionGroups' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with(['values' => fn ($v) => $v->where('is_active', true)->orderBy('sort_order')])])
-            ->orderBy('name')->get()->map(fn (Product $p) => [
-                'id' => $p->id, 'name' => $p->name, 'minimum_quantity' => $p->minimum_quantity,
-                'groups' => $p->optionGroups->map(fn ($g) => [
-                    'id' => $g->id, 'name' => $g->name, 'selection_type' => $g->selection_type, 'is_required' => $g->is_required,
-                    'values' => $g->values->map(fn ($v) => ['id' => $v->id, 'name' => $v->name, 'addition_minor' => $v->unit_price_addition->minor])->all(),
-                ])->all(),
-            ]);
+        $products = $this->catalog();
 
         $fixture = null;
         if (app()->environment('local') && $request->query('fixture') === 'pen') {
@@ -161,6 +157,22 @@ class OrderController extends Controller
         return redirect()->route('orders.show', $order)->with('success', 'تم إلغاء الأوردر.');
     }
 
+    public function addItem(Request $request, Order $order, ManageOrderItems $action): RedirectResponse
+    {
+        $d = $request->validate(['product_id' => ['required', 'integer', 'exists:products,id'], 'quantity' => ['required', 'integer', 'min:1', 'max:1000000'], 'options' => ['nullable', 'array'], 'notes' => ['nullable', 'string', 'max:1000']]);
+        $action->add($request->user(), $order, $d);
+
+        return back()->with('success', 'تمت إضافة البند وإسناده لمصمم.');
+    }
+
+    public function cancelItem(Request $request, Order $order, OrderItem $item, ManageOrderItems $action): RedirectResponse
+    {
+        $d = $request->validate(['reason' => ['required', 'string', 'max:255']], ['reason.required' => 'يجب كتابة سبب إلغاء البند.']);
+        $action->cancel($request->user(), $order, $item, $d['reason']);
+
+        return back()->with('success', 'تم إلغاء البند.');
+    }
+
     public function store(OrderRequest $request, CreateOrder $action): RedirectResponse
     {
         Gate::authorize('orders.create');
@@ -201,6 +213,21 @@ class OrderController extends Controller
             $props = array_replace($props, PenFixtures::orderDetail());
         }
 
-        return Inertia::render('orders/show', ['tab' => $tab, 'reasons' => self::CANCEL_REASONS] + $props);
+        $catalog = ($props['can']['items'] ?? false) && $order->status === OrderStatus::DESIGN_STAGE ? $this->catalog() : [];
+
+        return Inertia::render('orders/show', ['tab' => $tab, 'reasons' => self::CANCEL_REASONS, 'catalog' => $catalog] + $props);
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    private function catalog(): Collection
+    {
+        return Product::where('is_active', true)->with(['optionGroups' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with(['values' => fn ($v) => $v->where('is_active', true)->orderBy('sort_order')])])
+            ->orderBy('name')->get()->map(fn (Product $p) => [
+                'id' => $p->id, 'name' => $p->name, 'minimum_quantity' => $p->minimum_quantity,
+                'groups' => $p->optionGroups->map(fn ($g) => [
+                    'id' => $g->id, 'name' => $g->name, 'selection_type' => $g->selection_type, 'is_required' => $g->is_required,
+                    'values' => $g->values->map(fn ($v) => ['id' => $v->id, 'name' => $v->name, 'addition_minor' => $v->unit_price_addition->minor])->all(),
+                ])->all(),
+            ]);
     }
 }

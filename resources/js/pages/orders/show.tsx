@@ -2,6 +2,8 @@ import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoney, formatTime } from '@/lib/money';
 import { PaymentDialog } from '@/components/finance/payment-dialog';
+import { AddItemDialog, type CatalogProduct } from '@/components/orders/add-item-dialog';
+import { CancelItemDialog } from '@/components/orders/cancel-item-dialog';
 import { CancelOrderDialog } from '@/components/orders/cancel-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Head, Link, router } from '@inertiajs/react';
@@ -21,6 +23,7 @@ interface OrderItemRow {
 }
 interface Props {
     tab: Tab;
+    catalog: CatalogProduct[];
     order: {
         id: number;
         number: string;
@@ -220,14 +223,18 @@ function Overview({ p }: { p: Props }) {
 
 function Items({ p }: { p: Props }) {
     const { order: o, items, approval: a, can } = p;
+    const [cancelItem, setCancelItem] = useState<OrderItemRow | null>(null);
+    const [adding, setAdding] = useState(false);
     return (
         <>
+            {adding && <AddItemDialog orderId={o.id} catalog={p.catalog} onClose={() => setAdding(false)} />}
+            {cancelItem && <CancelItemDialog orderId={o.id} item={cancelItem} onClose={() => setCancelItem(null)} />}
             <div className="w-full text-right text-[20px] leading-[32px] font-[700] text-[var(--ink)]">بنود الأوردر</div>
             <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
-                {can.items && (
-                    <Link href={`/orders/${o.id}/items/create`} className={primary34}>
+                {can.items && o.status === 'DESIGN_STAGE' && (
+                    <button type="button" onClick={() => setAdding(true)} className={primary34}>
                         إضافة بند
-                    </Link>
+                    </button>
                 )}
                 <div className="flex-1 text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">
                     {a.approved} من {a.total} بنود معتمدة
@@ -261,6 +268,11 @@ function Items({ p }: { p: Props }) {
                                 <Link href={`/orders/${o.id}/items/${i.id}`} className="flex h-[40px] w-[120px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--primary)] p-[0px_12px] text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap text-white">
                                     عرض البند
                                 </Link>
+                                {can.items && o.status === 'DESIGN_STAGE' && i.status !== 'CANCELLED' && (
+                                    <button type="button" onClick={() => setCancelItem(i)} className="text-left text-[12px] font-[600] text-[#DC2626]">
+                                        إلغاء البند
+                                    </button>
+                                )}
                                 <div className="flex w-full shrink-0 gap-[8px]">
                                     {(['تاريخ التصميم', 'تغيير المصمم', 'تعديل البند'] as const).map((l) => (
                                         <div key={l} className="flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_4px] text-left text-[13px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]">

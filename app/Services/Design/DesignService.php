@@ -184,6 +184,17 @@ class DesignService
         });
     }
 
+    /** عند عدم بقاء بند نشط غير معتمد (مثلًا بعد إلغاء آخر بند غير معتمد) يبدأ الأوردر الطباعة داخل نفس المعاملة (BR/6.5). */
+    public function startPrintingIfReady(Order $order): bool
+    {
+        if ($order->status !== OrderStatus::DESIGN_STAGE || OrderItem::where('order_id', $order->id)->whereNull('cancelled_at')->whereNull('approved_at')->exists()) {
+            return false;
+        }
+        $this->startPrinting($order);
+
+        return true;
+    }
+
     private function startPrinting(Order $order): void
     {
         $order->update(['status' => OrderStatus::IN_PRINTING, 'printing_started_at' => now()]);
