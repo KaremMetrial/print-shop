@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\OutboxEventPublished;
 use App\Listeners\AssignDesignersOnOrderCreated;
+use App\Listeners\CreateOperationalNotifications;
 use App\Models\Product;
 use App\Models\User;
 use App\Policies\CatalogPolicy;
@@ -56,5 +57,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, EmployeePolicy::class);
         Gate::policy(Product::class, CatalogPolicy::class);
         Event::listen(OutboxEventPublished::class, AssignDesignersOnOrderCreated::class);
+        Event::listen(OutboxEventPublished::class, CreateOperationalNotifications::class);
     }
 }

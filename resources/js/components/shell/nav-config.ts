@@ -83,7 +83,7 @@ export const designerNav: ShellNavGroup[] = [
         items: [
             { title: 'مهامي', href: '/designer/tasks', icon: 'layout-dashboard', permission: 'design.tasks.view_own' },
             { title: 'الإشعارات', href: '/notifications', icon: 'bell' },
-            { title: 'الملف الشخصي', href: '/profile', icon: 'user-round' },
+            { title: 'الملف الشخصي', href: '/settings/profile', icon: 'user-round' },
         ],
     },
 ];

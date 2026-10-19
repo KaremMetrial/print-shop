@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 use App\Services\Audit\AuditService;
+use App\Services\Notifications\NotificationService;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -78,6 +79,9 @@ class AssignmentService
         DB::table('item_assignment_history')->insert([
             'order_item_id' => $item->id, 'designer_id' => $designer->id, 'mode' => $mode, 'reason' => $reason, 'assigned_by' => $by?->id, 'created_at' => now(),
         ]);
+        if (! OrderItem::where('order_id', $item->order_id)->whereNull('cancelled_at')->whereNull('designer_id')->exists()) {
+            app(NotificationService::class)->resolveByKey("assign:{$item->order_id}", $by, 'تم إسناد كل البنود');
+        }
         $this->audit->record($old ? 'item.designer_changed' : 'item.designer_assigned', $item, ['designer_id' => $old], ['designer_id' => $designer->id, 'mode' => $mode], $reason);
     }
 

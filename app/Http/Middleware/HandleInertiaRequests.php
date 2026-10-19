@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -49,6 +50,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $this->authUser($request),
             ],
+            'unread' => fn () => $request->user() ? DB::table('staff_notifications')->where('user_id', $request->user()->id)->whereNull('read_at')->count() : 0,
         ]);
     }
 

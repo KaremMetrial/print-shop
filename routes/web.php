@@ -13,6 +13,7 @@ use App\Http\Controllers\Designer\TaskController;
 use App\Http\Controllers\Employees\EmployeeController;
 use App\Http\Controllers\Files\FileController;
 use App\Http\Controllers\Link\PublicLinkController;
+use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\Orders\OrderLinkController;
 use App\Http\Controllers\Orders\OrderRequestController;
@@ -87,6 +88,16 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('{orderRequest}', 'save')->name('save')->middleware('idempotent');
         Route::post('{orderRequest}/accept', 'accept')->name('accept')->middleware('idempotent');
         Route::post('{orderRequest}/reject', 'reject')->name('reject')->middleware('idempotent');
+    });
+
+    Route::controller(NotificationController::class)->group(function () {
+        Route::get('notifications', 'index')->name('notifications.index');
+        Route::post('notifications/read-all', 'readAll')->name('notifications.read-all');
+        Route::post('notifications/{id}/read', 'read')->name('notifications.read');
+        Route::get('actions', 'actions')->name('actions.index');
+        Route::get('actions/log', 'log')->name('actions.log');
+        Route::post('actions/{id}/claim', 'claim')->name('actions.claim')->middleware('idempotent');
+        Route::post('actions/{id}/complete', 'complete')->name('actions.complete')->middleware('idempotent');
     });
 
     Route::prefix('design')->name('design.')->controller(ManagementController::class)->group(function () {
