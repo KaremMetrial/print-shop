@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Customers;
 
 use App\Actions\Customers\SaveCustomer;
 use App\Enums\NotificationMode;
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\CustomerRequest;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\PricingTier;
 use App\Services\Finance\PaymentService;
 use App\Support\PenFixtures;
@@ -14,6 +16,7 @@ use App\Support\PhoneNormalizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -93,8 +96,11 @@ class CustomerController extends Controller
                 'created_by' => $customer->creator?->name,
                 'created_at' => $customer->created_at?->toIso8601String(),
             ],
-            // ملخص النشاط يُربط بالأوردرات (مرحلة 4)
-            'summary' => ['orders_total' => 0, 'orders_active' => 0, 'last_order_at' => null],
+            'summary' => [
+                'orders_total' => Order::where('customer_id', $customer->id)->count(),
+                'orders_active' => Order::where('customer_id', $customer->id)->whereNotIn('status', [OrderStatus::COMPLETED->value, OrderStatus::CANCELLED->value])->count(),
+                'last_order_at' => Order::where('customer_id', $customer->id)->max('created_at') ? Carbon::parse(Order::where('customer_id', $customer->id)->max('created_at'))->toIso8601String() : null,
+            ],
             'access' => ['last_login_at' => $customer->credential?->last_login_at?->toIso8601String()],
         ]);
     }

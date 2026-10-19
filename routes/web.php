@@ -8,6 +8,7 @@ use App\Http\Controllers\Chat\StaffChatController;
 use App\Http\Controllers\Customers\CustomerAccessController;
 use App\Http\Controllers\Customers\CustomerActivityController;
 use App\Http\Controllers\Customers\CustomerController;
+use App\Http\Controllers\Customers\CustomerFinanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Design\ManagementController;
 use App\Http\Controllers\Designer\TaskController;
@@ -48,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('{customer}/access/disable', [CustomerAccessController::class, 'disable'])->name('access.disable');
         Route::post('{customer}/access/reset-password', [CustomerAccessController::class, 'resetPassword'])->name('access.reset');
         Route::get('{customer}/activity', CustomerActivityController::class)->name('activity');
+        Route::get('{customer}/orders', [CustomerFinanceController::class, 'orders'])->name('orders');
+        Route::get('{customer}/financial', [CustomerFinanceController::class, 'financial'])->name('financial');
+        Route::get('{customer}/payments', [CustomerFinanceController::class, 'payments'])->name('payments');
+        Route::get('{customer}/refunds', [CustomerFinanceController::class, 'refunds'])->name('refunds');
     });
 
     Route::prefix('products')->name('products.')->group(function () {
