@@ -23,6 +23,8 @@ use App\Http\Controllers\Operations\SettingsController;
 use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\Orders\OrderLinkController;
 use App\Http\Controllers\Orders\OrderRequestController;
+use App\Http\Controllers\Portal\PortalAuthController;
+use App\Http\Controllers\Portal\PortalController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard')->name('home');
@@ -170,4 +172,31 @@ Route::prefix('l/{token}')->middleware(['throttle:link-access'])->name('link.')-
     Route::get('items/{item}', 'item')->name('item');
     Route::post('items/{item}/approve', 'approve')->name('approve');
     Route::get('files/{file}', 'file')->name('file');
+});
+
+// بوابة العميل المسجّل (جلسة منفصلة)
+Route::prefix('portal')->name('portal.')->group(function () {
+    Route::controller(PortalAuthController::class)->group(function () {
+        Route::get('login', 'login')->name('login');
+        Route::post('login', 'store')->name('login.store')->middleware('throttle:20,1');
+        Route::get('recover', 'recover')->name('recover');
+        Route::post('recover', 'recoverStore')->name('recover.store')->middleware('throttle:20,1');
+    });
+    Route::middleware('portal')->group(function () {
+        Route::post('logout', [PortalAuthController::class, 'logout'])->name('logout');
+        Route::controller(PortalController::class)->group(function () {
+            Route::get('/', 'dashboard')->name('home');
+            Route::get('requests', 'requests')->name('requests');
+            Route::get('requests/new', 'createRequest')->name('requests.new');
+            Route::post('requests/quote', 'quote')->name('requests.quote');
+            Route::post('requests', 'storeRequest')->name('requests.store')->middleware('idempotent');
+            Route::get('requests/{orderRequest}', 'showRequest')->name('requests.show');
+            Route::get('orders', 'orders')->name('orders');
+            Route::get('orders/{order}', 'showOrder')->name('orders.show');
+            Route::get('orders/{order}/items/{item}', 'item')->name('orders.item');
+            Route::post('orders/{order}/items/{item}/approve', 'approve')->name('orders.approve')->middleware('idempotent');
+            Route::get('files/{file}', 'file')->name('files');
+            Route::get('account', 'account')->name('account');
+        });
+    });
 });

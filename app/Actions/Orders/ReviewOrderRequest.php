@@ -9,6 +9,7 @@ use App\Models\OrderRequest;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Audit\AuditService;
+use App\Services\Notifications\NotificationService;
 use App\Services\Pricing\PricingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -80,6 +81,7 @@ class ReviewOrderRequest
                 'items' => $request->items->map(fn ($i) => ['product_id' => $i->product_id, 'quantity' => $i->quantity, 'options' => $i->options, 'notes' => $i->notes])->all(),
             ]);
             $request->update(['status' => OrderRequestStatus::ACCEPTED, 'decided_at' => now(), 'decided_by' => $actor->id, 'order_id' => $order->id]);
+            app(NotificationService::class)->resolveByKey("request:{$request->id}", $actor, 'تم قبول الطلب');
             $this->audit->record('order_request.accepted', $request, ['status' => 'IN_REVIEW'], ['status' => 'ACCEPTED', 'order_id' => $order->id]);
 
             return $request;
@@ -96,6 +98,7 @@ class ReviewOrderRequest
         return DB::transaction(function () use ($actor, $request, $reason) {
             $request = $this->lockActive($actor, $request);
             $request->update(['status' => OrderRequestStatus::REJECTED, 'decided_at' => now(), 'decided_by' => $actor->id, 'reject_reason' => trim($reason)]);
+            app(NotificationService::class)->resolveByKey("request:{$request->id}", $actor, 'تم رفض الطلب');
             $this->audit->record('order_request.rejected', $request, ['status' => 'IN_REVIEW'], ['status' => 'REJECTED'], trim($reason));
 
             return $request;

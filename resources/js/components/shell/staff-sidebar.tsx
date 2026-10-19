@@ -7,7 +7,7 @@ import { adminNav, type ShellNavGroup } from './nav-config';
 const roleLine: Record<string, string> = { super_admin: 'حساب إداري', admin: 'حساب إداري', data_entry: 'حساب تشغيل', designer: 'حساب مصمم', accountant: 'حساب محاسبة' };
 
 /** Right sidebar · V3 — 264px، أبيض، حد يسار 1px، padding 20×12، gap 16 (pen: S-007). */
-export function StaffSidebar({ onNavigate, nav = adminNav, width = 264 }: { onNavigate?: () => void; nav?: ShellNavGroup[]; width?: number }) {
+export function StaffSidebar({ onNavigate, nav = adminNav, width = 264, subtitle = 'إدارة أعمال الطباعة', footer }: { onNavigate?: () => void; nav?: ShellNavGroup[]; width?: number; subtitle?: string; footer?: { a: string; b: string } }) {
     const { url } = usePage();
     const { name, auth } = usePage<SharedData>().props;
     const { canAny } = usePermissions();
@@ -18,7 +18,7 @@ export function StaffSidebar({ onNavigate, nav = adminNav, width = 264 }: { onNa
             <div className="flex w-full shrink-0 flex-col gap-[2px] p-[0px_8px]">
                 <div className="w-full text-right font-[Goldman] text-[28px] leading-[39px] font-[400] text-[var(--primary)]">PBMS</div>
                 <div className="w-full text-right text-[14px] leading-[22px] font-[700] text-[var(--ink)]">{name}</div>
-                <div className="w-full text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">إدارة أعمال الطباعة</div>
+                <div className="w-full text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">{subtitle}</div>
             </div>
 
             <nav aria-label="القائمة الرئيسية" className="flex w-full flex-1 flex-col gap-[4px] overflow-y-auto">
@@ -49,8 +49,8 @@ export function StaffSidebar({ onNavigate, nav = adminNav, width = 264 }: { onNa
             </nav>
 
             <div className="flex w-full shrink-0 flex-col gap-[4px] rounded-[10px] bg-[var(--background)] p-[12px]">
-                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--ink)]">الفرع الرئيسي • القاهرة</div>
-                <div className="w-full text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">{roleLine[auth.user.role ?? ''] ?? 'حساب موظف'} • اتصال آمن</div>
+                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--ink)]">{footer?.a ?? 'الفرع الرئيسي • القاهرة'}</div>
+                <div className="w-full text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">{footer?.b ?? `${roleLine[auth.user?.role ?? ''] ?? 'حساب موظف'} • اتصال آمن`}</div>
             </div>
         </div>
     );

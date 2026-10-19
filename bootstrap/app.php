@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureStaffSession;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\Idempotent;
+use App\Http\Middleware\PortalAuth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
-        $middleware->alias(['idempotent' => Idempotent::class]);
+        $middleware->alias(['idempotent' => Idempotent::class, 'portal' => PortalAuth::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

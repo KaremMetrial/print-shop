@@ -4,6 +4,7 @@ namespace App\Actions\Customers;
 
 use App\Models\Customer;
 use App\Services\Audit\AuditService;
+use App\Services\Notifications\NotificationService;
 use App\Support\TempPassword;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -51,6 +52,10 @@ class ManagePlatformAccess
             ])->save();
             if ($enable) {
                 $customer->update(['platform_access_enabled' => true]);
+            }
+            if ($action === 'customer.password_reset') {
+                DB::table('password_recovery_requests')->where('customer_id', $customer->id)->whereIn('status', ['OPEN', 'CLAIMED'])->update(['status' => 'COMPLETED', 'completed_at' => now()]);
+                app(NotificationService::class)->resolveByKey("recovery:{$customer->id}", null, 'أُعيد تعيين كلمة المرور');
             }
             $this->audit->record($action, $customer);
         });

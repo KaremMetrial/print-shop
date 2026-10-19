@@ -50,6 +50,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $this->authUser($request),
             ],
+            'portal' => fn () => ($c = $request->attributes->get('portal_customer')) ? ['name' => $c->name, 'phone' => $c->phone_display] : null,
             'unread' => fn () => $request->user() ? DB::table('staff_notifications')->where('user_id', $request->user()->id)->whereNull('read_at')->count() : 0,
         ]);
     }

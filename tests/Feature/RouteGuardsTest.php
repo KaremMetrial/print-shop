@@ -5,7 +5,7 @@ use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Facades\Route;
 
 /** مسارات عامة مقصودة (كل ما عداها يجب أن يكون خلف auth). */
-const PUBLIC_ROUTES = ['home', 'login', 'password.request', 'password.email', 'password.reset', 'password.store', 'verification.verify', 'link.show', 'link.item', 'link.approve', 'link.file'];
+const PUBLIC_ROUTES = ['home', 'login', 'password.request', 'password.email', 'password.reset', 'password.store', 'verification.verify', 'link.show', 'link.item', 'link.approve', 'link.file', 'portal.login', 'portal.login.store', 'portal.recover', 'portal.recover.store'];
 
 function appRoutes(): array
 {
@@ -18,7 +18,7 @@ it('puts every non-public route behind authentication (TC route-permission matri
     foreach (appRoutes() as $r) {
         $name = $r->getName() ?? $r->uri();
         $isPublic = in_array($r->getName(), PUBLIC_ROUTES, true) || str_starts_with((string) $r->getName(), 'password.') || str_starts_with((string) $r->getName(), 'verification.');
-        $guarded = collect($r->gatherMiddleware())->contains(fn ($m) => is_string($m) && (str_starts_with($m, 'auth') || str_starts_with($m, 'guest')));
+        $guarded = collect($r->gatherMiddleware())->contains(fn ($m) => is_string($m) && (str_starts_with($m, 'auth') || str_starts_with($m, 'guest') || $m === 'portal'));
         if (! $isPublic && ! $guarded) {
             $unguarded[] = $r->methods()[0].' '.$r->uri().' ('.$name.')';
         }

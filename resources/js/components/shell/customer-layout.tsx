@@ -1,47 +1,57 @@
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { FlashMessages } from '@/components/flash-messages';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
-import { Bell, CircleUser } from 'lucide-react';
-import { customerNav } from './nav-config';
+import { router, usePage } from '@inertiajs/react';
+import { Menu } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { type ShellNavGroup } from './nav-config';
+import { StaffSidebar } from './staff-sidebar';
 
-/** واجهة العميل المسجّل — مستقلة عن تنقل الموظفين: الرئيسية · أوردراتي · طلباتي · حسابي (pen: V3 canonical navigation) */
-export function CustomerLayout({ children }: { children: React.ReactNode }) {
-    const { name, auth } = usePage<SharedData>().props;
-    const { url } = usePage();
-    const items = customerNav;
+const portalNav: ShellNavGroup[] = [
+    {
+        title: '',
+        items: [
+            { title: 'لوحة التحكم', href: '/portal', icon: 'layout-dashboard' },
+            { title: 'أوردراتي', href: '/portal/orders', icon: 'package' },
+            { title: 'إنشاء طلب أوردر', href: '/portal/requests/new', icon: 'square-plus' },
+            { title: 'طلباتي', href: '/portal/requests', icon: 'clipboard-list' },
+            { title: 'الملف الشخصي', href: '/portal/account', icon: 'user' },
+        ],
+    },
+];
+
+/** بوابة العميل المسجّل: نفس الشيل المشترك (شريط جانبي + علوي) بقائمة العميل. جلسة منفصلة عن الموظفين. */
+export function CustomerLayout({ children }: { children: ReactNode }) {
+    const portal = (usePage<SharedData & { portal?: { name: string; phone: string } | null }>().props as { portal?: { name: string; phone: string } | null }).portal;
+    const [open, setOpen] = useState(false);
+    const side = <StaffSidebar nav={portalNav} subtitle="بوابة العملاء" footer={{ a: portal?.name ?? '', b: portal?.phone ?? '' }} onNavigate={() => setOpen(false)} />;
     return (
-        <div className="bg-background flex min-h-screen flex-col">
-            <header className="bg-surface border-border h-topbar flex shrink-0 items-center gap-4 border-b px-4 lg:px-8">
-                <span className="text-primary text-lg font-bold">{name}</span>
-                <nav className="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="القائمة">
-                    {items.map((i) => (
-                        <Link key={i.href} href={i.href} className={cn('rounded-control h-11 px-3 text-sm leading-[2.75rem]', url.startsWith(i.href) ? 'bg-primary-soft text-primary font-semibold' : 'text-text-secondary font-medium')}>
-                            {i.title}
-                        </Link>
-                    ))}
-                </nav>
-                <Button variant="ghost" size="icon" aria-label="الإشعارات">
-                    <Bell className="text-muted-foreground" />
-                </Button>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="حسابي">
-                            <CircleUser className="text-muted-foreground" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-60 p-2">
-                        <span className="text-ink block px-3 py-2 text-sm">{auth.user.name}</span>
-                        <DropdownMenuItem asChild className="h-11 px-3">
-                            <Link href="/customer/logout" method="post" as="button" className="w-full text-start">
-                                تسجيل الخروج
-                            </Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </header>
-            <main className="mx-auto w-full max-w-6xl flex-1 p-4 lg:p-8">{children}</main>
+        <div dir="ltr" className="flex min-h-screen w-full bg-[var(--background)]">
+            <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex h-[66px] w-full shrink-0 items-center gap-[16px] border-solid bg-[var(--surface)] p-[0px_24px] [border-color:var(--border)] [border-width:0px_0px_1px_0px]">
+                    <button type="button" onClick={() => setOpen(true)} aria-label="فتح القائمة" className="text-[var(--muted-foreground)] lg:hidden">
+                        <Menu className="size-6" />
+                    </button>
+                    <button type="button" onClick={() => router.post('/portal/logout')} className="text-left text-[13px] text-[var(--muted-foreground)]">
+                        تسجيل الخروج
+                    </button>
+                    <div className="flex flex-1 flex-col items-end">
+                        <div className="text-left text-[14px] leading-[22px] font-[700] text-[var(--ink)]">{portal?.name}</div>
+                        <div className="text-left text-[11px] text-[var(--muted-foreground)]">عميل مسجّل</div>
+                    </div>
+                </div>
+                <main className="flex w-full shrink-0 flex-col gap-[20px] p-[16px] lg:p-[32px]">
+                    <FlashMessages />
+                    {children}
+                </main>
+            </div>
+            <aside className="sticky top-0 hidden h-screen shrink-0 lg:block">{side}</aside>
+            <Sheet open={open} onOpenChange={setOpen}>
+                <SheetContent side="right" className="w-[264px] max-w-[85vw] p-0">
+                    <SheetTitle className="sr-only">القائمة</SheetTitle>
+                    {side}
+                </SheetContent>
+            </Sheet>
         </div>
     );
 }
