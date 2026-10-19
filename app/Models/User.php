@@ -126,6 +126,18 @@ class User extends Authenticatable
         return $this->effectivePermissions = $codes;
     }
 
+    /** @param list<string> $codes */
+    public function hasAnyPermission(array $codes): bool
+    {
+        foreach ($codes as $c) {
+            if ($this->hasPermission($c)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function hasPermission(string $code): bool
     {
         return in_array($code, $this->permissionCodes(), true);

@@ -14,6 +14,12 @@ use App\Http\Controllers\Employees\EmployeeController;
 use App\Http\Controllers\Files\FileController;
 use App\Http\Controllers\Link\PublicLinkController;
 use App\Http\Controllers\Notifications\NotificationController;
+use App\Http\Controllers\Operations\AccountingController;
+use App\Http\Controllers\Operations\AuditController;
+use App\Http\Controllers\Operations\DeliveryController;
+use App\Http\Controllers\Operations\ReportsController;
+use App\Http\Controllers\Operations\SearchController;
+use App\Http\Controllers\Operations\SettingsController;
 use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\Orders\OrderLinkController;
 use App\Http\Controllers\Orders\OrderRequestController;
@@ -98,6 +104,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('actions/log', 'log')->name('actions.log');
         Route::post('actions/{id}/claim', 'claim')->name('actions.claim')->middleware('idempotent');
         Route::post('actions/{id}/complete', 'complete')->name('actions.complete')->middleware('idempotent');
+    });
+
+    Route::get('audit', [AuditController::class, 'index'])->name('audit.index');
+    Route::get('delivery', [DeliveryController::class, 'index'])->name('delivery.index');
+    Route::get('search', SearchController::class)->name('search');
+    Route::get('reports', ReportsController::class)->name('reports');
+    Route::get('settings/system', [SettingsController::class, 'index'])->name('settings.system');
+    Route::patch('settings/system', [SettingsController::class, 'update'])->name('settings.system.update');
+    Route::prefix('accounting')->name('accounting.')->controller(AccountingController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('payments', 'store')->name('payments.store')->middleware('idempotent');
+        Route::post('payments/{payment}/correct', 'correct')->name('payments.correct')->middleware('idempotent');
+        Route::post('payments/{payment}/void', 'void')->name('payments.void')->middleware('idempotent');
+        Route::post('refunds/{id}/payout', 'payout')->name('refunds.payout')->middleware('idempotent');
     });
 
     Route::prefix('design')->name('design.')->controller(ManagementController::class)->group(function () {

@@ -1,6 +1,7 @@
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoney, formatTime } from '@/lib/money';
+import { PaymentDialog } from '@/components/finance/payment-dialog';
 import { CancelOrderDialog } from '@/components/orders/cancel-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Head, Link, router } from '@inertiajs/react';
@@ -47,7 +48,7 @@ interface Props {
     activity: { id: number; at: string; actor: string; action: string; details: string }[];
     delivery_log: { at: string; text: string; by: string }[];
     link: { status: string } | null;
-    can: { update: boolean; items: boolean; links: boolean; price: boolean; cancel: boolean; next: { step: string; label: string } | null };
+    can: { update: boolean; items: boolean; links: boolean; price: boolean; cancel: boolean; pay: boolean; next: { step: string; label: string } | null };
     reasons: string[];
 }
 
@@ -276,7 +277,7 @@ function Items({ p }: { p: Props }) {
     );
 }
 
-function Payments({ p }: { p: Props }) {
+function Payments({ p, onPay }: { p: Props; onPay: () => void }) {
     const o = p.order;
     const th = 'text-right text-[13px] leading-[21px] font-[600] text-[#475569]';
     return (
@@ -297,9 +298,11 @@ function Payments({ p }: { p: Props }) {
                 ))}
             </div>
             <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
-                <Link href={`/orders/${o.id}/payments/create`} className={primary34}>
-                    تسجيل دفعة
-                </Link>
+                {p.can.pay && (
+                    <button type="button" onClick={onPay} className={primary34}>
+                        تسجيل دفعة
+                    </button>
+                )}
                 <div className="flex-1 text-right text-[18px] leading-[29px] font-[700] text-[var(--ink)]">سجل المدفوعات</div>
             </div>
             <div className={panel}>
@@ -443,6 +446,7 @@ export default function OrderShow(props: Props) {
     const { order: o, tab, can } = props;
     const overview = tab === 'overview';
     const [cancelOpen, setCancelOpen] = useState(false);
+    const [payOpen, setPayOpen] = useState(false);
     return (
         <AppLayout active="/orders">
             <Head title={`تفاصيل الأوردر ${o.number}`} />
@@ -515,11 +519,12 @@ export default function OrderShow(props: Props) {
                 <Tabs order={o} tab={tab} />
                 {tab === 'overview' && <Overview p={props} />}
                 {tab === 'items' && <Items p={props} />}
-                {tab === 'payments' && <Payments p={props} />}
+                {tab === 'payments' && <Payments p={props} onPay={() => setPayOpen(true)} />}
                 {tab === 'delivery' && <Delivery p={props} />}
                 {tab === 'files' && <Files p={props} />}
                 {tab === 'activity' && <Activity p={props} />}
             </div>
+            {payOpen && <PaymentDialog onClose={() => setPayOpen(false)} customerId={o.customer.id} order={{ id: o.id, number: o.number, remaining_minor: o.remaining_minor ?? 0 }} />}
             {can.cancel && <CancelOrderDialog open={cancelOpen} onOpenChange={setCancelOpen} order={o} reasons={props.reasons} />}
         </AppLayout>
     );

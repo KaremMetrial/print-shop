@@ -56,7 +56,7 @@ export const adminNav: ShellNavGroup[] = [
         items: [
             { title: 'الموظفون', href: '/employees', icon: 'contact', permission: 'employees.view' },
             { title: 'سجل التدقيق', href: '/audit', icon: 'history', permission: 'audit.view' },
-            { title: 'الإعدادات', href: '/settings', icon: 'settings' },
+            { title: 'الإعدادات', href: '/settings/system', icon: 'settings', permission: ['settings.general.manage', 'settings.orders.manage', 'settings.payments.manage', 'settings.files.manage'] },
         ],
     },
 ];

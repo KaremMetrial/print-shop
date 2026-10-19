@@ -7,6 +7,8 @@ use App\Models\AuditLog;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /** يجهّز بيانات صفحة تفاصيل الأوردر (S-012/013). المصمم لا يرى الأسعار (BR-071) — تُحجب في السيرفر. */
 class OrderPresenter
@@ -24,7 +26,7 @@ class OrderPresenter
         $active = $order->items->whereNull('cancelled_at');
         $approved = $active->whereNotNull('approved_at')->count();
         $next = $active->whereNull('approved_at')->first();
-        $paid = 0; // يُربط بوحدة المدفوعات (مرحلة 8)
+        $paid = $order->paidMinor();
         $c = $order->customer;
 
         return [
@@ -48,7 +50,7 @@ class OrderPresenter
                 'updated_at' => $i->updated_at->toIso8601String(),
                 ...($showPrice ? ['total_minor' => $i->item_total->minor] : []),
             ])->all(),
-            'payments' => [],
+            'payments' => $showPrice ? DB::table('payment_allocations')->join('payments', 'payments.id', '=', 'payment_allocations.payment_id')->where('payment_allocations.order_id', $order->id)->orderByDesc('payments.id')->get(['payments.number', 'payments.id', 'payments.status', 'payments.method', 'payments.received_at', 'payment_allocations.amount'])->map(fn ($r) => ['id' => $r->id, 'number' => $r->number, 'at' => Carbon::parse($r->received_at)->toIso8601String(), 'amount_minor' => (int) $r->amount, 'method' => ['CASH' => 'نقدًا', 'BANK_TRANSFER' => 'تحويل بنكي', 'WALLET' => 'محفظة إلكترونية', 'CARD' => 'بطاقة'][$r->method] ?? $r->method, 'status' => $r->status === 'CONFIRMED' ? 'مؤكدة' : 'ملغاة'])->all() : [],
             'files' => [],
             'activity' => AuditLog::where('entity_type', $order->getMorphClass())->where('entity_id', $order->id)->oldest('id')->limit(200)->get()
                 ->map(fn (AuditLog $l) => [
@@ -59,7 +61,7 @@ class OrderPresenter
             'link' => null,
             'can' => [
                 'update' => (bool) $viewer->hasPermission('orders.update'), 'items' => (bool) $viewer->hasPermission('orders.items.manage'),
-                'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
+                'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
                 'next' => $this->nextStep($order, $viewer), 'price' => $showPrice,
             ],
         ];
