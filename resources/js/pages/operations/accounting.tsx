@@ -3,7 +3,7 @@ import { DataGrid, ListHead, Pill, RowBtn, SearchBox, TabsBar } from '@/componen
 import { PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoneyFixed, formatTime } from '@/lib/money';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 interface Pay {
@@ -85,7 +85,7 @@ export default function Accounting({ tab, filters, can, payments, customers, rec
                                 { h: 'المبلغ', w: 110, cell: (p) => <b>{formatMoneyFixed(p.amount_minor)}</b> },
                                 { h: 'التاريخ', w: 150, cell: (p) => `${formatDate(p.at)}، ${formatTime(p.at)}` },
                                 { h: 'العميل', cell: (p) => p.customer },
-                                { h: 'رقم الدفعة', w: 100, cell: (p) => <b>{p.number}</b> },
+                                { h: 'رقم الدفعة', w: 100, cell: (p) => <Link href={`/accounting/payments/${p.id}`}><b>{p.number}</b></Link> },
                             ]}
                         />
                         <PenPagination page={payments.current_page} pages={payments.last_page} summary={`عرض ${payments.from ?? 0}–${payments.to ?? 0} من ${payments.total}`} onPage={(p) => go({ page: String(p) })} />

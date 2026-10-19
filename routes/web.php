@@ -18,6 +18,7 @@ use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Operations\AccountingController;
 use App\Http\Controllers\Operations\AuditController;
 use App\Http\Controllers\Operations\DeliveryController;
+use App\Http\Controllers\Operations\PaymentDetailsController;
 use App\Http\Controllers\Operations\ReportsController;
 use App\Http\Controllers\Operations\SearchController;
 use App\Http\Controllers\Operations\SettingsController;
@@ -122,6 +123,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/system', [SettingsController::class, 'index'])->name('settings.system');
     Route::patch('settings/system', [SettingsController::class, 'update'])->name('settings.system.update');
     Route::prefix('accounting')->name('accounting.')->controller(AccountingController::class)->group(function () {
+        Route::get('payments/{payment}', [PaymentDetailsController::class, 'show'])->name('payments.show');
+        Route::get('payments/{payment}/receipt', [PaymentDetailsController::class, 'receipt'])->name('payments.receipt');
+        Route::get('payments/{payment}/receipt/pdf', [PaymentDetailsController::class, 'receiptPdf'])->name('payments.receipt.pdf');
         Route::get('/', 'index')->name('index');
         Route::post('payments', 'store')->name('payments.store')->middleware('idempotent');
         Route::post('payments/{payment}/correct', 'correct')->name('payments.correct')->middleware('idempotent');
