@@ -46,6 +46,8 @@ jobs:
         run: vendor/bin/phpstan analyse --memory-limit=1G
       - name: TypeScript
         run: npx tsc --noEmit
+      - name: Vitest
+        run: npm test
       - name: ESLint
         run: npm run lint -- --max-warnings=0
       - name: Generated types in sync
