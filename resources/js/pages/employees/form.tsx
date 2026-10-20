@@ -57,7 +57,7 @@ export default function EmployeeForm({ employee, roles, specialties, availabilit
 
                 <PenSection title="الدور الوظيفي">
                     <PenSelect label="الدور الوظيفي *" placeholder="اختر الدور" options={roles} value={data.role} onValueChange={(v) => setData('role', v)} error={errors.role} />
-                    <div className={penNote}>Admin يمكنه اختيار: مدخل بيانات، مصمم، محاسب. إنشاء Admin متاح لمسار Super Admin فقط، ولا يتوفر Super Admin هنا.</div>
+                    <div className={penNote}>المدير يمكنه اختيار: مدخل بيانات، مصمم، محاسب. إنشاء مدير متاح للمدير العام فقط، ولا يتوفر المدير العام هنا.</div>
                 </PenSection>
 
                 <PenSection title="بيانات الدخول">

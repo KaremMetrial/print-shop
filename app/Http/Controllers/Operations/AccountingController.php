@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Operations;
 
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
@@ -17,24 +18,22 @@ use Inertia\Response;
 /** المحاسبة (S-051..058): التحصيلات، المديونيات، المستردات. كل العمليات عبر PaymentService (معاملة + قفل + تدقيق). */
 class AccountingController extends Controller
 {
-    private const METHODS = ['CASH' => 'نقدًا', 'BANK_TRANSFER' => 'تحويل بنكي', 'WALLET' => 'محفظة إلكترونية', 'CARD' => 'بطاقة'];
-
     public function index(Request $request, PaymentService $svc): Response
     {
         $u = $request->user();
         abort_unless($u->hasAnyPermission(['payments.view_all', 'payments.view_summary', 'refunds.view']), 403);
         $tab = in_array($request->query('tab'), ['receivables', 'refunds'], true) ? $request->query('tab') : 'payments';
-        $props = ['tab' => $tab, 'methods' => self::METHODS, 'filters' => $request->only(['q', 'method', 'status']), 'can' => [
+        $props = ['tab' => $tab, 'methods' => PaymentMethod::labels(), 'enabled_methods' => PaymentMethod::enabled(), 'filters' => $request->only(['q', 'method', 'status']), 'can' => [
             'create' => (bool) $u->hasPermission('payments.create'), 'correct' => (bool) $u->hasPermission('payments.correct'), 'refund' => (bool) $u->hasPermission('refunds.record'),
         ]];
         if ($tab === 'payments') {
             abort_unless($u->hasPermission('payments.view_all'), 403);
             $props['payments'] = Payment::with('customer:id,name')
                 ->when($request->query('q'), fn ($b, $t) => $b->where(fn ($w) => $w->where('number', 'like', "%{$t}%")->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$t}%"))))
-                ->when(array_key_exists((string) $request->query('method'), self::METHODS), fn ($b) => $b->where('method', $request->query('method')))
+                ->when(array_key_exists((string) $request->query('method'), PaymentMethod::labels()), fn ($b) => $b->where('method', $request->query('method')))
                 ->when(in_array($request->query('status'), ['CONFIRMED', 'VOIDED'], true), fn ($b) => $b->where('status', $request->query('status')))
                 ->latest('id')->paginate(15)->withQueryString()->through(fn (Payment $p) => [
-                    'id' => $p->id, 'number' => $p->number, 'customer' => $p->customer->name, 'customer_id' => $p->customer_id, 'amount_minor' => $p->amount->minor, 'method' => self::METHODS[$p->method] ?? $p->method,
+                    'id' => $p->id, 'number' => $p->number, 'customer' => $p->customer->name, 'customer_id' => $p->customer_id, 'amount_minor' => $p->amount->minor, 'method' => PaymentMethod::labels()[$p->method] ?? $p->method,
                     'status' => $p->status, 'at' => $p->received_at->toIso8601String(), 'target' => $p->target_order_id ? Order::whereKey($p->target_order_id)->value('order_number') : null,
                 ]);
             $props['customers'] = $u->hasPermission('payments.create') ? Customer::orderBy('name')->limit(300)->get(['id', 'name']) : [];
@@ -58,7 +57,7 @@ class AccountingController extends Controller
     public function store(Request $request, PaymentService $svc): RedirectResponse
     {
         $d = $request->validate([
-            'customer_id' => ['required', 'integer', 'exists:customers,id'], 'amount_minor' => ['required', 'integer', 'min:1'], 'method' => ['required', Rule::in(array_keys(self::METHODS))],
+            'customer_id' => ['required', 'integer', 'exists:customers,id'], 'amount_minor' => ['required', 'integer', 'min:1'], 'method' => ['required', Rule::in(array_keys(PaymentMethod::enabled()))],
             'order_id' => ['nullable', 'integer', 'exists:orders,id'], 'reference' => ['nullable', 'string', 'max:100'], 'notes' => ['nullable', 'string', 'max:500'],
         ], ['amount_minor.min' => 'قيمة الدفعة يجب أن تكون أكبر من صفر.']);
         $svc->record($request->user(), Customer::findOrFail($d['customer_id']), (int) $d['amount_minor'], $d['method'], ($d['order_id'] ?? null) ? Order::findOrFail($d['order_id']) : null, $d['reference'] ?? null, $d['notes'] ?? null);
@@ -84,7 +83,7 @@ class AccountingController extends Controller
 
     public function payout(Request $request, int $id, PaymentService $svc): RedirectResponse
     {
-        $d = $request->validate(['amount_minor' => ['required', 'integer', 'min:1'], 'method' => ['required', Rule::in(array_keys(self::METHODS))], 'notes' => ['nullable', 'string', 'max:255']]);
+        $d = $request->validate(['amount_minor' => ['required', 'integer', 'min:1'], 'method' => ['required', Rule::in(array_keys(PaymentMethod::enabled()))], 'notes' => ['nullable', 'string', 'max:255']]);
         $svc->payout($request->user(), $id, (int) $d['amount_minor'], $d['method'], $d['notes'] ?? null);
 
         return back()->with('success', 'تم تسجيل رد المبلغ.');

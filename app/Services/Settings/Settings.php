@@ -14,15 +14,18 @@ class Settings
         'shop.phone' => ['label' => 'هاتف المطبعة (يظهر لعميل الرابط)', 'group' => 'general', 'type' => 'text', 'default' => ''],
         'orders.default_eta_days' => ['label' => 'مدة الطباعة الافتراضية (أيام)', 'group' => 'orders', 'type' => 'int', 'default' => '2'],
         'orders.auto_complete_hours' => ['label' => 'إتمام تلقائي بعد الخروج للتوصيل (ساعات)', 'group' => 'orders', 'type' => 'int', 'default' => '24'],
-        'payments.methods' => ['label' => 'طرق الدفع المتاحة', 'group' => 'payments', 'type' => 'text', 'default' => 'CASH,BANK_TRANSFER,WALLET'],
+        'payments.methods' => ['label' => 'طرق الدفع المتاحة', 'group' => 'payments', 'type' => 'methods', 'default' => 'CASH,BANK_TRANSFER,WALLET'],
         'files.max_mb' => ['label' => 'الحد الأقصى لحجم الملف (ميجابايت)', 'group' => 'files', 'type' => 'int', 'default' => '50'],
     ];
 
+    /** @var array<string, string>|null */
+    private ?array $cache = null;
+
     public function get(string $key): string
     {
-        $v = DB::table('app_settings')->where('key', $key)->value('value');
+        $this->cache ??= DB::table('app_settings')->pluck('value', 'key')->all();
 
-        return $v ?? (self::DEFAULTS[$key]['default'] ?? '');
+        return $this->cache[$key] ?? (self::DEFAULTS[$key]['default'] ?? '');
     }
 
     public function int(string $key): int
@@ -45,5 +48,6 @@ class Settings
     {
         abort_unless(isset(self::DEFAULTS[$key]), 422);
         DB::table('app_settings')->updateOrInsert(['key' => $key], ['value' => $value, 'updated_by' => $by, 'updated_at' => now()]);
+        $this->cache = null;
     }
 }

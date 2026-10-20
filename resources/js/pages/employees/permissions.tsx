@@ -131,7 +131,7 @@ export default function EmployeePermissions({ employee, groups, granted }: { emp
             <div className="flex w-full shrink-0 flex-col gap-[12px] rounded-[10px] bg-[var(--background)] p-[14px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                 <div className="w-full text-right text-[14px] leading-[normal] font-[700] text-[var(--ink)]">قيود محمية</div>
                 <div className="w-full text-right text-[12px] leading-[normal] font-[400] text-[var(--text-secondary)]">
-                    المصمم: لا يصل إلى مهام مصممين آخرين أو معلومات العملاء المالية. مدخل البيانات: لا يلغي الأوردرات ولا يصحح دفعات مؤكدة ولا يرسل داخل محادثات التصميم. Admin: لا يدير Admin أو Super Admin ولا يعدل صلاحياته الذاتية.
+                    المصمم: لا يصل إلى مهام مصممين آخرين أو معلومات العملاء المالية. مدخل البيانات: لا يلغي الأوردرات ولا يصحح دفعات مؤكدة ولا يرسل داخل محادثات التصميم. المدير: لا يدير مديرًا آخر أو المدير العام ولا يعدل صلاحياته الذاتية.
                 </div>
             </div>
         </AppLayout>

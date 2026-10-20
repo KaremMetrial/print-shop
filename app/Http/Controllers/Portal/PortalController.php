@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Actions\Orders\SubmitOrderRequest;
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\DesignVersion;
@@ -194,7 +195,7 @@ class PortalController extends Controller
     public function proof(Request $request, Order $order): RedirectResponse
     {
         $this->orderOf($request, $order);
-        $d = $request->validate(['file' => ['required', 'file'], 'amount_minor' => ['required', 'integer', 'min:1', 'max:100000000'], 'method' => ['required', 'in:CASH,BANK_TRANSFER,WALLET,CARD'], 'reference' => ['nullable', 'string', 'max:100']]);
+        $d = $request->validate(['file' => ['required', 'file'], 'amount_minor' => ['required', 'integer', 'min:1', 'max:100000000'], 'method' => ['required', 'in:'.implode(',', array_keys(PaymentMethod::enabled()))], 'reference' => ['nullable', 'string', 'max:100']]);
         app(PaymentProofService::class)->submit($order, $request->file('file'), (int) $d['amount_minor'], $d['method'], $d['reference'] ?? null, 'customer', $this->me($request)->id);
 
         return back()->with('success', 'تم إرسال إثبات الدفع للمراجعة. لن يُحتسب إلا بعد تأكيد المطبعة.');

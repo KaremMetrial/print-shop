@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\PaymentMethod;
+use App\Services\Settings\Settings;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +43,10 @@ class HandleInertiaRequests extends Middleware
 
         return array_merge(parent::share($request), [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $this->shop('shop.name'),
+            'branch' => $this->shop('shop.branch'),
+            'paymentMethods' => fn () => PaymentMethod::enabled(),
+            'paymentMethodLabels' => PaymentMethod::labels(),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -73,5 +78,15 @@ class HandleInertiaRequests extends Middleware
             'role_label' => $role?->label(),
             'permissions' => $u->permissionCodes(),
         ];
+    }
+
+    /** اسم/فرع المطبعة من الإعدادات (يتغير فورًا بعد الحفظ؛ يرجع لاسم التطبيق لو الجدول غير جاهز). */
+    private function shop(string $key): string
+    {
+        try {
+            return app(Settings::class)->get($key) ?: (string) config('app.name');
+        } catch (\Throwable) {
+            return (string) config('app.name');
+        }
     }
 }

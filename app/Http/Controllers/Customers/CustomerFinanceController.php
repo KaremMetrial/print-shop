@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customers;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Order;
@@ -19,8 +20,6 @@ use Inertia\Response;
 /** S-025 أوردرات العميل · S-026 الملخص المالي + كشف الحساب · S-027 المدفوعات · S-030 الاستردادات. كل الأرقام من PaymentService/الجداول. */
 class CustomerFinanceController extends Controller
 {
-    private const METHODS = ['CASH' => 'نقدًا', 'BANK_TRANSFER' => 'تحويل بنكي', 'WALLET' => 'محفظة إلكترونية', 'CARD' => 'بطاقة'];
-
     public function orders(Request $request, Customer $customer, CustomerController $profile): Response
     {
         Gate::authorize('view', $customer);
@@ -56,7 +55,7 @@ class CustomerFinanceController extends Controller
         Gate::authorize('view', $customer);
         abort_unless($request->user()->hasPermission('payments.view_all'), 403);
         $rows = Payment::where('customer_id', $customer->id)->latest('id')->paginate(10)->withQueryString()->through(fn (Payment $p) => [
-            'id' => $p->id, 'number' => $p->number, 'amount_minor' => $p->amount->minor, 'method' => self::METHODS[$p->method] ?? $p->method, 'status' => $p->status,
+            'id' => $p->id, 'number' => $p->number, 'amount_minor' => $p->amount->minor, 'method' => PaymentMethod::labels()[$p->method] ?? $p->method, 'status' => $p->status,
             'at' => $p->received_at->toIso8601String(), 'target' => $p->target_order_id ? Order::whereKey($p->target_order_id)->value('order_number') : null,
         ]);
 

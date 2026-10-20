@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Operations;
 
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\User;
@@ -17,8 +18,6 @@ use Mpdf\Mpdf;
 /** S-029 تفاصيل الدفعة + S-029-R01 إيصال الدفع (مبلغ مستلم مؤكد وليس فاتورة). السجل المالي لا يُحذف. */
 class PaymentDetailsController extends Controller
 {
-    private const METHODS = ['CASH' => 'نقدًا', 'BANK_TRANSFER' => 'تحويل بنكي', 'WALLET' => 'محفظة إلكترونية', 'CARD' => 'بطاقة'];
-
     public function show(Request $request, Payment $payment): Response
     {
         return Inertia::render('operations/payment', $this->data($request, $payment) + ['can' => [
@@ -34,7 +33,7 @@ class PaymentDetailsController extends Controller
 
     public function receiptPdf(Request $request, Payment $payment): HttpResponse
     {
-        $d = $this->data($request, $payment) + ['shop' => app(Settings::class)->get('shop.name'), 'methods' => self::METHODS];
+        $d = $this->data($request, $payment) + ['shop' => app(Settings::class)->get('shop.name'), 'methods' => PaymentMethod::labels()];
         $pdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'default_font' => 'dejavusans', 'tempDir' => storage_path('app/mpdf')]);
         $pdf->autoScriptToLang = true;
         $pdf->autoLangToFont = true;
@@ -57,7 +56,7 @@ class PaymentDetailsController extends Controller
                 'id' => $payment->id, 'number' => $payment->number, 'status' => $payment->status, 'status_label' => $payment->status === 'CONFIRMED' ? 'مؤكدة' : 'ملغاة',
                 'customer' => ['id' => $payment->customer->id, 'name' => $payment->customer->name, 'phone' => $payment->customer->phone_normalized],
                 'original_minor' => $original, 'confirmed_minor' => $payment->status === 'CONFIRMED' ? $payment->amount->minor : 0, 'amount_minor' => $payment->amount->minor,
-                'method' => self::METHODS[$payment->method] ?? $payment->method, 'by' => $payment->received_by ? User::find($payment->received_by)?->name : null,
+                'method' => PaymentMethod::labels()[$payment->method] ?? $payment->method, 'by' => $payment->received_by ? User::find($payment->received_by)?->name : null,
                 'at' => $payment->received_at->toIso8601String(), 'reference' => $payment->reference, 'notes' => $payment->notes, 'void_reason' => $payment->void_reason,
             ],
             'allocations' => DB::table('payment_allocations')->join('orders', 'orders.id', '=', 'payment_allocations.order_id')->where('payment_id', $payment->id)

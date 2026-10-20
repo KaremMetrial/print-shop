@@ -9,7 +9,7 @@ const roleLine: Record<string, string> = { super_admin: 'حساب إداري', a
 /** Right sidebar · V3 — 264px، أبيض، حد يسار 1px، padding 20×12، gap 16 (pen: S-007). */
 export function StaffSidebar({ onNavigate, nav = adminNav, width = 264, subtitle = 'إدارة أعمال الطباعة', footer }: { onNavigate?: () => void; nav?: ShellNavGroup[]; width?: number; subtitle?: string; footer?: { a: string; b: string } }) {
     const { url } = usePage();
-    const { name, auth } = usePage<SharedData>().props;
+    const { name, auth, branch } = usePage<SharedData & { branch?: string }>().props;
     const { canAny } = usePermissions();
     const path = url.split('?')[0];
     const matches = (href: string) => path === href || path.startsWith(href + '/');
@@ -53,7 +53,7 @@ export function StaffSidebar({ onNavigate, nav = adminNav, width = 264, subtitle
             </nav>
 
             <div className="flex w-full shrink-0 flex-col gap-[4px] rounded-[10px] bg-[var(--background)] p-[12px]">
-                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--ink)]">{footer?.a ?? 'الفرع الرئيسي • القاهرة'}</div>
+                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--ink)]">{footer?.a ?? branch ?? ''}</div>
                 <div className="w-full text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">{footer?.b ?? `${roleLine[auth.user?.role ?? ''] ?? 'حساب موظف'} • اتصال آمن`}</div>
             </div>
         </div>

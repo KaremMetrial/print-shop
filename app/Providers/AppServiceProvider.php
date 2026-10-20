@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Policies\CatalogPolicy;
 use App\Policies\EmployeePolicy;
 use App\Services\Files\FileAccessRegistry;
+use App\Services\Settings\Settings;
+use App\Support\Shop;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(FileAccessRegistry::class);
+        $this->app->singleton(Settings::class);
         $this->app->afterResolving(FileAccessRegistry::class, function (FileAccessRegistry $r) {
             // ملفات النسخ: المصمم المسند، أو موظف يملك صلاحية ملفات الأوردر (BR-071: مصمم غير مسند لا يرى)
             $r->register('design_version', function ($file, $actor) {
@@ -47,6 +50,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // اسم المطبعة من الإعدادات يظهر في كل مكان يقرأ app.name (البريد، العناوين) — في طلبات الويب فقط
+        if (! $this->app->runningInConsole()) {
+            $name = Shop::name();
+            config(['app.name' => $name, 'mail.from.name' => $name]);
+        }
         // أي ability بصيغة permission (module.action) تُحسم من RBAC؛ غيرها يمر للـPolicies.
         Gate::before(function ($user, string $ability) {
             if ($user instanceof User && str_contains($ability, '.')) {

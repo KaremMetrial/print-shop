@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Operations;
 
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Services\Audit\AuditService;
 use App\Services\Settings\Settings;
@@ -27,7 +28,7 @@ class SettingsController extends Controller
             }
         }
 
-        return Inertia::render('operations/settings', ['fields' => $fields, 'groups' => array_keys($groups)]);
+        return Inertia::render('operations/settings', ['fields' => $fields, 'groups' => array_keys($groups), 'methods' => PaymentMethod::labels()]);
     }
 
     public function update(Request $request, Settings $s, AuditService $audit): RedirectResponse
@@ -41,6 +42,14 @@ class SettingsController extends Controller
             abort_if(! $meta || ! $u->hasPermission(self::PERM[$meta['group']]), 403);
             if ($meta['type'] === 'int') {
                 abort_unless(is_numeric($v) && (int) $v >= 0, 422, 'قيمة رقمية غير صالحة.');
+            }
+            if ($meta['type'] === 'methods') {
+                $codes = array_values(array_unique(array_filter(array_map('trim', explode(',', (string) $v)))));
+                abort_if($codes === [] || array_diff($codes, array_keys(PaymentMethod::labels())) !== [], 422, 'اختر طريقة دفع واحدة على الأقل من الطرق المتاحة.');
+                $v = implode(',', $codes);
+            }
+            if ($k === 'shop.name') {
+                abort_if(trim((string) $v) === '', 422, 'اسم المطبعة مطلوب.');
             }
             $cur = $s->get($k);
             if ((string) $v !== $cur) {
