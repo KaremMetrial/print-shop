@@ -9,6 +9,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,5 +29,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['idempotent' => Idempotent::class, 'portal' => PortalAuth::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // 419: انتهت الجلسة/الرمز (مثلًا بعد تفريغ الكاش أو طول الخمول) → رجوع للصفحة بتوكن جديد مع رسالة عربية بدل صفحة خطأ.
+        $exceptions->render(function (HttpException $e, Request $request) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+            if ($request->expectsJson() && ! $request->header('X-Inertia')) {
+                return response()->json(['error' => ['code' => 'SESSION_EXPIRED', 'message' => 'انتهت صلاحية الجلسة. حدّث الصفحة وحاول مرة أخرى.']], 419);
+            }
+
+            return redirect()->back(fallback: '/')->withErrors(['business' => 'انتهت صلاحية الجلسة. حاول مرة أخرى.'])->withInput($request->except(['password', 'password_confirmation']));
+        });
     })->create();

@@ -17,7 +17,7 @@ export default function Login({ status }: { status?: string }) {
         e.preventDefault();
         post(route('login'), { onFinish: () => reset('password') });
     };
-    const error = errors.email ?? errors.password;
+    const error = errors.email ?? errors.password ?? (errors as Record<string, string>).business;
 
     return (
         <div dir="ltr" className="bg-background flex min-h-screen flex-col items-start gap-8 overflow-hidden p-12 font-[Cairo]">

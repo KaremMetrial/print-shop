@@ -156,4 +156,12 @@ return [
     'uppercase' => 'يجب أن يحتوي الحقل :attribute على حروف كبيرة.',
     'url' => 'صيغة رابط حقل :attribute غير صحيحة.',
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
+
+    'attributes' => [
+        'email' => 'البريد الإلكتروني', 'password' => 'كلمة المرور', 'password_confirmation' => 'تأكيد كلمة المرور', 'current_password' => 'كلمة المرور الحالية',
+        'name' => 'الاسم', 'phone' => 'رقم الهاتف', 'address' => 'العنوان', 'notes' => 'الملاحظات', 'reason' => 'السبب', 'body' => 'الرسالة',
+        'amount_minor' => 'المبلغ', 'method' => 'طريقة الدفع', 'reference' => 'المرجع', 'quantity' => 'الكمية', 'product_id' => 'المنتج', 'customer_id' => 'العميل',
+        'pricing_tier_id' => 'شريحة السعر', 'role' => 'الدور', 'delivery_method' => 'طريقة التسليم', 'delivery_address' => 'عنوان التوصيل', 'file' => 'الملف',
+        'designer_id' => 'المصمم', 'client_id' => 'معرّف الرسالة', 'items' => 'البنود', 'username' => 'اسم المستخدم', 'token' => 'الرمز',
+    ],
 ];
