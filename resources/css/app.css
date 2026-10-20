@@ -232,4 +232,7 @@
     --sidebar-ring: #2563eb;
 }
 
-html { font-family: var(--font-sans); }
+html { font-family: var(--font-sans); scrollbar-gutter: stable; overflow-y: scroll; }
+/* قائمة الشريط الجانبي تتمرر بدون إظهار شريط تمرير يزيح التخطيط */
+nav[aria-label="القائمة الرئيسية"] { scrollbar-width: none; }
+nav[aria-label="القائمة الرئيسية"]::-webkit-scrollbar { display: none; }
