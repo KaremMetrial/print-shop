@@ -1,18 +1,22 @@
-import { PageTabs } from '@/components/pen/page-tabs';
-import { PenBreadcrumb } from '@/components/pen/primitives';
-import AppLayout from '@/layouts/app-layout';
-import { formatDate, formatMoney, formatTime } from '@/lib/money';
 import { PaymentDialog } from '@/components/finance/payment-dialog';
 import { AddItemDialog, type CatalogProduct } from '@/components/orders/add-item-dialog';
-import { CancelItemDialog } from '@/components/orders/cancel-item-dialog';
+import { AssignDesignerDialog } from '@/components/orders/assign-designer-dialog';
 import { CancelOrderDialog } from '@/components/orders/cancel-dialog';
+import { CancelItemDialog } from '@/components/orders/cancel-item-dialog';
+import { EditItemDialog } from '@/components/orders/edit-item-dialog';
+import { PageTabs } from '@/components/pen/page-tabs';
+import { PenBreadcrumb } from '@/components/pen/primitives';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import AppLayout from '@/layouts/app-layout';
+import { formatDate, formatMoney, formatTime } from '@/lib/money';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, type ReactNode } from 'react';
 
 type Tab = 'overview' | 'items' | 'payments' | 'delivery' | 'files' | 'activity';
 interface OrderItemRow {
     id: number;
+    notes: string | null;
+    designer_id: number | null;
     label: string;
     quantity: number;
     specs: string;
@@ -25,6 +29,7 @@ interface OrderItemRow {
 interface Props {
     tab: Tab;
     catalog: CatalogProduct[];
+    designers: { id: number; name: string }[];
     order: {
         id: number;
         number: string;
@@ -52,7 +57,16 @@ interface Props {
     activity: { id: number; at: string; actor: string; action: string; details: string }[];
     delivery_log: { at: string; text: string; by: string }[];
     link: { status: string } | null;
-    can: { update: boolean; items: boolean; links: boolean; price: boolean; cancel: boolean; pay: boolean; next: { step: string; label: string } | null };
+    can: {
+        assign: boolean;
+        update: boolean;
+        items: boolean;
+        links: boolean;
+        price: boolean;
+        cancel: boolean;
+        pay: boolean;
+        next: { step: string; label: string } | null;
+    };
     reasons: string[];
 }
 
@@ -64,16 +78,30 @@ const TABS: [Tab, string][] = [
     ['files', 'الملفات'],
     ['activity', 'سجل النشاط'],
 ];
+const sub36 =
+    'flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_4px] text-left text-[13px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
 const dt = (iso: string, seconds = false) => `${formatDate(iso)}، ${formatTime(iso)}${seconds ? '' : ''}`;
 const dShort = (iso: string) => `${formatDate(iso, { year: false })}، ${formatTime(iso)}`;
 const eta = (n: number | null) => (n === null ? '—' : n === 2 ? 'يومان' : n === 1 ? 'يوم' : `${n} أيام`);
 const deliveryLabel = (m: string) => (m === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة');
-const waitText = (s: string) => ({ DESIGN_STAGE: 'بانتظار اعتماد جميع التصميمات قبل الطباعة.', IN_PRINTING: 'الأوردر قيد الطباعة.', READY_FOR_PICKUP: 'الأوردر جاهز للاستلام من المطبعة.', READY_FOR_DELIVERY: 'الأوردر جاهز للتوصيل.', OUT_FOR_DELIVERY: 'الأوردر خرج للتوصيل.', COMPLETED: 'تم إتمام الأوردر.', CANCELLED: 'الأوردر ملغي.' })[s] ?? '';
+const waitText = (s: string) =>
+    ({
+        DESIGN_STAGE: 'بانتظار اعتماد جميع التصميمات قبل الطباعة.',
+        IN_PRINTING: 'الأوردر قيد الطباعة.',
+        READY_FOR_PICKUP: 'الأوردر جاهز للاستلام من المطبعة.',
+        READY_FOR_DELIVERY: 'الأوردر جاهز للتوصيل.',
+        OUT_FOR_DELIVERY: 'الأوردر خرج للتوصيل.',
+        COMPLETED: 'تم إتمام الأوردر.',
+        CANCELLED: 'الأوردر ملغي.',
+    })[s] ?? '';
 
 const panel = 'flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
-const btn40 = 'flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] text-left text-[14px] leading-[normal] font-[400] whitespace-nowrap text-[var(--ink)]';
-const btn34 = 'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_12px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]';
-const primary34 = 'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--primary)] p-[0px_12px] [outline:1px_solid_var(--primary)] [outline-offset:-0.5px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-white';
+const btn40 =
+    'flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] text-left text-[14px] leading-[normal] font-[400] whitespace-nowrap text-[var(--ink)]';
+const btn34 =
+    'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_12px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]';
+const primary34 =
+    'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--primary)] p-[0px_12px] [outline:1px_solid_var(--primary)] [outline-offset:-0.5px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-white';
 
 function StatusPill({ tone, children, w }: { tone: 'amber' | 'green'; children: ReactNode; w?: number }) {
     const c = tone === 'amber' ? ['#FEF3C7', '#92400E'] : ['#F0FDF4', '#15803D'];
@@ -87,12 +115,40 @@ function StatusPill({ tone, children, w }: { tone: 'amber' | 'green'; children: 
 }
 
 function Tabs({ order, tab }: { order: Props['order']; tab: Tab }) {
-    return <PageTabs label="أقسام الأوردر" value={tab} tabs={TABS.map(([key, label]) => ({ key, label, href: `/orders/${order.id}${key === 'overview' ? '' : `?tab=${key}`}` }))} />;
+    return (
+        <PageTabs
+            label="أقسام الأوردر"
+            value={tab}
+            tabs={TABS.map(([key, label]) => ({ key, label, href: `/orders/${order.id}${key === 'overview' ? '' : `?tab=${key}`}` }))}
+        />
+    );
 }
 
-const Line = ({ k, v, vc, h = 28.5, pad = '4px 0px', vs = 13, kv = 12 }: { k: string; v: ReactNode; vc?: string; h?: number; pad?: string; vs?: number; kv?: number }) => (
-    <div className="flex w-full shrink-0 items-center gap-[12px] [border-color:var(--border)] [border-style:solid] [border-width:0px_0px_1px_0px]" style={{ height: h, padding: pad, margin: '0px 0px -0.5px 0px' }}>
-        <div className="flex-1 text-right font-[600]" style={{ fontSize: vs, lineHeight: vs === 13 ? '21px' : '22px', color: vc ?? 'var(--ink)', fontWeight: vs === 14 ? 700 : 600 }}>
+const Line = ({
+    k,
+    v,
+    vc,
+    h = 28.5,
+    pad = '4px 0px',
+    vs = 13,
+    kv = 12,
+}: {
+    k: string;
+    v: ReactNode;
+    vc?: string;
+    h?: number;
+    pad?: string;
+    vs?: number;
+    kv?: number;
+}) => (
+    <div
+        className="flex w-full shrink-0 items-center gap-[12px] [border-width:0px_0px_1px_0px] [border-style:solid] [border-color:var(--border)]"
+        style={{ height: h, padding: pad, margin: '0px 0px -0.5px 0px' }}
+    >
+        <div
+            className="flex-1 text-right font-[600]"
+            style={{ fontSize: vs, lineHeight: vs === 13 ? '21px' : '22px', color: vc ?? 'var(--ink)', fontWeight: vs === 14 ? 700 : 600 }}
+        >
             {v}
         </div>
         <div className="flex-1 text-right font-[400] text-[var(--muted-foreground)]" style={{ fontSize: kv, lineHeight: '19px' }}>
@@ -100,7 +156,9 @@ const Line = ({ k, v, vc, h = 28.5, pad = '4px 0px', vs = 13, kv = 12 }: { k: st
         </div>
     </div>
 );
-const H17 = ({ children }: { children: ReactNode }) => <div className="w-full text-right text-[17px] leading-[27px] font-[700] text-[var(--ink)]">{children}</div>;
+const H17 = ({ children }: { children: ReactNode }) => (
+    <div className="w-full text-right text-[17px] leading-[27px] font-[700] text-[var(--ink)]">{children}</div>
+);
 
 function Overview({ p }: { p: Props }) {
     const { order: o, approval: a, can } = p;
@@ -108,7 +166,9 @@ function Overview({ p }: { p: Props }) {
     return (
         <>
             <div className={`${panel} gap-[8px] p-[16px]`}>
-                <div className="w-full text-right text-[15px] leading-[24px] font-[700] text-[var(--ink)]">حالة الأوردر: {o.status_label} • اعتماد التصميمات</div>
+                <div className="w-full text-right text-[15px] leading-[24px] font-[700] text-[var(--ink)]">
+                    حالة الأوردر: {o.status_label} • اعتماد التصميمات
+                </div>
                 <div className="w-full text-right text-[20px] leading-[32px] font-[700] text-[var(--primary)]">
                     {a.approved} من {a.total} بنود معتمدة
                 </div>
@@ -124,9 +184,13 @@ function Overview({ p }: { p: Props }) {
                         </Link>
                     )}
                     <div className="flex flex-1 flex-col gap-[4px]">
-                        <div className="w-full text-right text-[18px] leading-[29px] font-[700] text-[var(--ink)]">{next ? `بانتظار اعتماد تصميم ${next.name}` : 'تم اعتماد جميع التصميمات'}</div>
+                        <div className="w-full text-right text-[18px] leading-[29px] font-[700] text-[var(--ink)]">
+                            {next ? `بانتظار اعتماد تصميم ${next.name}` : 'تم اعتماد جميع التصميمات'}
+                        </div>
                         <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">
-                            {next ? `تم اعتماد ${a.approved === 2 ? 'تصميمين' : `${a.approved} تصميمات`}، ويتبقى اعتماد تصميم ${next.name} لبدء الطباعة.` : 'يمكن بدء الطباعة.'}
+                            {next
+                                ? `تم اعتماد ${a.approved === 2 ? 'تصميمين' : `${a.approved} تصميمات`}، ويتبقى اعتماد تصميم ${next.name} لبدء الطباعة.`
+                                : 'يمكن بدء الطباعة.'}
                         </div>
                     </div>
                 </div>
@@ -139,13 +203,20 @@ function Overview({ p }: { p: Props }) {
                             <Line k="إجمالي البنود" v={formatMoney(o.subtotal_minor ?? 0)} vs={14} h={33.5} pad="6px 0px" />
                             <Line k="خصم الأوردر" v={formatMoney(o.discount_minor ?? 0)} vc="#B45309" vs={14} h={33.5} pad="6px 0px" />
                             <Line k="رسوم التوصيل" v={formatMoney(o.delivery_fee_minor ?? 0)} vs={14} h={33.5} pad="6px 0px" />
-                            <div className="flex h-[43.5px] w-full shrink-0 items-center gap-[12px] p-[6px_0px] [border-color:var(--border)] [border-style:solid] [border-width:0px_0px_1px_0px]" style={{ margin: '0px 0px -0.5px 0px' }}>
-                                <div className="flex-1 text-right text-[20px] leading-[32px] font-[700] text-[var(--primary)]">{formatMoney(o.grand_total_minor ?? 0)}</div>
+                            <div
+                                className="flex h-[43.5px] w-full shrink-0 items-center gap-[12px] [border-width:0px_0px_1px_0px] [border-style:solid] [border-color:var(--border)] p-[6px_0px]"
+                                style={{ margin: '0px 0px -0.5px 0px' }}
+                            >
+                                <div className="flex-1 text-right text-[20px] leading-[32px] font-[700] text-[var(--primary)]">
+                                    {formatMoney(o.grand_total_minor ?? 0)}
+                                </div>
                                 <div className="flex-1 text-right text-[14px] leading-[22px] font-[700] text-[var(--ink)]">الإجمالي النهائي</div>
                             </div>
                             <Line k="المدفوع" v={formatMoney(o.paid_minor ?? 0)} vc="#15803D" vs={14} h={33.5} pad="6px 0px" />
                             <div className="flex w-full shrink-0 items-center gap-[12px] rounded-[8px] bg-[#FFFBEB] p-[8px_12px]">
-                                <div className="flex-1 text-right text-[20px] leading-[32px] font-[700] text-[#B45309]">{formatMoney(o.remaining_minor ?? 0)}</div>
+                                <div className="flex-1 text-right text-[20px] leading-[32px] font-[700] text-[#B45309]">
+                                    {formatMoney(o.remaining_minor ?? 0)}
+                                </div>
                                 <div className="flex-1 text-right text-[14px] leading-[22px] font-[700] text-[var(--ink)]">المتبقي</div>
                             </div>
                         </div>
@@ -180,8 +251,13 @@ function Overview({ p }: { p: Props }) {
                         <Line k="طريقة التسليم" v={deliveryLabel(o.delivery_method)} />
                         <Line k="مدة الطباعة المتوقعة" v={eta(o.eta_days)} />
                         {o.delivery_method === 'DELIVERY' && (
-                            <div className="flex h-[51.5px] w-full shrink-0 flex-col items-end gap-[4px] p-[4px_0px] [border-color:var(--border)] [border-style:solid] [border-width:0px_0px_1px_0px]" style={{ margin: '0px 0px -0.5px 0px' }}>
-                                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">عنوان التوصيل</div>
+                            <div
+                                className="flex h-[51.5px] w-full shrink-0 flex-col items-end gap-[4px] [border-width:0px_0px_1px_0px] [border-style:solid] [border-color:var(--border)] p-[4px_0px]"
+                                style={{ margin: '0px 0px -0.5px 0px' }}
+                            >
+                                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">
+                                    عنوان التوصيل
+                                </div>
                                 <div className="w-full text-right text-[13px] leading-[21px] font-[600] text-[var(--ink)]">{o.delivery_address}</div>
                             </div>
                         )}
@@ -207,9 +283,14 @@ function Items({ p }: { p: Props }) {
     const { order: o, items, approval: a, can } = p;
     const [cancelItem, setCancelItem] = useState<OrderItemRow | null>(null);
     const [adding, setAdding] = useState(false);
+    const [editing, setEditing] = useState<OrderItemRow | null>(null);
+    const [assigning, setAssigning] = useState<OrderItemRow | null>(null);
+    const open = o.status === 'DESIGN_STAGE';
     return (
         <>
             {adding && <AddItemDialog orderId={o.id} catalog={p.catalog} onClose={() => setAdding(false)} />}
+            {editing && <EditItemDialog orderId={o.id} item={editing} onClose={() => setEditing(null)} />}
+            {assigning && <AssignDesignerDialog item={assigning} designers={p.designers} onClose={() => setAssigning(null)} />}
             {cancelItem && <CancelItemDialog orderId={o.id} item={cancelItem} onClose={() => setCancelItem(null)} />}
             <div className="w-full text-right text-[20px] leading-[32px] font-[700] text-[var(--ink)]">بنود الأوردر</div>
             <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
@@ -235,33 +316,59 @@ function Items({ p }: { p: Props }) {
                     return (
                         <div key={i.id} className={`${panel} min-w-0 flex-1 gap-[10px] p-[18px]`}>
                             <div className="w-full text-right text-[16px] leading-[26px] font-[700] text-[var(--ink)]">{i.label}</div>
-                            <div className="flex w-fit shrink-0 items-center rounded-[8px] p-[4px_10px]" style={{ background: i.status === 'APPROVED' ? '#F0FDF4' : '#FEF3C7' }}>
-                                <div className="text-left text-[13px] leading-[normal] font-[700] whitespace-nowrap" style={{ color: i.status === 'APPROVED' ? '#15803D' : '#92400E' }}>
+                            <div
+                                className="flex w-fit shrink-0 items-center rounded-[8px] p-[4px_10px]"
+                                style={{ background: i.status === 'APPROVED' ? '#F0FDF4' : '#FEF3C7' }}
+                            >
+                                <div
+                                    className="text-left text-[13px] leading-[normal] font-[700] whitespace-nowrap"
+                                    style={{ color: i.status === 'APPROVED' ? '#15803D' : '#92400E' }}
+                                >
                                     {i.status === 'APPROVED' ? 'معتمد' : i.status === 'CANCELLED' ? 'ملغي' : 'بانتظار اعتماد العميل'}
                                 </div>
                             </div>
                             {rows.map(([k, v]) => (
-                                <div key={k} className="flex min-h-[28.5px] w-full shrink-0 items-center gap-[12px] p-[4px_0px] [border-color:var(--border)] [border-style:solid] [border-width:0px_0px_1px_0px]">
+                                <div
+                                    key={k}
+                                    className="flex min-h-[28.5px] w-full shrink-0 items-center gap-[12px] [border-width:0px_0px_1px_0px] [border-style:solid] [border-color:var(--border)] p-[4px_0px]"
+                                >
                                     <div className="flex-1 text-right text-[13px] leading-[21px] font-[600] text-[var(--ink)]">{v}</div>
                                     <div className="flex-1 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{k}</div>
                                 </div>
                             ))}
                             <div className="flex w-full shrink-0 flex-col items-end gap-[8px]">
-                                <Link href={`/orders/${o.id}/items/${i.id}`} className="flex h-[40px] w-[120px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--primary)] p-[0px_12px] text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap text-white">
+                                <Link
+                                    href={`/orders/${o.id}/items/${i.id}`}
+                                    className="flex h-[40px] w-[120px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--primary)] p-[0px_12px] text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap text-white"
+                                >
                                     عرض البند
                                 </Link>
                                 {can.items && o.status === 'DESIGN_STAGE' && i.status !== 'CANCELLED' && (
-                                    <button type="button" onClick={() => setCancelItem(i)} className="text-left text-[12px] font-[600] text-[#DC2626]">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCancelItem(i)}
+                                        className="text-left text-[12px] font-[600] text-[#DC2626]"
+                                    >
                                         إلغاء البند
                                     </button>
                                 )}
-                                <div className="flex w-full shrink-0 gap-[8px]">
-                                    {(['تاريخ التصميم', 'تغيير المصمم', 'تعديل البند'] as const).map((l) => (
-                                        <div key={l} className="flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_4px] text-left text-[13px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]">
-                                            {l}
-                                        </div>
-                                    ))}
-                                </div>
+                                {i.status !== 'CANCELLED' && (
+                                    <div className="flex w-full shrink-0 gap-[8px]">
+                                        <Link href={`/orders/${o.id}/items/${i.id}?tab=versions`} className={sub36}>
+                                            تاريخ التصميم
+                                        </Link>
+                                        {can.assign && open && (
+                                            <button type="button" onClick={() => setAssigning(i)} className={sub36}>
+                                                تغيير المصمم
+                                            </button>
+                                        )}
+                                        {can.items && open && (
+                                            <button type="button" onClick={() => setEditing(i)} className={sub36}>
+                                                تعديل البند
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );
@@ -308,7 +415,11 @@ function Payments({ p, onPay }: { p: Props; onPay: () => void }) {
                     <div className={`${th} w-[210px] shrink-0`}>التاريخ</div>
                     <div className={`${th} flex-1`}>رقم الدفعة</div>
                 </div>
-                {p.payments.length === 0 && <div className="w-full p-[24px] text-center text-[13px] leading-[21px] text-[var(--muted-foreground)]">لا توجد مدفوعات مسجلة لهذا الأوردر.</div>}
+                {p.payments.length === 0 && (
+                    <div className="w-full p-[24px] text-center text-[13px] leading-[21px] text-[var(--muted-foreground)]">
+                        لا توجد مدفوعات مسجلة لهذا الأوردر.
+                    </div>
+                )}
                 {p.payments.map((x) => (
                     <div key={x.id} className="flex h-[67.5px] w-full shrink-0 items-center gap-[12px] p-[0px_16px]">
                         <div className="flex w-[220px] shrink-0 items-center gap-[4px]">
@@ -321,8 +432,12 @@ function Payments({ p, onPay }: { p: Props; onPay: () => void }) {
                             </StatusPill>
                         </div>
                         <div className="w-[140px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--ink)]">{x.method}</div>
-                        <div className="w-[130px] shrink-0 text-right text-[13px] leading-[21px] font-[700] text-[var(--ink)]">{formatMoney(x.amount_minor)}</div>
-                        <div className="w-[210px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{dt(x.at)}</div>
+                        <div className="w-[130px] shrink-0 text-right text-[13px] leading-[21px] font-[700] text-[var(--ink)]">
+                            {formatMoney(x.amount_minor)}
+                        </div>
+                        <div className="w-[210px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">
+                            {dt(x.at)}
+                        </div>
                         <div className="flex-1 text-right text-[13px] leading-[21px] font-[600] text-[var(--ink)]">{x.number}</div>
                     </div>
                 ))}
@@ -358,10 +473,15 @@ function Delivery({ p }: { p: Props }) {
             <div className={panel}>
                 <div className="w-full text-right text-[16px] leading-[26px] font-[700] text-[var(--ink)]">سجل تحديثات التسليم</div>
                 {p.delivery_log.map((l, i) => (
-                    <div key={i} className="flex h-[42.5px] w-full shrink-0 items-center gap-[12px] p-[12px_14px] [border-color:var(--border)] [border-style:solid] [border-width:1px_0px_0px_0px]">
+                    <div
+                        key={i}
+                        className="flex h-[42.5px] w-full shrink-0 items-center gap-[12px] [border-width:1px_0px_0px_0px] [border-style:solid] [border-color:var(--border)] p-[12px_14px]"
+                    >
                         <div className="w-[140px] shrink-0 text-right text-[12px] leading-[19px] font-[600] text-[var(--ink)]">{l.by}</div>
                         <div className="flex-1 text-right text-[12px] leading-[19px] font-[400] text-[var(--ink)]">{l.text}</div>
-                        <div className="w-[160px] shrink-0 text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">{dShort(l.at)}</div>
+                        <div className="w-[160px] shrink-0 text-right text-[11px] leading-[18px] font-[400] text-[var(--muted-foreground)]">
+                            {dShort(l.at)}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -379,7 +499,10 @@ function Files({ p }: { p: Props }) {
                         <div className="flex-1 text-right text-[15px] leading-[24px] font-[700] text-[var(--ink)]">{g.label}</div>
                     </div>
                     {g.rows.map((r, i) => (
-                        <div key={i} className="flex h-[75.5px] w-full shrink-0 items-center gap-[12px] p-[8px_16px] [border-color:var(--border)] [border-style:solid] [border-width:1px_0px_0px_0px]">
+                        <div
+                            key={i}
+                            className="flex h-[75.5px] w-full shrink-0 items-center gap-[12px] [border-width:1px_0px_0px_0px] [border-style:solid] [border-color:var(--border)] p-[8px_16px]"
+                        >
                             <div className="flex w-[180px] shrink-0 items-center gap-[6px]">
                                 <div className={btn34}>تنزيل</div>
                                 <div className={btn34}>معاينة</div>
@@ -393,9 +516,13 @@ function Files({ p }: { p: Props }) {
                                     </>
                                 )}
                             </div>
-                            <div className="w-[180px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{dShort(r.at)}</div>
+                            <div className="w-[180px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">
+                                {dShort(r.at)}
+                            </div>
                             <div className="w-[90px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--ink)]">{r.item}</div>
-                            <div className="w-[60px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{r.type}</div>
+                            <div className="w-[60px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">
+                                {r.type}
+                            </div>
                             <div className="flex-1 text-right text-[13px] leading-[21px] font-[600] text-[var(--ink)]">{r.name}</div>
                         </div>
                     ))}
@@ -403,7 +530,9 @@ function Files({ p }: { p: Props }) {
             ))}
             <div className={`${panel} gap-[10px] p-[16px]`}>
                 <div className="w-full text-right text-[16px] leading-[26px] font-[400] text-[var(--ink)]">ملفات التشغيل الداخلية</div>
-                <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">لا توجد ملفات تشغيل مرفوعة حتى الآن.</div>
+                <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">
+                    لا توجد ملفات تشغيل مرفوعة حتى الآن.
+                </div>
             </div>
         </>
     );
@@ -422,11 +551,16 @@ function Activity({ p }: { p: Props }) {
                     <div className={`${th} w-[210px] shrink-0`}>التاريخ والوقت</div>
                 </div>
                 {p.activity.map((r) => (
-                    <div key={r.id} className="flex h-[67.5px] w-full shrink-0 items-center gap-[12px] p-[0px_16px] [border-color:var(--border)] [border-style:solid] [border-width:1px_0px_0px_0px]">
+                    <div
+                        key={r.id}
+                        className="flex h-[67.5px] w-full shrink-0 items-center gap-[12px] [border-width:1px_0px_0px_0px] [border-style:solid] [border-color:var(--border)] p-[0px_16px]"
+                    >
                         <div className="flex-1 text-right text-[13px] leading-[21px] font-[400] text-[var(--ink)]">{r.details || r.action}</div>
                         <div className="w-[190px] shrink-0 text-right text-[13px] leading-[21px] font-[600] text-[var(--ink)]">{r.action}</div>
                         <div className="w-[180px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--ink)]">{r.actor}</div>
-                        <div className="w-[210px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{dt(r.at)}</div>
+                        <div className="w-[210px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">
+                            {dt(r.at)}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -445,53 +579,67 @@ export default function OrderShow(props: Props) {
             <Head title={`تفاصيل الأوردر ${o.number}`} />
             <div className="flex w-full shrink-0 flex-col" style={{ gap: 18 }}>
                 <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, { label: 'الأوردرات', href: '/orders' }, o.number]} />
-                    <div className="flex w-full shrink-0 justify-between gap-[12px]">
-                        <div className="flex w-fit shrink-0 items-center gap-[12px]">
-                            <div className="flex w-fit shrink-0 items-center gap-[8px]">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger className={btn40}>المزيد</DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-52 p-2">
+                <div className="flex w-full shrink-0 justify-between gap-[12px]">
+                    <div className="flex w-fit shrink-0 items-center gap-[12px]">
+                        <div className="flex w-fit shrink-0 items-center gap-[8px]">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className={btn40}>المزيد</DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-52 p-2">
+                                    <DropdownMenuItem asChild className="h-11 px-3">
+                                        <Link href={`/orders/${o.id}/job-ticket`}>بطاقة تشغيل الطباعة</Link>
+                                    </DropdownMenuItem>
+                                    {can.links && (
                                         <DropdownMenuItem asChild className="h-11 px-3">
-                                            <Link href={`/orders/${o.id}/job-ticket`}>بطاقة تشغيل الطباعة</Link>
+                                            <Link href={`/orders/${o.id}/link`}>إدارة رابط الأوردر</Link>
                                         </DropdownMenuItem>
-                                        {can.links && (
-                                            <DropdownMenuItem asChild className="h-11 px-3">
-                                                <Link href={`/orders/${o.id}/link`}>إدارة رابط الأوردر</Link>
-                                            </DropdownMenuItem>
-                                        )}
-                                        {can.next && (
-                                            <DropdownMenuItem className="h-11 px-3 font-[700] text-[var(--primary)]" onSelect={() => router.post(`/orders/${o.id}/${can.next!.step}`, {}, { headers: { 'Idempotency-Key': crypto.randomUUID() } })}>
-                                                {can.next.label}
-                                            </DropdownMenuItem>
-                                        )}
-                                        {can.cancel && (
-                                            <DropdownMenuItem className="h-11 px-3 text-[var(--danger-text)]" onSelect={() => setCancelOpen(true)}>
-                                                إلغاء الأوردر
-                                            </DropdownMenuItem>
-                                        )}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                {can.update && (
-                                    <Link href={`/orders/${o.id}/edit`} className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[10px] bg-[var(--primary)] p-[0px_12px] [outline:1px_solid_var(--primary)] [outline-offset:-0.5px] text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap text-white">
-                                        تعديل الأوردر
-                                    </Link>
-                                )}
-                            </div>
-                        </div>
-                        <div className="flex flex-1 flex-col gap-[4px]">
-                            <h1 className="w-full text-right text-[28px] leading-[39px] font-[700] text-[var(--ink)]">تفاصيل الأوردر</h1>
-                            <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">
-                                {o.number} • {o.customer.name}
-                            </div>
-                            <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">
-                                تم الإنشاء {dt(o.created_at)} • آخر تحديث {dt(o.updated_at)}
-                            </div>
-                        </div>
-                        <div className="flex w-fit shrink-0 flex-col items-end gap-[8px]">
-                            <StatusPill tone="amber">{o.status_label}</StatusPill>
-                            <div className="w-[130px] text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{o.customer.phone_display}</div>
+                                    )}
+                                    {can.next && (
+                                        <DropdownMenuItem
+                                            className="h-11 px-3 font-[700] text-[var(--primary)]"
+                                            onSelect={() =>
+                                                router.post(
+                                                    `/orders/${o.id}/${can.next!.step}`,
+                                                    {},
+                                                    { headers: { 'Idempotency-Key': crypto.randomUUID() } },
+                                                )
+                                            }
+                                        >
+                                            {can.next.label}
+                                        </DropdownMenuItem>
+                                    )}
+                                    {can.cancel && (
+                                        <DropdownMenuItem className="h-11 px-3 text-[var(--danger-text)]" onSelect={() => setCancelOpen(true)}>
+                                            إلغاء الأوردر
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            {can.update && (
+                                <Link
+                                    href={`/orders/${o.id}/edit`}
+                                    className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[10px] bg-[var(--primary)] p-[0px_12px] text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap text-white [outline:1px_solid_var(--primary)] [outline-offset:-0.5px]"
+                                >
+                                    تعديل الأوردر
+                                </Link>
+                            )}
                         </div>
                     </div>
+                    <div className="flex flex-1 flex-col gap-[4px]">
+                        <h1 className="w-full text-right text-[28px] leading-[39px] font-[700] text-[var(--ink)]">تفاصيل الأوردر</h1>
+                        <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">
+                            {o.number} • {o.customer.name}
+                        </div>
+                        <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">
+                            تم الإنشاء {dt(o.created_at)} • آخر تحديث {dt(o.updated_at)}
+                        </div>
+                    </div>
+                    <div className="flex w-fit shrink-0 flex-col items-end gap-[8px]">
+                        <StatusPill tone="amber">{o.status_label}</StatusPill>
+                        <div className="w-[130px] text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">
+                            {o.customer.phone_display}
+                        </div>
+                    </div>
+                </div>
                 <Tabs order={o} tab={tab} />
                 {tab === 'overview' && <Overview p={props} />}
                 {tab === 'items' && <Items p={props} />}
@@ -500,7 +648,13 @@ export default function OrderShow(props: Props) {
                 {tab === 'files' && <Files p={props} />}
                 {tab === 'activity' && <Activity p={props} />}
             </div>
-            {payOpen && <PaymentDialog onClose={() => setPayOpen(false)} customerId={o.customer.id} order={{ id: o.id, number: o.number, remaining_minor: o.remaining_minor ?? 0 }} />}
+            {payOpen && (
+                <PaymentDialog
+                    onClose={() => setPayOpen(false)}
+                    customerId={o.customer.id}
+                    order={{ id: o.id, number: o.number, remaining_minor: o.remaining_minor ?? 0 }}
+                />
+            )}
             {can.cancel && <CancelOrderDialog open={cancelOpen} onOpenChange={setCancelOpen} order={o} reasons={props.reasons} />}
         </AppLayout>
     );

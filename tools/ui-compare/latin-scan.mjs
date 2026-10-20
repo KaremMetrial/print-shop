@@ -7,7 +7,8 @@ const paths = process.argv.slice(2).filter((a) => a.startsWith('/'));
 const ALLOW = /^(PBMS|CUS|ORD|REQ|PAY|REF|ITEM|PRF|ALLOC|EMP|PDF|PNG|JPEG|WebP|MB|AI|EGP|ID|http|https|com|pbms|test|id)$/i;
 const b = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const p = await (await b.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'ar' })).newPage();
-if (as) { await p.goto(base + '/login'); await p.fill('input[type=email]', as); await p.fill('input[type=password]', pw); await Promise.all([p.waitForURL((u) => !u.pathname.startsWith('/login')), p.click('button[type=submit]')]); }
+const portal = process.argv.includes('--portal');
+if (as && portal) { await p.goto(base + '/portal/login'); await p.fill('input[inputmode=tel]', as); await p.fill('input[type=password]', pw); await Promise.all([p.waitForURL((u) => !u.pathname.endsWith('/login')), p.click('button[type=submit]')]); } else if (as) { await p.goto(base + '/login'); await p.fill('input[type=email]', as); await p.fill('input[type=password]', pw); await Promise.all([p.waitForURL((u) => !u.pathname.startsWith('/login')), p.click('button[type=submit]')]); }
 let bad = 0;
 for (const u of paths) {
   await p.goto(base + u, { waitUntil: 'networkidle' });

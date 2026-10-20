@@ -21,7 +21,7 @@ class Labels
         'item.design_started' => 'بدء تصميم بند', 'item.design_submitted' => 'إرسال نسخة تصميم', 'item.design_approved' => 'اعتماد تصميم بند', 'item.design_reopened' => 'إعادة فتح تصميم معتمد',
         'item.assigned' => 'إسناد بند لمصمم',
         'order.created' => 'إنشاء أوردر', 'order.updated' => 'تعديل أوردر', 'order.cancelled' => 'إلغاء أوردر', 'order.status_changed' => 'تغيير حالة أوردر',
-        'order.item_added' => 'إضافة بند للأوردر', 'order.item_cancelled' => 'إلغاء بند من الأوردر',
+        'order.item_added' => 'إضافة بند للأوردر', 'order.item_updated' => 'تعديل بند في الأوردر', 'order.item_cancelled' => 'إلغاء بند من الأوردر',
         'order_link.regenerated' => 'إعادة توليد رابط الأوردر', 'order_link.suspended' => 'إيقاف رابط الأوردر', 'order_link.reactivated' => 'إعادة تفعيل رابط الأوردر',
         'order_request.submitted' => 'إرسال طلب أوردر', 'order_request.review_started' => 'بدء مراجعة طلب', 'order_request.edited' => 'تعديل طلب أثناء المراجعة',
         'order_request.accepted' => 'قبول طلب أوردر', 'order_request.rejected' => 'رفض طلب أوردر',

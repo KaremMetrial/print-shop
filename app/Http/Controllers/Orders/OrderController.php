@@ -165,6 +165,14 @@ class OrderController extends Controller
         return back()->with('success', 'تمت إضافة البند وإسناده لمصمم.');
     }
 
+    public function updateItem(Request $request, Order $order, OrderItem $item, ManageOrderItems $action): RedirectResponse
+    {
+        $d = $request->validate(['quantity' => ['required', 'integer', 'min:1', 'max:1000000'], 'notes' => ['nullable', 'string', 'max:1000']]);
+        $action->update($request->user(), $order, $item, (int) $d['quantity'], $d['notes'] ?? null);
+
+        return back()->with('success', 'تم تعديل البند وإعادة حساب السعر.');
+    }
+
     public function cancelItem(Request $request, Order $order, OrderItem $item, ManageOrderItems $action): RedirectResponse
     {
         $d = $request->validate(['reason' => ['required', 'string', 'max:255']], ['reason.required' => 'يجب كتابة سبب إلغاء البند.']);

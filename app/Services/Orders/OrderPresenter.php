@@ -3,6 +3,7 @@
 namespace App\Services\Orders;
 
 use App\Enums\OrderStatus;
+use App\Enums\Role;
 use App\Models\AuditLog;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -44,12 +45,13 @@ class OrderPresenter
             'approval' => ['approved' => $approved, 'total' => $active->count(), 'next' => $next ? ['id' => $next->id, 'name' => $next->product_snapshot['name']] : null],
             'items' => $order->items->values()->map(fn (OrderItem $i, int $n) => [
                 'id' => $i->id, 'label' => 'البند '.str_pad((string) ($n + 1), 2, '0', STR_PAD_LEFT).' — '.$i->product_snapshot['name'],
-                'quantity' => $i->quantity, 'specs' => collect($i->options_snapshot)->pluck('value')->implode(' • '),
+                'quantity' => $i->quantity, 'notes' => $i->notes, 'designer_id' => $i->designer_id, 'specs' => collect($i->options_snapshot)->pluck('value')->implode(' • '),
                 'designer' => $i->designer_id ? User::find($i->designer_id)?->name : null, 'version' => null,
                 'status' => $i->cancelled_at ? 'CANCELLED' : ($i->approved_at ? 'APPROVED' : 'PENDING'),
                 'updated_at' => $i->updated_at->toIso8601String(),
                 ...($showPrice ? ['total_minor' => $i->item_total->minor] : []),
             ])->all(),
+            'designers' => $viewer->hasPermission('designers.assignment.manage') ? User::whereHas('role', fn ($r) => $r->where('code', Role::Designer->value))->orderBy('name')->get(['id', 'name']) : [],
             'payments' => $showPrice ? DB::table('payment_allocations')->join('payments', 'payments.id', '=', 'payment_allocations.payment_id')->where('payment_allocations.order_id', $order->id)->orderByDesc('payments.id')->get(['payments.number', 'payments.id', 'payments.status', 'payments.method', 'payments.received_at', 'payment_allocations.amount'])->map(fn ($r) => ['id' => $r->id, 'number' => $r->number, 'at' => Carbon::parse($r->received_at)->toIso8601String(), 'amount_minor' => (int) $r->amount, 'method' => ['CASH' => 'نقدًا', 'BANK_TRANSFER' => 'تحويل بنكي', 'WALLET' => 'محفظة إلكترونية', 'CARD' => 'بطاقة'][$r->method] ?? $r->method, 'status' => $r->status === 'CONFIRMED' ? 'مؤكدة' : 'ملغاة'])->all() : [],
             'files' => [],
             'activity' => AuditLog::where('entity_type', $order->getMorphClass())->where('entity_id', $order->id)->oldest('id')->limit(200)->get()
@@ -61,7 +63,7 @@ class OrderPresenter
             'link' => null,
             'can' => [
                 'update' => (bool) $viewer->hasPermission('orders.update'), 'items' => (bool) $viewer->hasPermission('orders.items.manage'),
-                'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
+                'assign' => (bool) $viewer->hasPermission('designers.assignment.manage'), 'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
                 'next' => $this->nextStep($order, $viewer), 'price' => $showPrice,
             ],
         ];

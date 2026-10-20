@@ -7,11 +7,20 @@ import { useRef, useState } from 'react';
 interface Props {
     open: boolean;
     onOpenChange: (o: boolean) => void;
-    order: { id: number; number: string; status_label: string; customer: { name: string }; grand_total_minor?: number; paid_minor?: number; remaining_minor?: number };
+    order: {
+        id: number;
+        number: string;
+        status_label: string;
+        customer: { name: string };
+        grand_total_minor?: number;
+        paid_minor?: number;
+        remaining_minor?: number;
+    };
     reasons: string[];
 }
 
-const btn = 'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap [outline-offset:-0.5px] disabled:opacity-60';
+const btn =
+    'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap [outline-offset:-0.5px] disabled:opacity-60';
 const Row = ({ k, v, c }: { k: string; v: string; c: string }) => (
     <div className="flex h-[32.5px] w-full shrink-0 items-center gap-[12px] p-[6px_0px] [border-bottom:1px_solid_var(--border)]">
         <div className="flex-1 text-right text-[13px] leading-[21px] font-[700]" style={{ color: c }}>
@@ -39,7 +48,11 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
     };
     const submit = () => {
         setBusy(true);
-        router.post(`/orders/${order.id}/cancel`, { reason, notes }, { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) });
+        router.post(
+            `/orders/${order.id}/cancel`,
+            { reason, notes },
+            { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
+        );
     };
 
     return (
@@ -50,16 +63,44 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
                 onOpenChange(o);
             }}
         >
-            <DialogContent className={step === 'form' ? 'w-[720px] max-w-[95vw] gap-[16px] rounded-[12px] p-[24px]' : 'w-[440px] max-w-[95vw] gap-[14px] rounded-[12px] p-[20px]'} dir="ltr">
+            <DialogContent
+                className={
+                    step === 'form'
+                        ? 'w-[720px] max-w-[95vw] gap-[16px] rounded-[12px] p-[24px]'
+                        : 'w-[440px] max-w-[95vw] gap-[14px] rounded-[12px] p-[20px]'
+                }
+                dir="ltr"
+            >
                 {step === 'form' ? (
                     <>
                         <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
-                            <div className="w-[90px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{order.number}</div>
-                            <DialogTitle className="flex-1 text-right text-[24px] leading-[34px] font-[700] text-[var(--ink)]">إلغاء الأوردر</DialogTitle>
+                            <div className="w-[90px] shrink-0 text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">
+                                {order.number}
+                            </div>
+                            <DialogTitle className="flex-1 text-right text-[24px] leading-[34px] font-[700] text-[var(--ink)]">
+                                إلغاء الأوردر
+                            </DialogTitle>
                         </div>
                         <DialogDescription className="w-full text-right text-[13px] leading-[21px] font-[400] whitespace-pre text-[var(--muted-foreground)]">{`${order.customer.name}  •  ${order.status_label}`}</DialogDescription>
-                        <PenSelect v3 label="سبب الإلغاء *" value={reason} placeholder="اختر سبب الإلغاء" error={err ? 'أدخل سبب الإلغاء قبل المتابعة.' : undefined} options={reasons.map((r) => ({ value: r, label: r }))} onValueChange={(v) => { setReason(v); setErr(false); }} />
-                        <PenTextarea v3 label="ملاحظات إضافية" placeholder="اكتب ملاحظات إضافية إن وجدت…" value={notes} onChange={(e) => setNotes(e.target.value)} />
+                        <PenSelect
+                            v3
+                            label="سبب الإلغاء *"
+                            value={reason}
+                            placeholder="اختر سبب الإلغاء"
+                            error={err ? 'أدخل سبب الإلغاء قبل المتابعة.' : undefined}
+                            options={reasons.map((r) => ({ value: r, label: r }))}
+                            onValueChange={(v) => {
+                                setReason(v);
+                                setErr(false);
+                            }}
+                        />
+                        <PenTextarea
+                            v3
+                            label="ملاحظات إضافية"
+                            placeholder="اكتب ملاحظات إضافية إن وجدت…"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                        />
                         {showMoney && (
                             <div className="flex w-full shrink-0 flex-col gap-[8px] rounded-[12px] bg-[var(--background)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                                 <div className="w-full text-right text-[16px] leading-[26px] font-[700] text-[var(--ink)]">الملخص المالي</div>
@@ -69,27 +110,49 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
                                 <Row k="المبلغ المتوقع رده بعد الإلغاء" v={formatMoney(paid)} c="#2563EB" />
                             </div>
                         )}
-                        <div className="w-full rounded-[12px] bg-[#FEF2F2] p-[14px] text-right text-[12px] leading-[19px] font-[400] text-[#B91C1C] [outline:1px_solid_#FCA5A5] [outline-offset:-0.5px]">سيتم إلغاء الأوردر وإغلاق رابط العميل وإيقاف المهام المرتبطة به.</div>
+                        <div className="w-full rounded-[12px] bg-[#FEF2F2] p-[14px] text-right text-[12px] leading-[19px] font-[400] text-[#B91C1C] [outline:1px_solid_#FCA5A5] [outline-offset:-0.5px]">
+                            سيتم إلغاء الأوردر وإغلاق رابط العميل وإيقاف المهام المرتبطة به.
+                        </div>
                         <div className="flex w-full shrink-0 items-center justify-end gap-[12px]">
-                            <button type="button" onClick={() => onOpenChange(false)} className={`${btn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--border)]`}>
+                            <button
+                                type="button"
+                                onClick={() => onOpenChange(false)}
+                                className={`${btn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--border)]`}
+                            >
                                 الرجوع
                             </button>
-                            <button type="button" onClick={next} className={`${btn} bg-[var(--primary)] text-white [outline:1px_solid_var(--primary)]`}>
+                            <button
+                                type="button"
+                                onClick={next}
+                                className={`${btn} bg-[var(--primary)] text-white [outline:1px_solid_var(--primary)]`}
+                            >
                                 تأكيد الإلغاء
                             </button>
                         </div>
                     </>
                 ) : (
                     <>
-                        <DialogTitle className="w-full text-right text-[14px] leading-[22px] font-[700] text-[var(--ink)]">تأكيد إلغاء الأوردر</DialogTitle>
+                        <DialogTitle className="w-full text-right text-[14px] leading-[22px] font-[700] text-[var(--ink)]">
+                            تأكيد إلغاء الأوردر
+                        </DialogTitle>
                         <DialogDescription className="w-full text-right text-[11px] leading-[18px] font-[400] text-[#92400E]">
-                            {showMoney && paid > 0 ? `سيُصبح المتبقي صفرًا، ويُسجل ${formatMoney(paid)} مستحقًا للرد. ` : 'سيُصبح المتبقي صفرًا. '}سيُغلق الرابط والمحادثات وتُوقف المهام المرتبطة بالأوردر.
+                            {showMoney && paid > 0 ? `سيُصبح المتبقي صفرًا، ويُسجل ${formatMoney(paid)} مستحقًا للرد. ` : 'سيُصبح المتبقي صفرًا. '}
+                            سيُغلق الرابط والمحادثات وتُوقف المهام المرتبطة بالأوردر.
                         </DialogDescription>
                         <div className="flex w-full shrink-0 justify-end gap-[12px]">
-                            <button type="button" onClick={() => setStep('form')} className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-left text-[14px] leading-[normal] font-[400] text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                            <button
+                                type="button"
+                                onClick={() => setStep('form')}
+                                className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-left text-[14px] leading-[normal] font-[400] text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]"
+                            >
                                 الرجوع
                             </button>
-                            <button type="button" onClick={submit} disabled={busy} className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-left text-[14px] leading-[normal] font-[400] text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] disabled:opacity-60">
+                            <button
+                                type="button"
+                                onClick={submit}
+                                disabled={busy}
+                                className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-left text-[14px] leading-[normal] font-[400] text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] disabled:opacity-60"
+                            >
                                 تأكيد الإلغاء
                             </button>
                         </div>

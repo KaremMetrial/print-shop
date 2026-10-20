@@ -46,6 +46,35 @@ class ManageOrderItems
         });
     }
 
+    /** تعديل كمية/ملاحظات بند قبل الطباعة: يُعاد التسعير من السيرفر بنفس خيارات البند (BR-057)، والتعديل مُدقَّق. */
+    public function update(User $actor, Order $order, OrderItem $item, int $quantity, ?string $notes): OrderItem
+    {
+        Gate::forUser($actor)->authorize('orders.items.manage');
+
+        return DB::transaction(function () use ($actor, $order, $item, $quantity, $notes) {
+            $order = $this->lock($order);
+            $item = OrderItem::whereKey($item->id)->where('order_id', $order->id)->lockForUpdate()->firstOrFail();
+            if ($item->cancelled_at) {
+                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 'لا يمكن تعديل بند ملغي.');
+            }
+            $before = ['quantity' => $item->quantity, 'notes' => $item->notes, 'item_total_minor' => $item->item_total->minor];
+            if ($quantity !== $item->quantity) {
+                $this->guardPricing($actor, $order);
+                $selected = [];
+                foreach ($item->options_snapshot as $o) {
+                    $selected[$o['group_id']][] = $o['value_id'];
+                }
+                $q = $this->pricing->quoteItem(Product::findOrFail($item->product_id), $selected, $quantity, $order->customer->pricingTier);
+                $item->update(['quantity' => $q->quantity, 'base_unit_price' => $q->baseUnit, 'options_unit_price' => $q->optionsUnit, 'tier_adjustment' => $q->tierAdjustment->minor, 'unit_price' => $q->finalUnit, 'item_total' => $q->itemTotal, 'options_snapshot' => $q->optionsSnapshot]);
+                $this->reprice($order);
+            }
+            $item->update(['notes' => $notes]);
+            $this->audit->record('order.item_updated', $order, ['item_id' => $item->id] + $before, ['item_id' => $item->id, 'quantity' => $item->quantity, 'notes' => $item->notes, 'item_total_minor' => $item->item_total->minor]);
+
+            return $item;
+        });
+    }
+
     public function cancel(User $actor, Order $order, OrderItem $item, string $reason): OrderItem
     {
         Gate::forUser($actor)->authorize('orders.items.manage');

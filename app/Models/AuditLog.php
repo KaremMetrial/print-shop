@@ -5,7 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use LogicException;
 
-/** سجل تدقيق append-only: ممنوع التعديل/الحذف (التطبيق + trigger في MySQL). */
+/**
+ * سجل تدقيق append-only: ممنوع التعديل/الحذف (التطبيق + trigger في MySQL).
+ *
+ * @property array<string, mixed>|null $old_values
+ * @property array<string, mixed>|null $new_values
+ */
 class AuditLog extends Model
 {
     public const UPDATED_AT = null;

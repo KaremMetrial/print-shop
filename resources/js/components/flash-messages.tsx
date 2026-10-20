@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { copyText } from '@/lib/copy';
 import { Icon } from '@/pen/icon';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
@@ -30,7 +31,13 @@ export function FlashMessages() {
     useEffect(() => {
         const next: Msg[] = [];
         if (flash?.success) next.push({ tone: 'success', title: flash.success });
-        if (flash?.generated_password) next.push({ tone: 'warning', title: 'كلمة المرور المؤقتة', body: 'تظهر مرة واحدة فقط. انسخها الآن وسلّمها للمستخدم.', secret: flash.generated_password });
+        if (flash?.generated_password)
+            next.push({
+                tone: 'warning',
+                title: 'كلمة المرور المؤقتة',
+                body: 'تظهر مرة واحدة فقط. انسخها الآن وسلّمها للمستخدم.',
+                secret: flash.generated_password,
+            });
         if (errors?.business) next.push({ tone: 'danger', title: 'تعذر تنفيذ العملية', body: errors.business });
         setQueue(next);
         setCopied(false);
@@ -50,15 +57,14 @@ export function FlashMessages() {
                             </div>
                             <DialogTitle className="flex-1 text-[16px] leading-[26px] font-[700] text-[var(--ink)]">{m.title}</DialogTitle>
                         </div>
-                        {m.body && <DialogDescription className="text-[13px] leading-[21px] text-[var(--muted-foreground)]">{m.body}</DialogDescription>}
+                        {m.body && (
+                            <DialogDescription className="text-[13px] leading-[21px] text-[var(--muted-foreground)]">{m.body}</DialogDescription>
+                        )}
                         {m.secret && (
                             <div className="flex items-center justify-between gap-[12px] rounded-[10px] bg-[var(--background)] p-[12px_14px] [outline:1px_solid_var(--control-border)]">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        navigator.clipboard?.writeText(m.secret!);
-                                        setCopied(true);
-                                    }}
+                                    onClick={async () => setCopied(await copyText(m.secret!))}
                                     className="text-[12px] font-[700] text-[var(--primary)]"
                                 >
                                     {copied ? 'تم النسخ' : 'نسخ'}
@@ -69,7 +75,11 @@ export function FlashMessages() {
                             </div>
                         )}
                         <div className="flex justify-end">
-                            <button type="button" onClick={() => setQueue((q) => q.slice(1))} className="flex h-[40px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_18px] text-[14px] font-[600] text-white">
+                            <button
+                                type="button"
+                                onClick={() => setQueue((q) => q.slice(1))}
+                                className="flex h-[40px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_18px] text-[14px] font-[600] text-white"
+                            >
                                 حسنًا
                             </button>
                         </div>

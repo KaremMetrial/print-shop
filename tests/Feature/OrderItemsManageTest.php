@@ -47,3 +47,21 @@ it('requires orders.items.manage', function () {
     [$o, $ps] = mkOrder($this->admin);
     $this->actingAs(User::factory()->designer()->create())->post("/orders/{$o->id}/items", ['product_id' => $ps[0]->id, 'quantity' => 1], ['Idempotency-Key' => 'p1'])->assertForbidden();
 });
+
+it('edits an item quantity/notes, reprices server-side, audits, and is locked once printing', function () {
+    [$o] = mkOrder($this->admin, 1);
+    $it = $o->items[0];
+    $total = $o->grand_total->minor;
+    $this->actingAs($this->admin)->patch("/orders/{$o->id}/items/{$it->id}", ['quantity' => 3, 'notes' => 'ملاحظة جديدة'], ['Idempotency-Key' => 'u1'])->assertRedirect();
+    expect($it->refresh()->quantity)->toBe(3)->and($it->notes)->toBe('ملاحظة جديدة')->and($o->refresh()->grand_total->minor)->toBeGreaterThan($total);
+    expect(DB::table('audit_logs')->where('action', 'order.item_updated')->count())->toBe(1);
+    $this->patchJson("/orders/{$o->id}/items/{$it->id}", ['quantity' => 0], ['Idempotency-Key' => 'u2'])->assertStatus(422);
+    $o->update(['status' => OrderStatus::IN_PRINTING]);
+    $this->patchJson("/orders/{$o->id}/items/{$it->id}", ['quantity' => 5], ['Idempotency-Key' => 'u3'])->assertStatus(409);
+    $this->actingAs(User::factory()->designer()->create())->patch("/orders/{$o->id}/items/{$it->id}", ['quantity' => 2], ['Idempotency-Key' => 'u4'])->assertForbidden();
+});
+
+it('exposes designers and assign permission to the order page for managers only', function () {
+    [$o] = mkOrder($this->admin, 1);
+    $this->actingAs($this->admin)->get("/orders/{$o->id}?tab=items")->assertInertia(fn ($p) => $p->where('can.assign', true)->has('designers'));
+});

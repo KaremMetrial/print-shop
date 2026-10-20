@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Customer;
 use App\Models\User;
+use App\Support\Labels;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -44,6 +45,9 @@ class CustomerActivityController extends Controller
             'action' => self::LABELS[$l->action] ?? $l->action,
             'summary' => $this->summary($l, $customer),
             'ref' => $customer->code(),
+            'old' => Labels::fields($l->old_values ?: null),
+            'new' => Labels::fields($l->new_values ?: null),
+            'reason' => $l->reason,
             'at' => $l->created_at->toIso8601String(),
             'actor' => $l->actor_id ? ($names[$l->actor_id] ?? '—') : 'النظام',
         ]);

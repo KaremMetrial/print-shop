@@ -23,6 +23,12 @@ class DashboardController extends Controller
 
         $items = OrderItem::query()->whereNull('cancelled_at')->whereHas('order', fn ($o) => $o->where('status', 'DESIGN_STAGE'));
         $orders = fn (string ...$st) => Order::whereIn('status', $st)->count();
+        $period = in_array($request->query('period'), ['today', 'week', 'month'], true) ? $request->query('period') : 'today';
+        $from = match ($period) {
+            'week' => now()->startOfWeek(),
+            'month' => now()->startOfMonth(),
+            default => now()->startOfDay(),
+        };
         $todayStart = now()->startOfDay();
         $openActions = DB::table('staff_actions')->where('status', '!=', 'DONE');
         $late = Order::where('status', 'DESIGN_STAGE')->where('created_at', '<', now()->subDays(3))->count();
@@ -31,6 +37,7 @@ class DashboardController extends Controller
         $data = [
             'user_first_name' => explode(' ', trim($u->name))[0],
             'now' => now()->toIso8601String(),
+            'period' => $period,
             'urgent' => ($late + $unassigned) > 0 ? ['late' => $late, 'unassigned' => $unassigned] : null,
             'kpis' => [
                 'pending_requests' => OrderRequest::where('status', 'PENDING')->count(), 'unassigned_items' => $unassigned,
@@ -40,15 +47,15 @@ class DashboardController extends Controller
             ],
             'summary' => [
                 'awaiting_approval' => (clone $items)->where('design_state', 'AWAITING_APPROVAL')->count(), 'in_design' => (clone $items)->where('design_state', 'IN_DESIGN')->count(),
-                'out_for_delivery' => $orders('OUT_FOR_DELIVERY'), 'completed' => $orders('COMPLETED'),
+                'out_for_delivery' => $orders('OUT_FOR_DELIVERY'), 'completed' => Order::where('status', 'COMPLETED')->where('completed_at', '>=', $from)->count(),
                 'pickup' => Order::whereNotIn('status', ['COMPLETED', 'CANCELLED'])->where('delivery_method', 'PICKUP')->count(),
                 'delivery' => Order::whereNotIn('status', ['COMPLETED', 'CANCELLED'])->where('delivery_method', 'DELIVERY')->count(),
             ],
             'finance' => $canFinance ? [
-                'collected_today' => (int) DB::table('payments')->where('status', 'CONFIRMED')->where('received_at', '>=', $todayStart)->sum('amount'),
+                'collected_today' => (int) DB::table('payments')->where('status', 'CONFIRMED')->where('received_at', '>=', $from)->sum('amount'),
                 'collected_week' => (int) DB::table('payments')->where('status', 'CONFIRMED')->where('received_at', '>=', now()->startOfWeek())->sum('amount'),
                 'receivables' => Customer::get()->sum(fn (Customer $c) => app(PaymentService::class)->customerDue($c)),
-                'order_value_today' => (int) Order::where('created_at', '>=', $todayStart)->where('status', '!=', 'CANCELLED')->sum('grand_total'),
+                'order_value_today' => (int) Order::where('created_at', '>=', $from)->where('status', '!=', 'CANCELLED')->sum('grand_total'),
                 'refund_due' => (int) DB::table('refund_obligations')->sum('amount_due') - (int) DB::table('refund_payouts')->sum('amount'),
             ] : null,
             'alerts' => $late > 0 ? [['title' => 'أوردرات متأخرة في التصميم', 'tone' => 'warn', 'text' => "{$late} أوردر مضى عليه أكثر من 3 أيام في مرحلة التصميم."]] : [],
