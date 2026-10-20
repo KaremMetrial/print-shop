@@ -11,7 +11,11 @@ export function StaffSidebar({ onNavigate, nav = adminNav, width = 264, subtitle
     const { url } = usePage();
     const { name, auth } = usePage<SharedData>().props;
     const { canAny } = usePermissions();
-    const active = (href: string) => url === href || url.startsWith(href + '/') || url.startsWith(href + '?');
+    const path = url.split('?')[0];
+    const matches = (href: string) => path === href || path.startsWith(href + '/');
+    // عنصر واحد فقط نشط: الأطول تطابقًا (مثلًا /accounting/proofs يغلب /accounting)
+    const best = nav.flatMap((g) => g.items).filter((i) => matches(i.href)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
+    const active = (href: string) => href === best;
 
     return (
         <div dir="ltr" style={{ width }} className="flex h-full shrink-0 flex-col gap-[16px] border-solid bg-[var(--surface)] p-[20px_12px] [border-color:var(--border)] [border-width:0px_0px_0px_1px]">
