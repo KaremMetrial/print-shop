@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Catalog\CategoryController;
 use App\Http\Controllers\Catalog\OptionGroupController;
 use App\Http\Controllers\Catalog\PricingQuoteController;
 use App\Http\Controllers\Catalog\ProductController;
@@ -55,6 +56,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{customer}/payments', [CustomerFinanceController::class, 'payments'])->name('payments');
         Route::get('{customer}/refunds', [CustomerFinanceController::class, 'refunds'])->name('refunds');
     });
+
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('categories', [CategoryController::class, 'save'])->name('categories.store');
+    Route::patch('categories/{category}', [CategoryController::class, 'save'])->name('categories.update');
+    Route::post('categories/{category}/toggle', [CategoryController::class, 'toggle'])->name('categories.toggle');
 
     Route::prefix('products')->name('products.')->group(function () {
         $c = ProductController::class;

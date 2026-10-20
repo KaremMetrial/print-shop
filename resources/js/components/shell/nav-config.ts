@@ -33,6 +33,7 @@ export const adminNav: ShellNavGroup[] = [
         title: 'المنتجات والتسعير',
         items: [
             { title: 'المنتجات', href: '/products', icon: 'package', permission: 'products.view' },
+            { title: 'التصنيفات', href: '/categories', icon: 'folder', permission: 'products.view' },
             { title: 'التسعير', href: '/pricing', icon: 'tags', permission: 'products.view' },
         ],
     },
