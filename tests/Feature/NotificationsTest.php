@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\OutboxEventPublished;
 use App\Events\StaffNotificationCreated;
 use App\Models\Order;
 use App\Models\Product;
@@ -92,4 +93,14 @@ it('does not fail the business flow when broadcasting is down', function () {
     User::factory()->superAdmin()->create();
     expect(app(NotificationService::class)->notify(['orders.view'], 'TEST', 'x'))->toBeGreaterThan(0);
     expect(DB::table('staff_notifications')->where('title', 'x')->count())->toBeGreaterThan(0);
+});
+
+it('notifies each recipient exactly once per business event (listeners registered once)', function () {
+    $a = User::factory()->superAdmin()->create();
+    $o = Order::factory()->create();
+    app(Outbox::class)->record('PrintingStarted', $o, ['order_id' => $o->id]);
+    app(Outbox::class)->dispatchPending();
+    expect(DB::table('staff_notifications')->where('user_id', $a->id)->where('type', 'PRINTING_STARTED')->count())->toBe(1);
+    $listeners = collect(app('events')->getListeners(OutboxEventPublished::class));
+    expect($listeners)->toHaveCount(2);
 });

@@ -2,9 +2,6 @@
 
 namespace App\Providers;
 
-use App\Events\OutboxEventPublished;
-use App\Listeners\AssignDesignersOnOrderCreated;
-use App\Listeners\CreateOperationalNotifications;
 use App\Models\Product;
 use App\Models\User;
 use App\Policies\CatalogPolicy;
@@ -15,7 +12,6 @@ use App\Support\Shop;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -66,7 +62,6 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('link-access', fn (Request $r) => Limit::perMinute(60)->by($r->ip().'|'.substr(hash('sha256', (string) $r->route('token')), 0, 12)));
         Gate::policy(User::class, EmployeePolicy::class);
         Gate::policy(Product::class, CatalogPolicy::class);
-        Event::listen(OutboxEventPublished::class, AssignDesignersOnOrderCreated::class);
-        Event::listen(OutboxEventPublished::class, CreateOperationalNotifications::class);
+        // المستمعون يُكتشفون تلقائيًا من app/Listeners (type-hint على handle) — التسجيل اليدوي كان يكرر كل إشعار مرتين.
     }
 }

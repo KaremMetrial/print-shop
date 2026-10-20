@@ -61,7 +61,7 @@ class AssignmentService
         }
         $spec = $item->product_snapshot['required_specialty_id'] ?? null;
         if ($spec && ! $designer->specialties()->whereKey($spec)->exists()) {
-            throw new BusinessException(ErrorCode::NO_QUALIFIED_DESIGNER);
+            throw new BusinessException(ErrorCode::NO_QUALIFIED_DESIGNER, 'المصمم المختار لا يملك تخصص هذا المنتج. أضف التخصص له من صفحة المصمم أو اختر مصممًا آخر.');
         }
 
         return DB::transaction(function () use ($actor, $item, $designer, $reason) {
