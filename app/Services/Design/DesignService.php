@@ -12,6 +12,7 @@ use App\Models\OrderItem;
 use App\Models\User;
 use App\Services\Audit\AuditService;
 use App\Services\Outbox\Outbox;
+use App\Services\Search\ImageIndexer;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -107,6 +108,7 @@ class DesignService
             $this->event($item, $version, 'submitted', $designer);
             $this->audit->record('item.design_submitted', $item, [], ['version' => $version->version_no]);
             $this->outbox->record('DesignSubmitted', $item, ['item_id' => $item->id, 'version_id' => $version->id]);
+            DB::afterCommit(fn () => app(ImageIndexer::class)->indexVersion($version->id));
 
             return $version->refresh();
         });

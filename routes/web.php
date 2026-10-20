@@ -21,6 +21,7 @@ use App\Http\Controllers\Operations\AccountantDashboardController;
 use App\Http\Controllers\Operations\AccountingController;
 use App\Http\Controllers\Operations\AuditController;
 use App\Http\Controllers\Operations\DeliveryController;
+use App\Http\Controllers\Operations\ImageSearchController;
 use App\Http\Controllers\Operations\PaymentDetailsController;
 use App\Http\Controllers\Operations\PaymentProofController;
 use App\Http\Controllers\Operations\ReportsController;
@@ -132,6 +133,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('audit', [AuditController::class, 'index'])->name('audit.index');
     Route::get('delivery', [DeliveryController::class, 'index'])->name('delivery.index');
     Route::get('search', SearchController::class)->name('search');
+    Route::get('search/image', [ImageSearchController::class, 'form'])->name('search.image');
+    Route::post('search/image', [ImageSearchController::class, 'search'])->name('search.image.run')->middleware('throttle:20,1');
+    Route::get('search/image/compare', [ImageSearchController::class, 'compare'])->name('search.image.compare');
+    Route::get('search/image/query/{token}', [ImageSearchController::class, 'query'])->name('search.image.query');
     Route::get('reports', ReportsController::class)->name('reports');
     Route::get('settings/system', [SettingsController::class, 'index'])->name('settings.system');
     Route::patch('settings/system', [SettingsController::class, 'update'])->name('settings.system.update');
