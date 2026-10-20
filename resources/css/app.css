@@ -236,3 +236,16 @@ html { font-family: var(--font-sans); scrollbar-gutter: stable; overflow-y: scro
 /* قائمة الشريط الجانبي تتمرر بدون إظهار شريط تمرير يزيح التخطيط */
 nav[aria-label="القائمة الرئيسية"] { scrollbar-width: none; }
 nav[aria-label="القائمة الرئيسية"]::-webkit-scrollbar { display: none; }
+
+/* ===== Responsive (≤1023px): صفوف الـpen الأفقية تلتف بدل أن تتجاوز الشاشة =====
+   - الصفوف بلا ارتفاع ثابت تلتف (flex-wrap)، والأعمدة المرنة لها حد أدنى فتتراص عموديًا عند الضيق.
+   - أي عنصر لا يتجاوز عرض الأب. الجداول تتحول لبطاقات داخل المكوّنات نفسها. */
+@media (max-width: 1023px) {
+  main div.flex:not(.flex-col):not(.flex-col-reverse):not([class*="h-["]):not([class*="overflow-x"]) { flex-wrap: wrap; }
+  main div.flex:not(.flex-col):not([class*="h-["]) > .flex-1 { flex-basis: 260px; }
+  main div.flex:not(.flex-col):not([class*="h-["]) > form.flex-1 { flex-basis: 100%; min-width: 0; }
+  main div.flex > * { max-width: 100%; }
+  main img, main video { max-width: 100%; height: auto; }
+  /* جداول/شرائط مرسومة يدويًا بأعمدة بعرض ثابت: تتمرر أفقيًا داخل حاويتها بدل كسر الصفحة */
+  main div:has(> div.flex[class*="h-["] > div[class*="w-["].shrink-0), main div:has(> button.flex[class*="h-["].shrink-0) { overflow-x: auto; }
+}

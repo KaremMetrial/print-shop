@@ -1,3 +1,4 @@
+import { MobileCards } from '@/components/pen/lists';
 import { Icon } from '@/pen/icon';
 import { Link } from '@inertiajs/react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -11,7 +12,23 @@ const btnBase = 'flex h-[46px] w-fit shrink-0 items-center justify-center rounde
 const lblBase = 'text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap';
 
 /** Button / Primary — V3 */
-export function PenButton({ href, children, onClick, type = 'button', variant = 'primary', disabled, className }: { href?: string; children: ReactNode; onClick?: () => void; type?: 'button' | 'submit'; variant?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; className?: string }) {
+export function PenButton({
+    href,
+    children,
+    onClick,
+    type = 'button',
+    variant = 'primary',
+    disabled,
+    className,
+}: {
+    href?: string;
+    children: ReactNode;
+    onClick?: () => void;
+    type?: 'button' | 'submit';
+    variant?: 'primary' | 'secondary' | 'danger';
+    disabled?: boolean;
+    className?: string;
+}) {
     const style =
         variant === 'primary'
             ? 'bg-[var(--primary)] hover:bg-[var(--primary-hover)]'
@@ -33,7 +50,8 @@ export function PenButton({ href, children, onClick, type = 'button', variant = 
 
 /** Table action / عرض الطلب: h32، radius 8، padding 0×10، outline، نص 12/600 */
 export function PenRowAction({ href, children, onClick }: { href?: string; children: ReactNode; onClick?: () => void }) {
-    const c = 'flex h-[32px] w-fit shrink-0 items-center justify-center gap-[6px] rounded-[8px] bg-[var(--surface)] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)]';
+    const c =
+        'flex h-[32px] w-fit shrink-0 items-center justify-center gap-[6px] rounded-[8px] bg-[var(--surface)] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)]';
     const l = <span className="text-left text-[12px] leading-[19px] font-[600] whitespace-nowrap text-[var(--ink)]">{children}</span>;
     return href ? (
         <Link href={href} className={c}>
@@ -68,15 +86,47 @@ export function PenStatus({ tone, children }: { tone: StatusTone; children: Reac
 }
 
 /** KPI card (S-007): border، radius 12، padding 16، gap 4 */
-export function PenKpi({ label, value, hint, href, big = true, className }: { label: string; value: ReactNode; hint: string; href?: string; big?: boolean; className?: string }) {
+export function PenKpi({
+    label,
+    value,
+    hint,
+    href,
+    big = true,
+    className,
+}: {
+    label: string;
+    value: ReactNode;
+    hint: string;
+    href?: string;
+    big?: boolean;
+    className?: string;
+}) {
     const body = (
         <>
-            <div className={cx('w-full text-right font-[400] text-[var(--muted-foreground)]', big ? 'text-[13px] leading-[21px]' : 'text-[13px] leading-[21px]')}>{label}</div>
-            <div className={cx('w-full text-right font-[700] text-[var(--ink)]', big ? 'text-[28px] leading-[39px]' : 'text-[20px] leading-[32px]')}>{value}</div>
-            <div className={cx('w-full text-right font-[400] text-[var(--primary)]', big ? 'text-[12px] leading-[19px]' : 'text-[11px] leading-[18px]')}>{hint}</div>
+            <div
+                className={cx(
+                    'w-full text-right font-[400] text-[var(--muted-foreground)]',
+                    big ? 'text-[13px] leading-[21px]' : 'text-[13px] leading-[21px]',
+                )}
+            >
+                {label}
+            </div>
+            <div className={cx('w-full text-right font-[700] text-[var(--ink)]', big ? 'text-[28px] leading-[39px]' : 'text-[20px] leading-[32px]')}>
+                {value}
+            </div>
+            <div
+                className={cx(
+                    'w-full text-right font-[400] text-[var(--primary)]',
+                    big ? 'text-[12px] leading-[19px]' : 'text-[11px] leading-[18px]',
+                )}
+            >
+                {hint}
+            </div>
         </>
     );
-    const base = big ? 'flex shrink-0 flex-col gap-[4px] rounded-[12px] bg-[var(--surface)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]' : 'flex flex-1 shrink-0 flex-col gap-[4px] bg-transparent';
+    const base = big
+        ? 'flex shrink-0 flex-col gap-[4px] rounded-[12px] bg-[var(--surface)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]'
+        : 'flex flex-1 shrink-0 flex-col gap-[4px] bg-transparent';
     return href ? (
         <Link href={href} className={cx(base, 'hover:bg-[var(--background)]', className)}>
             {body}
@@ -88,7 +138,16 @@ export function PenKpi({ label, value, hint, href, big = true, className }: { la
 
 /** بطاقة بحد: radius 12، outline 1px border */
 export function PenCard({ children, className }: { children: ReactNode; className?: string }) {
-    return <div className={cx('flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]', className)}>{children}</div>;
+    return (
+        <div
+            className={cx(
+                'flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]',
+                className,
+            )}
+        >
+            {children}
+        </div>
+    );
 }
 
 export const penH2 = 'w-full text-right text-[18px] leading-[29px] font-[700] text-[var(--ink)]';
@@ -105,29 +164,50 @@ export interface PenCol<T> {
 }
 
 /** جدول الـpen: رأس h43.5 خلفية surface-subtle، صفوف h71.5 بحد سفلي، أعمدة بعروض حرفية. */
-export function PenTable<T extends { id: string | number }>({ cols, rows, rowHeight = 71.5, empty }: { cols: PenCol<T>[]; rows: T[]; rowHeight?: number; empty?: ReactNode }) {
+export function PenTable<T extends { id: string | number }>({
+    cols,
+    rows,
+    rowHeight = 71.5,
+    empty,
+}: {
+    cols: PenCol<T>[];
+    rows: T[];
+    rowHeight?: number;
+    empty?: ReactNode;
+}) {
     const colCls = (c: PenCol<T>) => (c.width ? '' : 'flex-1');
     const colStyle = (c: PenCol<T>) => (c.width ? { width: c.width } : undefined);
     return (
-        <div className="flex w-full flex-col">
-            <div className="flex h-[43.5px] w-full items-center gap-[12px] bg-[var(--surface-subtle)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
-                {cols.map((c) => (
-                    <div key={c.key} style={colStyle(c)} className={cx('shrink-0 text-right text-[12px] leading-[19px] font-[600] text-[var(--text-secondary)]', colCls(c))}>
-                        {c.header}
-                    </div>
-                ))}
-            </div>
-            {rows.length === 0 && empty}
-            {rows.map((r) => (
-                <div key={r.id} style={{ height: rowHeight }} className="flex w-full items-center gap-[12px] bg-[var(--surface)] p-[0px_16px] [border-bottom:1px_solid_var(--border)] last:border-b-0">
+        <>
+            <MobileCards cols={cols.map((c) => ({ h: c.header, cell: c.cell }))} rows={rows} empty={empty ?? 'لا توجد بيانات.'} />
+            <div className="hidden w-full flex-col md:flex">
+                <div className="flex h-[43.5px] w-full items-center gap-[12px] bg-[var(--surface-subtle)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
                     {cols.map((c) => (
-                        <div key={c.key} style={colStyle(c)} className={cx('shrink-0', colCls(c), c.align === 'left' && 'flex justify-start')}>
-                            {c.cell(r)}
+                        <div
+                            key={c.key}
+                            style={colStyle(c)}
+                            className={cx('shrink-0 text-right text-[12px] leading-[19px] font-[600] text-[var(--text-secondary)]', colCls(c))}
+                        >
+                            {c.header}
                         </div>
                     ))}
                 </div>
-            ))}
-        </div>
+                {rows.length === 0 && empty}
+                {rows.map((r) => (
+                    <div
+                        key={r.id}
+                        style={{ height: rowHeight }}
+                        className="flex w-full items-center gap-[12px] bg-[var(--surface)] p-[0px_16px] [border-bottom:1px_solid_var(--border)] last:border-b-0"
+                    >
+                        {cols.map((c) => (
+                            <div key={c.key} style={colStyle(c)} className={cx('shrink-0', colCls(c), c.align === 'left' && 'flex justify-start')}>
+                                {c.cell(r)}
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </div>
+        </>
     );
 }
 
@@ -191,7 +271,17 @@ export function PenPageHeader({ title, subtitle, children }: { title: string; su
 }
 
 /** فلتر منسدل (Action / …: الكل ⌄): h46، radius 10، bg background، outline control-border */
-export function PenFilterMenu({ label, value, options, onChange }: { label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void }) {
+export function PenFilterMenu({
+    label,
+    value,
+    options,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    options: { value: string; label: string }[];
+    onChange: (v: string) => void;
+}) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -202,14 +292,23 @@ export function PenFilterMenu({ label, value, options, onChange }: { label: stri
     const current = options.find((o) => o.value === value) ?? options[0];
     return (
         <div ref={ref} className="relative w-fit shrink-0">
-            <button type="button" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="flex h-[46px] w-fit shrink-0 items-center justify-between gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px]">
+            <button
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                onClick={() => setOpen((o) => !o)}
+                className="flex h-[46px] w-fit shrink-0 items-center justify-between gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px]"
+            >
                 <Icon name="chevron-down" className="h-[16px] w-[16px] shrink-0" color="var(--muted-foreground)" />
                 <span className="text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]">
                     {label}: {current.label}
                 </span>
             </button>
             {open && (
-                <div role="listbox" className="absolute start-0 top-[50px] z-30 flex min-w-full flex-col overflow-hidden rounded-[10px] bg-[var(--surface)] [box-shadow:0px_4px_12px_#0F172A16] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div
+                    role="listbox"
+                    className="absolute start-0 top-[50px] z-30 flex min-w-full flex-col overflow-hidden rounded-[10px] bg-[var(--surface)] [box-shadow:0px_4px_12px_#0F172A16] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]"
+                >
                     {options.map((o) => {
                         const on = o.value === current.value;
                         return (
@@ -222,10 +321,24 @@ export function PenFilterMenu({ label, value, options, onChange }: { label: stri
                                     onChange(o.value);
                                     setOpen(false);
                                 }}
-                                className={cx('flex h-[42px] w-full shrink-0 items-center justify-between gap-[12px] p-[0px_14px] hover:bg-[var(--surface-subtle)]', on && 'bg-[var(--primary-soft)]')}
+                                className={cx(
+                                    'flex h-[42px] w-full shrink-0 items-center justify-between gap-[12px] p-[0px_14px] hover:bg-[var(--surface-subtle)]',
+                                    on && 'bg-[var(--primary-soft)]',
+                                )}
                             >
-                                {on ? <Icon name="check" className="h-[15px] w-[15px]" color="var(--primary)" /> : <span className="h-[15px] w-[15px]" />}
-                                <span className={cx('text-left text-[14px] leading-[normal] whitespace-nowrap', on ? 'font-[600] text-[var(--primary)]' : 'font-[400] text-[var(--ink)]')}>{o.label}</span>
+                                {on ? (
+                                    <Icon name="check" className="h-[15px] w-[15px]" color="var(--primary)" />
+                                ) : (
+                                    <span className="h-[15px] w-[15px]" />
+                                )}
+                                <span
+                                    className={cx(
+                                        'text-left text-[14px] leading-[normal] whitespace-nowrap',
+                                        on ? 'font-[600] text-[var(--primary)]' : 'font-[400] text-[var(--ink)]',
+                                    )}
+                                >
+                                    {o.label}
+                                </span>
                             </button>
                         );
                     })}
@@ -237,7 +350,8 @@ export function PenFilterMenu({ label, value, options, onChange }: { label: stri
 
 /** شريط ترقيم الصفحات (pen: Pagination): [‹ التالي][الصفحة][السابق ›][ملخص] */
 export function PenPagination({ page, pages, summary, onPage }: { page: number; pages: number; summary: string; onPage: (p: number) => void }) {
-    const b = 'flex h-[32px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] disabled:cursor-default';
+    const b =
+        'flex h-[32px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] disabled:cursor-default';
     const l = 'text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]';
     return (
         <div className="flex w-full shrink-0 items-center gap-[12px] rounded-[10px] bg-[var(--surface)] p-[12px_16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
@@ -256,9 +370,38 @@ export function PenPagination({ page, pages, summary, onPage }: { page: number; 
 }
 
 /** Action (11px): h32، radius 8، outline border، padding 0×10، نص 11/600 — شاشات المنتجات/التسعير */
-export function PenAction11({ href, children, onClick, width, disabled, type = 'button', muted }: { href?: string; children: ReactNode; onClick?: () => void; width?: number; disabled?: boolean; type?: 'button' | 'submit'; muted?: boolean }) {
-    const cls = cx('flex h-[32px] shrink-0 items-center justify-center gap-[12px] rounded-[8px] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)] disabled:opacity-50', muted ? 'bg-[var(--background)]' : 'bg-[var(--surface)]', !width && 'w-fit');
-    const lab = <span className={cx('text-left text-[11px] leading-[normal] font-[600] whitespace-nowrap', muted ? 'text-[var(--muted-foreground)]' : 'text-[var(--ink)]')}>{children}</span>;
+export function PenAction11({
+    href,
+    children,
+    onClick,
+    width,
+    disabled,
+    type = 'button',
+    muted,
+}: {
+    href?: string;
+    children: ReactNode;
+    onClick?: () => void;
+    width?: number;
+    disabled?: boolean;
+    type?: 'button' | 'submit';
+    muted?: boolean;
+}) {
+    const cls = cx(
+        'flex h-[32px] shrink-0 items-center justify-center gap-[12px] rounded-[8px] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)] disabled:opacity-50',
+        muted ? 'bg-[var(--background)]' : 'bg-[var(--surface)]',
+        !width && 'w-fit',
+    );
+    const lab = (
+        <span
+            className={cx(
+                'text-left text-[11px] leading-[normal] font-[600] whitespace-nowrap',
+                muted ? 'text-[var(--muted-foreground)]' : 'text-[var(--ink)]',
+            )}
+        >
+            {children}
+        </span>
+    );
     const style = width ? { width } : undefined;
     return href ? (
         <Link href={href} className={cls} style={style}>
@@ -272,10 +415,33 @@ export function PenAction11({ href, children, onClick, width, disabled, type = '
 }
 
 /** شارة حالة ثابتة العرض (Status badge / نشط: h27 radius8) */
-export function PenStatusFixed({ on, w = 64, onLabel = 'نشط', offLabel = 'غير نشط' }: { on: boolean; w?: number; onLabel?: string; offLabel?: string }) {
+export function PenStatusFixed({
+    on,
+    w = 64,
+    onLabel = 'نشط',
+    offLabel = 'غير نشط',
+}: {
+    on: boolean;
+    w?: number;
+    onLabel?: string;
+    offLabel?: string;
+}) {
     return (
-        <span className={cx('flex h-[27px] shrink-0 items-center justify-center rounded-[8px]', on ? 'bg-[var(--success-soft)]' : 'bg-[var(--surface-subtle)]')} style={{ width: w }}>
-            <span className={cx('text-left text-[11px] leading-[normal] font-[600] whitespace-nowrap', on ? 'text-[#15803D]' : 'text-[var(--text-secondary)]')}>{on ? onLabel : offLabel}</span>
+        <span
+            className={cx(
+                'flex h-[27px] shrink-0 items-center justify-center rounded-[8px]',
+                on ? 'bg-[var(--success-soft)]' : 'bg-[var(--surface-subtle)]',
+            )}
+            style={{ width: w }}
+        >
+            <span
+                className={cx(
+                    'text-left text-[11px] leading-[normal] font-[600] whitespace-nowrap',
+                    on ? 'text-[#15803D]' : 'text-[var(--text-secondary)]',
+                )}
+            >
+                {on ? onLabel : offLabel}
+            </span>
         </span>
     );
 }

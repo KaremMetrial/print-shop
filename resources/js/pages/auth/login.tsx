@@ -20,7 +20,7 @@ export default function Login({ status }: { status?: string }) {
     const error = errors.email ?? errors.password ?? (errors as Record<string, string>).business;
 
     return (
-        <div dir="ltr" className="bg-background flex min-h-screen flex-col items-start gap-8 overflow-hidden p-12 font-[Cairo]">
+        <div dir="ltr" className="bg-background flex min-h-screen flex-col items-start gap-8 overflow-hidden p-4 font-[Cairo] lg:p-12">
             <Head title="تسجيل دخول الموظفين" />
 
             <div className="flex w-full items-center justify-between gap-3">
@@ -29,14 +29,22 @@ export default function Login({ status }: { status?: string }) {
             </div>
 
             <div className="flex w-full flex-1 items-center justify-center gap-3">
-                <form onSubmit={submit} noValidate className="bg-surface flex w-[480px] max-w-full shrink-0 flex-col gap-6 rounded-xl p-10 outline-1 -outline-offset-[0.5px] outline-border">
+                <form
+                    onSubmit={submit}
+                    noValidate
+                    className="bg-surface outline-border flex w-[480px] max-w-full shrink-0 flex-col gap-6 rounded-xl p-10 outline-1 -outline-offset-[0.5px]"
+                >
                     <div className="flex w-full items-center justify-end gap-3">
                         <ShieldCheck className="text-primary size-8" strokeWidth={2} aria-hidden />
                     </div>
                     <h1 className="text-ink w-full text-right text-[28px] leading-[39px] font-bold">تسجيل دخول الموظفين</h1>
-                    <p className="text-muted-foreground w-full text-right text-sm leading-[22px]">ادخل إلى مساحة عملك الآمنة لمتابعة الطلبات وعمليات المطبعة اليومية.</p>
+                    <p className="text-muted-foreground w-full text-right text-sm leading-[22px]">
+                        ادخل إلى مساحة عملك الآمنة لمتابعة الطلبات وعمليات المطبعة اليومية.
+                    </p>
 
-                    {status && <div className="bg-success-soft text-success-text w-full rounded-[10px] p-3 text-right text-sm font-semibold">{status}</div>}
+                    {status && (
+                        <div className="bg-success-soft text-success-text w-full rounded-[10px] p-3 text-right text-sm font-semibold">{status}</div>
+                    )}
                     {error && (
                         <div role="alert" className="bg-danger-soft flex w-full flex-col gap-1 rounded-[10px] p-3 text-right">
                             <span className="text-[14px] leading-[22px] font-bold text-[#B91C1C]">تعذر تسجيل الدخول</span>
@@ -48,7 +56,7 @@ export default function Login({ status }: { status?: string }) {
                         <label htmlFor="email" className="text-ink w-full text-right text-sm leading-[22px] font-semibold">
                             البريد الإلكتروني *
                         </label>
-                        <div className="bg-background flex h-12 w-full items-center gap-3 rounded-[10px] px-3.5 outline-1 -outline-offset-[0.5px] outline-control-border focus-within:outline-2 focus-within:outline-primary">
+                        <div className="bg-background outline-control-border focus-within:outline-primary flex h-12 w-full items-center gap-3 rounded-[10px] px-3.5 outline-1 -outline-offset-[0.5px] focus-within:outline-2">
                             <input
                                 id="email"
                                 type="email"
@@ -66,8 +74,13 @@ export default function Login({ status }: { status?: string }) {
                         <label htmlFor="password" className="text-ink w-full text-right text-sm leading-[22px] font-semibold">
                             كلمة المرور *
                         </label>
-                        <div className="bg-background flex h-12 w-full items-center gap-3 rounded-[10px] px-3.5 outline-1 -outline-offset-[0.5px] outline-control-border focus-within:outline-2 focus-within:outline-primary">
-                            <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} className="text-muted-foreground shrink-0">
+                        <div className="bg-background outline-control-border focus-within:outline-primary flex h-12 w-full items-center gap-3 rounded-[10px] px-3.5 outline-1 -outline-offset-[0.5px] focus-within:outline-2">
+                            <button
+                                type="button"
+                                onClick={() => setShow((s) => !s)}
+                                aria-label={show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                                className="text-muted-foreground shrink-0"
+                            >
                                 {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                             </button>
                             <input
@@ -83,7 +96,11 @@ export default function Login({ status }: { status?: string }) {
                         </div>
                     </div>
 
-                    <button type="submit" disabled={processing} className="bg-primary hover:bg-primary-hover flex h-12 w-full items-center justify-center rounded-[10px] px-4 text-sm font-semibold whitespace-nowrap text-white disabled:opacity-70">
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="bg-primary hover:bg-primary-hover flex h-12 w-full items-center justify-center rounded-[10px] px-4 text-sm font-semibold whitespace-nowrap text-white disabled:opacity-70"
+                    >
                         {processing ? 'جارٍ التحقق…' : 'تسجيل الدخول'}
                     </button>
 
@@ -91,7 +108,9 @@ export default function Login({ status }: { status?: string }) {
                 </form>
             </div>
 
-            <div className="text-muted-foreground w-full text-center text-xs leading-[19px]">PBMS • نظام داخلي لإدارة مطبعة واحدة • جميع الاتصالات محمية</div>
+            <div className="text-muted-foreground w-full text-center text-xs leading-[19px]">
+                PBMS • نظام داخلي لإدارة مطبعة واحدة • جميع الاتصالات محمية
+            </div>
         </div>
     );
 }
