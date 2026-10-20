@@ -65,7 +65,6 @@ const TABS: [Tab, string][] = [
     ['activity', 'سجل النشاط'],
 ];
 const dt = (iso: string, seconds = false) => `${formatDate(iso)}، ${formatTime(iso)}${seconds ? '' : ''}`;
-const dtNoPad = (iso: string) => `${formatDate(iso)}، ${formatTime(iso).replace(/^0/, '')}`;
 const dShort = (iso: string) => `${formatDate(iso, { year: false })}، ${formatTime(iso)}`;
 const eta = (n: number | null) => (n === null ? '—' : n === 2 ? 'يومان' : n === 1 ? 'يوم' : `${n} أيام`);
 const deliveryLabel = (m: string) => (m === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة');
@@ -439,16 +438,14 @@ function Activity({ p }: { p: Props }) {
 /** S-012 (6 تبويبات) + S-013 البنود — pendev: Mo2G0 / O2atww / knyLb / XyDHA / rsbuP / OkEyj */
 export default function OrderShow(props: Props) {
     const { order: o, tab, can } = props;
-    const overview = tab === 'overview';
     const [cancelOpen, setCancelOpen] = useState(false);
     const [payOpen, setPayOpen] = useState(false);
     return (
         <AppLayout active="/orders">
             <Head title={`تفاصيل الأوردر ${o.number}`} />
-            <div className="flex w-full shrink-0 flex-col" style={{ gap: overview ? 16 : 18 }}>
-                <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, { label: 'الأوردرات', href: '/orders' }, overview ? 'تفاصيل الأوردر' : o.number]} />
-                {overview ? (
-                    <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
+            <div className="flex w-full shrink-0 flex-col" style={{ gap: 18 }}>
+                <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, { label: 'الأوردرات', href: '/orders' }, o.number]} />
+                    <div className="flex w-full shrink-0 justify-between gap-[12px]">
                         <div className="flex w-fit shrink-0 items-center gap-[12px]">
                             <div className="flex w-fit shrink-0 items-center gap-[8px]">
                                 <DropdownMenu>
@@ -481,21 +478,6 @@ export default function OrderShow(props: Props) {
                                 )}
                             </div>
                         </div>
-                        <div className="flex flex-1 flex-col items-end gap-[8px]">
-                            <div className="flex w-full shrink-0 items-center justify-end gap-[12px]">
-                                <StatusPill tone="amber">{o.status_label}</StatusPill>
-                                <div className="text-left text-[26px] leading-[36px] font-[700] whitespace-pre text-[var(--ink)]">
-                                    {`تفاصيل الأوردر  /  ${o.number}`}
-                                </div>
-                            </div>
-                            <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--primary)]">{o.customer.name}</div>
-                            <div className="w-full text-right text-[12px] leading-[19px] font-[400] whitespace-pre text-[var(--muted-foreground)]">
-                                {`تاريخ الإنشاء: ${dtNoPad(o.created_at)}  •  آخر تحديث: ${dtNoPad(o.updated_at)}`}
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="flex w-full shrink-0 justify-between gap-[12px]">
                         <div className="flex flex-1 flex-col gap-[4px]">
                             <h1 className="w-full text-right text-[28px] leading-[39px] font-[700] text-[var(--ink)]">تفاصيل الأوردر</h1>
                             <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">
@@ -510,7 +492,6 @@ export default function OrderShow(props: Props) {
                             <div className="w-[130px] text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{o.customer.phone_display}</div>
                         </div>
                     </div>
-                )}
                 <Tabs order={o} tab={tab} />
                 {tab === 'overview' && <Overview p={props} />}
                 {tab === 'items' && <Items p={props} />}

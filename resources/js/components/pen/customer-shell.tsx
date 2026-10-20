@@ -15,6 +15,16 @@ export interface CustomerHead {
 
 export const tierTone = (name: string): BadgeTone => (/ذهب/.test(name) ? 'amber' : /فض/.test(name) ? 'gray' : /بلات/.test(name) ? 'violet' : 'blue');
 
+const SUBTITLES: Record<string, string> = {
+    overview: 'بيانات العميل ونشاطه وسجلاته المرتبطة.',
+    orders: 'أوردرات العميل ومراحلها.',
+    financial: 'نظرة مالية على حساب العميل وحركات كشف الحساب.',
+    payments: 'سجل مدفوعات العميل.',
+    refunds: 'التزامات الاسترداد والمبالغ المردودة.',
+    access: 'إدارة دخول العميل إلى منصة العملاء.',
+    activity: 'سجل التغييرات والأحداث على ملف العميل.',
+};
+
 const TABS: [string, string, string][] = [
     ['activity', 'النشاط', '/activity'],
     ['access', 'دخول المنصة', '/access'],
@@ -34,7 +44,7 @@ export function CustomerShell({ customer, active, title, subtitle, crumb, childr
             <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, { label: 'العملاء', href: '/customers' }, crumb]} />
             <div className="flex w-full shrink-0 flex-col gap-[4px]">
                 <h1 className={`w-full text-right text-[28px] font-[700] text-[var(--ink)] ${full ? 'leading-[39px]' : 'leading-[45px]'}`}>{title}</h1>
-                {subtitle && <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">{subtitle}</div>}
+                <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">{subtitle ?? SUBTITLES[active]}</div>
             </div>
             <div className="flex w-full shrink-0 flex-col gap-[16px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                 <div className={`flex w-full shrink-0 items-center gap-[12px] ${full ? 'justify-between' : ''}`}>
