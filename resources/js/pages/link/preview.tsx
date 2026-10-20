@@ -27,7 +27,7 @@ export default function LinkPreview({ token, order, item, version: v }: Props) {
     return (
         <LinkLayout orderRef={order}>
             <Head title="معاينة التصميم" />
-            <div className="flex w-full flex-col items-end gap-[14px] p-[24px_48px]">
+            <div className="flex w-full flex-col items-end gap-[14px] p-[16px] lg:p-[24px_48px]">
                 <div className="text-left text-[11px] leading-[normal] font-[400] whitespace-pre text-[var(--muted-foreground)]">{`تفاصيل الأوردر ‹ ${item.name} ‹ معاينة التصميم`}</div>
                 <div className="flex w-full shrink-0 items-start justify-between">
                     <Link href={`/l/${token}`} className="flex h-[40px] w-fit items-center rounded-[8px] bg-[var(--surface)] p-[0px_13px] text-left text-[12px] leading-[normal] font-[700] text-[var(--primary)]">
@@ -49,8 +49,8 @@ export default function LinkPreview({ token, order, item, version: v }: Props) {
                     ))}
                 </div>
                 {tab === 'chat' && <ChatPanel url={`/l/${token}/items/${item.id}/chat`} mine={['link']} />}
-                <div className={`flex w-full shrink-0 items-start gap-[18px] ${tab === 'chat' ? 'hidden' : ''}`}>
-                    <div className="flex w-[350px] shrink-0 flex-col items-end gap-[12px]">
+                <div className={`flex w-full shrink-0 flex-col items-stretch gap-[18px] lg:flex-row lg:items-start ${tab === 'chat' ? 'hidden' : ''}`}>
+                    <div className="flex w-full shrink-0 lg:w-[350px] flex-col items-end gap-[12px]">
                         <div className={`${box} gap-[12px] rounded-[9px] p-[18px]`}>
                             <div className="text-left text-[15px] leading-[normal] font-[700] text-[var(--ink)]">معلومات النسخة</div>
                             {v &&

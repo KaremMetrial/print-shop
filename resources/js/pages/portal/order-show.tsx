@@ -59,7 +59,7 @@ export default function PortalOrderShow({ order: o }: Props) {
                     </div>
                 ))}
             </div>
-            <div className="flex w-full gap-[16px]">
+            <div className="flex w-full flex-col gap-[16px] lg:flex-row">
                 <div className={`${card} flex-1`}>
                     <div className="text-right text-[18px] font-[700]">ملخص الدفع</div>
                     <KV k="الإجمالي" v={formatMoneyFixed(o.grand_total_minor)} />

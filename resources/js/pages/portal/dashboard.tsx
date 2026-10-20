@@ -38,7 +38,7 @@ export default function PortalDashboard({ due_minor, active, awaiting, requests 
                     </div>
                 </div>
             ))}
-            <div className="flex w-full gap-[16px]">
+            <div className="flex w-full flex-col gap-[16px] lg:flex-row">
                 {[['طلبات بانتظار المراجعة', requests], ['تصميمات بانتظار اعتمادك', awaiting.length], ['الأوردرات النشطة', active.length]].map(([k, v]) => (
                     <div key={k} className={`${card} flex-1`}>
                         <div className="text-right text-[32px] leading-[40px] font-[700] text-[var(--ink)]">{v}</div>
