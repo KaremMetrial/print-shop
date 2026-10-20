@@ -1,6 +1,6 @@
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { DataGrid, ListHead, Pill, RowBtn, SearchBox, TabsBar } from '@/components/pen/lists';
-import { PenPagination } from '@/components/pen/primitives';
+import { PenFilterMenu, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
 import { Head, router } from '@inertiajs/react';
@@ -54,7 +54,7 @@ const EMPTY: Record<Tab, string> = {
 
 /** S-059 — الطباعة والتسليم. الانتقال يتم عبر زر واحد للأوردر كله (BR-031/032) وبتأكيد. */
 export default function Delivery({ orders, tab, counts, filters, can }: Props) {
-    const go = (n: Record<string, string | undefined>) => router.get('/delivery', { tab, ...filters, ...n }, { preserveState: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/delivery', { tab, ...filters, ...n }, { preserveState: true, preserveScroll: true });
     const [pending, setPending] = useState<{ id: number; s: string; msg: string } | null>(null);
     const step = (id: number, s: string, msg: string) => setPending({ id, s, msg });
     return (
@@ -84,16 +84,12 @@ export default function Delivery({ orders, tab, counts, filters, can }: Props) {
                 />
                 <TabsBar tabs={TABS.map(([k, l]) => [k, `${l} (${counts[k]})`])} value={tab} onChange={(t) => go({ tab: t, page: undefined })} />
                 <div className="flex w-full shrink-0 items-center gap-[12px]">
-                    <select
-                        aria-label="طريقة التسليم"
+                    <PenFilterMenu
+                        label="طريقة التسليم"
                         value={filters.method ?? ''}
-                        onChange={(e) => go({ method: e.target.value || undefined })}
-                        className="h-[46px] rounded-[10px] bg-[var(--background)] p-[0px_14px] text-[14px] [outline:1px_solid_var(--control-border)]"
-                    >
-                        <option value="">طريقة التسليم: الكل</option>
-                        <option value="PICKUP">استلام</option>
-                        <option value="DELIVERY">توصيل</option>
-                    </select>
+                        options={[{ value: '', label: 'طريقة التسليم: الكل' }, { value: 'PICKUP', label: 'استلام' }, { value: 'DELIVERY', label: 'توصيل' }]}
+                        onChange={(v) => go({ method: v || undefined })}
+                    />
                     <SearchBox value={filters.q ?? ''} onSubmit={(q) => go({ q: q || undefined })} placeholder="ابحث برقم الأوردر أو اسم العميل" />
                 </div>
                 <div className="w-full text-right text-[18px] leading-[28px] font-[700] text-[var(--ink)]">{TITLE[tab]}</div>

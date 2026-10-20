@@ -26,7 +26,7 @@ export default function PortalOrders({ orders, tab }: Props) {
                     { h: 'رقم الأوردر', w: 120, cell: (o) => <b>{o.number}</b> },
                 ]}
             />
-            <PenPagination page={orders.current_page} pages={orders.last_page} summary={`عرض ${orders.from ?? 0}–${orders.to ?? 0} من ${orders.total}`} onPage={(p) => router.get('/portal/orders', { tab, page: p }, { preserveState: true })} />
+            <PenPagination page={orders.current_page} pages={orders.last_page} summary={`عرض ${orders.from ?? 0}–${orders.to ?? 0} من ${orders.total}`} onPage={(p) => router.get('/portal/orders', { tab, page: p }, { preserveState: true, preserveScroll: true })} />
         </CustomerLayout>
     );
 }

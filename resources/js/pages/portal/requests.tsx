@@ -33,7 +33,7 @@ export default function PortalRequests({ requests, tab, counts }: Props) {
                     { h: 'رقم الطلب', w: 120, cell: (r) => <b>{r.number}</b> },
                 ]}
             />
-            <PenPagination page={requests.current_page} pages={requests.last_page} summary={`عرض ${requests.from ?? 0}–${requests.to ?? 0} من ${requests.total}`} onPage={(p) => router.get('/portal/requests', { tab, page: p }, { preserveState: true })} />
+            <PenPagination page={requests.current_page} pages={requests.last_page} summary={`عرض ${requests.from ?? 0}–${requests.to ?? 0} من ${requests.total}`} onPage={(p) => router.get('/portal/requests', { tab, page: p }, { preserveState: true, preserveScroll: true })} />
         </CustomerLayout>
     );
 }

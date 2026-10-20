@@ -29,7 +29,7 @@ const Card = ({ k, v }: { k: string; v: string | number }) => (
 /** S-060/061 — التقارير التشغيلية والمالية لفترة محددة. */
 export default function Reports({ from, to, ops, fin }: Props) {
     const { labels } = usePaymentMethods();
-    const go = (n: Record<string, string>) => router.get('/reports', { from, to, ...n }, { preserveState: true });
+    const go = (n: Record<string, string>) => router.get('/reports', { from, to, ...n }, { preserveState: true, preserveScroll: true });
     const fld = 'h-[46px] rounded-[10px] bg-[var(--background)] p-[0px_14px] text-[14px] [outline:1px_solid_var(--control-border)]';
     return (
         <AppLayout active="/reports">

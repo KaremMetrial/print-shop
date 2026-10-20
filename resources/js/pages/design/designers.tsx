@@ -1,4 +1,4 @@
-import { PenBreadcrumb } from '@/components/pen/primitives';
+import { PenBreadcrumb, PenFilterMenu } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { Icon } from '@/pen/icon';
 import { Head, Link, router } from '@inertiajs/react';
@@ -26,7 +26,7 @@ export const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w)
 /** S-040 — المصممون (pendev: eM5xP). */
 export default function Designers({ designers, filters, can }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (n: Record<string, string | undefined>) => router.get('/design/designers', { ...filters, ...n }, { preserveState: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/design/designers', { ...filters, ...n }, { preserveState: true, preserveScroll: true });
     const cycle = (d: D) => router.post(`/design/designers/${d.id}/availability`, { status: d.availability_value === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE' } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
     return (
         <AppLayout active="/design">
@@ -59,12 +59,12 @@ export default function Designers({ designers, filters, can }: Props) {
                         <Icon name="chevron-down" className="h-[16px] w-[16px]" color="var(--muted-foreground)" />
                         الحالة الوظيفية
                     </div>
-                    <select value={filters.availability ?? ''} onChange={(e) => go({ availability: e.target.value || undefined })} aria-label="حالة التوفر" className={filt}>
-                        <option value="">حالة التوفر</option>
-                        <option value="AVAILABLE">متاح</option>
-                        <option value="UNAVAILABLE">غير متاح</option>
-                        <option value="ON_LEAVE">في إجازة</option>
-                    </select>
+                    <PenFilterMenu
+                        label="حالة التوفر"
+                        value={filters.availability ?? ''}
+                        options={[{ value: '', label: 'حالة التوفر' }, { value: 'AVAILABLE', label: 'متاح' }, { value: 'UNAVAILABLE', label: 'غير متاح' }, { value: 'ON_LEAVE', label: 'في إجازة' }]}
+                        onChange={(v) => go({ availability: v || undefined })}
+                    />
                 </div>
                 <div className="flex w-full shrink-0 gap-[12px]">
                     {designers.map((d) => (

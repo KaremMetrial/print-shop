@@ -1,6 +1,6 @@
 import { PaymentDialog, ReasonDialog } from '@/components/finance/payment-dialog';
 import { DataGrid, ListHead, Pill, RowBtn, SearchBox, TabsBar } from '@/components/pen/lists';
-import { PenPagination } from '@/components/pen/primitives';
+import { PenFilterMenu, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoneyFixed, formatTime } from '@/lib/money';
 import { Head, Link, router } from '@inertiajs/react';
@@ -33,7 +33,7 @@ type Dlg = { kind: 'new' } | { kind: 'correct' | 'void'; p: Pay } | { kind: 'pay
 /** S-051 التحصيلات · S-054 المديونيات · S-055/056 المستردات · S-058 التصحيح المالي. الأرقام من PaymentService فقط. */
 export default function Accounting({ tab, filters, can, payments, customers, receivables, total_due_minor, refunds }: Props) {
     const [dlg, setDlg] = useState<Dlg | null>(null);
-    const go = (n: Record<string, string | undefined>) => router.get('/accounting', { tab, ...filters, ...n }, { preserveState: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/accounting', { tab, ...filters, ...n }, { preserveState: true, preserveScroll: true });
     const close = () => setDlg(null);
     return (
         <AppLayout active="/accounting">
@@ -57,11 +57,12 @@ export default function Accounting({ tab, filters, can, payments, customers, rec
                 {tab === 'payments' && payments && (
                     <>
                         <div className="flex w-full items-center gap-[12px]">
-                            <select aria-label="الحالة" value={filters.status ?? ''} onChange={(e) => go({ status: e.target.value || undefined })} className="h-[46px] rounded-[10px] bg-[var(--background)] p-[0px_14px] text-[14px] [outline:1px_solid_var(--control-border)]">
-                                <option value="">كل الحالات</option>
-                                <option value="CONFIRMED">مؤكدة</option>
-                                <option value="VOIDED">ملغاة</option>
-                            </select>
+                            <PenFilterMenu
+                                label="الحالة"
+                                value={filters.status ?? ''}
+                                options={[{ value: '', label: 'كل الحالات' }, { value: 'CONFIRMED', label: 'مؤكدة' }, { value: 'VOIDED', label: 'ملغاة' }]}
+                                onChange={(v) => go({ status: v || undefined })}
+                            />
                             <SearchBox value={filters.q ?? ''} onSubmit={(q) => go({ q: q || undefined })} placeholder="ابحث برقم الدفعة أو اسم العميل" />
                         </div>
                         <DataGrid

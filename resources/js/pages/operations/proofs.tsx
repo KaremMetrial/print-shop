@@ -74,7 +74,7 @@ function Review({ p, onClose }: { p: Proof; onClose: () => void }) {
 /** S-052-01 طابور إثباتات الدفع + S-052-02 مراجعة الإثبات (نافذة). pendev: byHTX / cYMXm */
 export default function Proofs({ proofs, status, filters, counts }: Props) {
     const [sel, setSel] = useState<Proof | null>(null);
-    const go = (n: Record<string, string | undefined>) => router.get('/accounting/proofs', { status, ...filters, ...n }, { preserveState: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/accounting/proofs', { status, ...filters, ...n }, { preserveState: true, preserveScroll: true });
     return (
         <AppLayout active="/accounting">
             <Head title="إثباتات الدفع" />

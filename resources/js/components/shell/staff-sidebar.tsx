@@ -39,6 +39,7 @@ export function StaffSidebar({ onNavigate, nav = adminNav, width = 264, subtitle
                                         key={item.href}
                                         href={item.href}
                                         onClick={onNavigate}
+                                        preserveScroll
                                         aria-current={on ? 'page' : undefined}
                                         className={`flex h-[44px] w-full shrink-0 items-center gap-[10px] rounded-[10px] p-[0px_12px] ${on ? 'bg-[var(--primary-soft)]' : 'bg-[var(--surface)] hover:bg-[var(--surface-subtle)]'}`}
                                     >

@@ -1,5 +1,5 @@
 import { PageTabs } from '@/components/pen/page-tabs';
-import { PenBreadcrumb, PenPagination } from '@/components/pen/primitives';
+import { PenBreadcrumb, PenFilterMenu, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -39,7 +39,7 @@ const btn = 'flex h-[36px] w-fit shrink-0 items-center rounded-[8px] bg-[var(--s
 /** S-005 — الإجراءات المطلوبة. الأقدم أولًا (BR-067). الإجراء لا يُغلق إلا بتنفيذه لا بقراءة إشعاره (BR-066). */
 export default function Actions({ actions: p, filters, counts }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (n: Record<string, string | undefined>) => router.get('/actions', { ...filters, ...n }, { preserveState: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/actions', { ...filters, ...n }, { preserveState: true, preserveScroll: true });
     const post = (url: string) => router.post(url, {}, { preserveScroll: true, headers: { 'Idempotency-Key': crypto.randomUUID() } });
     return (
         <AppLayout active="/actions">
@@ -68,11 +68,12 @@ export default function Actions({ actions: p, filters, counts }: Props) {
                     <button type="button" onClick={() => router.get('/actions')} className={`${btn} h-[46px]`}>
                         مسح
                     </button>
-                    <select value={filters.status ?? ''} onChange={(e) => go({ status: e.target.value || undefined })} aria-label="الحالة" className="h-[46px] rounded-[10px] bg-[var(--background)] p-[0px_14px] text-[14px] [outline:1px_solid_var(--control-border)]">
-                        <option value="">الحالة: مفتوح ومسند</option>
-                        <option value="OPEN">مفتوح</option>
-                        <option value="CLAIMED">مسند</option>
-                    </select>
+                    <PenFilterMenu
+                        label="الحالة"
+                        value={filters.status ?? ''}
+                        options={[{ value: '', label: 'الحالة: مفتوح ومسند' }, { value: 'OPEN', label: 'مفتوح' }, { value: 'CLAIMED', label: 'مسند' }]}
+                        onChange={(v) => go({ status: v || undefined })}
+                    />
                     <form
                         className="flex h-[46px] flex-1 items-center gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px]"
                         onSubmit={(e) => {

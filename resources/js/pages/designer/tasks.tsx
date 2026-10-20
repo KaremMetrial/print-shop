@@ -76,7 +76,7 @@ function summary(tab: Tab, n: number, workload: number) {
 /** S-043-01..04 — مهامي (pendev: FSGkX · PM7wz · UOvaG · zCk7b). */
 export default function DesignerTasks({ tab, counts, tasks, workload, designer, filters }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (t: Tab) => router.get('/designer/tasks', { tab: t }, { preserveState: true });
+    const go = (t: Tab) => router.get('/designer/tasks', { tab: t }, { preserveState: true, preserveScroll: true });
     const [dateLabel, productLabel] =
         tab === 'new' ? ['تاريخ الإسناد', 'المنتج'] : tab === 'in_progress' ? ['تاريخ الإسناد', 'المنتج'] : ['تاريخ التحديث', 'المنتج'];
     return (

@@ -32,7 +32,7 @@ const th = 'shrink-0 text-right text-[12px] leading-[19px] font-[600] text-[var(
 /** S-010 — قائمة الأوردرات: لا يوجد frame في الـpen؛ مبنية على قالب «قائمة» وجدول «Orders — canonical V2» (انظر docs/11-ui-deviations.md). */
 export default function OrdersIndex({ orders, filters, statuses, can, total }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (next: Record<string, string | undefined>) => router.get('/orders', { ...filters, page: undefined, ...next }, { preserveState: true, replace: true });
+    const go = (next: Record<string, string | undefined>) => router.get('/orders', { ...filters, page: undefined, ...next }, { preserveState: true, preserveScroll: true, replace: true });
     const hasFilters = Object.values(filters).some(Boolean);
 
     return (
@@ -105,7 +105,7 @@ export default function OrdersIndex({ orders, filters, statuses, can, total }: P
                     </div>
                 ))}
             </div>
-            <PenPagination page={orders.current_page} pages={orders.last_page} summary={`عرض ${orders.from ?? 0}–${orders.to ?? 0} من ${orders.total} • صفحة ${orders.current_page} من ${orders.last_page}`} onPage={(p) => router.get('/orders', { ...filters, page: p }, { preserveState: true })} />
+            <PenPagination page={orders.current_page} pages={orders.last_page} summary={`عرض ${orders.from ?? 0}–${orders.to ?? 0} من ${orders.total} • صفحة ${orders.current_page} من ${orders.last_page}`} onPage={(p) => router.get('/orders', { ...filters, page: p }, { preserveState: true, preserveScroll: true })} />
         </AppLayout>
     );
 }

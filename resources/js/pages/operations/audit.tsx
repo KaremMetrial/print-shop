@@ -1,5 +1,5 @@
 import { DataGrid, ListHead, RowBtn } from '@/components/pen/lists';
-import { PenPagination } from '@/components/pen/primitives';
+import { PenFilterMenu, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
 import { Head, router } from '@inertiajs/react';
@@ -30,7 +30,7 @@ const fld =
 /** S-077/078 — سجل التدقيق (للقراءة فقط) وتفاصيل الحدث. */
 export default function Audit({ logs, filters, actors, actions, entities }: Props) {
     const [open, setOpen] = useState<L | null>(null);
-    const go = (n: Record<string, string | undefined>) => router.get('/audit', { ...filters, ...n }, { preserveState: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/audit', { ...filters, ...n }, { preserveState: true, preserveScroll: true });
     return (
         <AppLayout active="/audit">
             <Head title="سجل التدقيق" />
@@ -55,45 +55,24 @@ export default function Audit({ logs, filters, actors, actions, entities }: Prop
                         onChange={(e) => go({ from: e.target.value || undefined })}
                         className={fld}
                     />
-                    <select
-                        aria-label="نوع الكيان"
+                    <PenFilterMenu
+                        label="نوع الكيان"
                         value={filters.entity ?? ''}
-                        onChange={(e) => go({ entity: e.target.value || undefined })}
-                        className={fld}
-                    >
-                        <option value="">كل الكيانات</option>
-                        {entities.map((x) => (
-                            <option key={x.value} value={x.value}>
-                                {x.label}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        aria-label="الإجراء"
+                        options={[{ value: '', label: 'كل الكيانات' }, ...entities.map((x) => ({ value: x.value, label: x.label }))]}
+                        onChange={(v) => go({ entity: v || undefined })}
+                    />
+                    <PenFilterMenu
+                        label="الإجراء"
                         value={filters.action ?? ''}
-                        onChange={(e) => go({ action: e.target.value || undefined })}
-                        className={fld}
-                    >
-                        <option value="">كل الإجراءات</option>
-                        {actions.map((x) => (
-                            <option key={x.value} value={x.value}>
-                                {x.label}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        aria-label="الموظف"
+                        options={[{ value: '', label: 'كل الإجراءات' }, ...actions.map((x) => ({ value: x.value, label: x.label }))]}
+                        onChange={(v) => go({ action: v || undefined })}
+                    />
+                    <PenFilterMenu
+                        label="الموظف"
                         value={filters.actor ?? ''}
-                        onChange={(e) => go({ actor: e.target.value || undefined })}
-                        className={fld}
-                    >
-                        <option value="">كل الموظفين</option>
-                        {actors.map((a) => (
-                            <option key={a.id} value={a.id}>
-                                {a.name}
-                            </option>
-                        ))}
-                    </select>
+                        options={[{ value: '', label: 'كل الموظفين' }, ...actors.map((a) => ({ value: String(a.id), label: a.name }))]}
+                        onChange={(v) => go({ actor: v || undefined })}
+                    />
                 </div>
                 <DataGrid
                     empty="لا توجد أحداث مطابقة."

@@ -1,5 +1,5 @@
 import { PageTabs } from '@/components/pen/page-tabs';
-import { PenBreadcrumb, PenPagination } from '@/components/pen/primitives';
+import { PenBreadcrumb, PenFilterMenu, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoneyFixed, formatTime } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -41,7 +41,7 @@ const filt = 'flex h-[46px] w-fit shrink-0 items-center justify-between gap-[12p
 /** S-019 — طلبات الأوردرات (pendev: QBHwi). أقدم طلب أولًا (BR-067). */
 export default function OrderRequestsIndex({ requests, tab, filters, counts, reviewers, customers }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (next: Record<string, string | undefined>) => router.get('/order-requests', { tab, ...filters, ...next }, { preserveState: true, replace: true });
+    const go = (next: Record<string, string | undefined>) => router.get('/order-requests', { tab, ...filters, ...next }, { preserveState: true, preserveScroll: true, replace: true });
     const pending = counts.PENDING;
     return (
         <AppLayout active="/order-requests">
@@ -71,22 +71,18 @@ export default function OrderRequestsIndex({ requests, tab, filters, counts, rev
                         <Icon name="chevron-down" className="h-[16px] w-[16px] shrink-0" color="var(--muted-foreground)" />
                         الفترة الزمنية
                     </div>
-                    <select value={filters.customer ?? ''} onChange={(e) => go({ customer: e.target.value || undefined })} aria-label="العميل" className={`${filt} text-[var(--ink)]`}>
-                        <option value="">العميل</option>
-                        {customers.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
-                    <select value={filters.reviewer ?? ''} onChange={(e) => go({ reviewer: e.target.value || undefined })} aria-label="الموظف المسؤول" className={`${filt} text-[var(--ink)]`}>
-                        <option value="">الموظف المسؤول</option>
-                        {reviewers.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
+                    <PenFilterMenu
+                        label="العميل"
+                        value={filters.customer ?? ''}
+                        options={[{ value: '', label: 'العميل' }, ...customers.map((c) => ({ value: String(c.id), label: c.name }))]}
+                        onChange={(v) => go({ customer: v || undefined })}
+                    />
+                    <PenFilterMenu
+                        label="الموظف المسؤول"
+                        value={filters.reviewer ?? ''}
+                        options={[{ value: '', label: 'الموظف المسؤول' }, ...reviewers.map((c) => ({ value: String(c.id), label: c.name }))]}
+                        onChange={(v) => go({ reviewer: v || undefined })}
+                    />
                 </div>
                 <div className="flex w-full shrink-0 flex-col rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[47.5px] w-full shrink-0 items-center bg-[var(--background)] p-[0px_16px]">

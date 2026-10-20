@@ -289,7 +289,7 @@ export function PenFilterMenu({
         document.addEventListener('mousedown', close);
         return () => document.removeEventListener('mousedown', close);
     }, []);
-    const current = options.find((o) => o.value === value) ?? options[0];
+    const current = options.find((o) => o.value === value) ?? { value, label: value || '—' };
     return (
         <div ref={ref} className="relative w-fit shrink-0">
             <button

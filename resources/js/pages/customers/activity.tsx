@@ -33,7 +33,7 @@ const th = 'shrink-0 text-right text-[11px] leading-[18px] font-[600] text-[var(
 export default function CustomerActivity({ customer, activity, filters, actors, types }: Props) {
     const [open, setOpen] = useState<number | null>(null);
     const go = (n: Record<string, string | undefined>) =>
-        router.get(`/customers/${customer.id}/activity`, { ...filters, page: undefined, ...n }, { preserveState: true, replace: true });
+        router.get(`/customers/${customer.id}/activity`, { ...filters, page: undefined, ...n }, { preserveState: true, preserveScroll: true, replace: true });
     return (
         <AppLayout>
             <Head title="نشاط العميل" />
@@ -130,7 +130,7 @@ export default function CustomerActivity({ customer, activity, filters, actors, 
                     page={activity.current_page}
                     pages={activity.last_page}
                     summary={`${activity.from ?? 0}–${activity.to ?? 0} من ${activity.total} نشاطًا`}
-                    onPage={(p) => router.get(`/customers/${customer.id}/activity`, { ...filters, page: p }, { preserveState: true })}
+                    onPage={(p) => router.get(`/customers/${customer.id}/activity`, { ...filters, page: p }, { preserveState: true, preserveScroll: true })}
                 />
             </CustomerShell>
         </AppLayout>

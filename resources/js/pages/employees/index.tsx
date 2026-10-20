@@ -40,7 +40,7 @@ const th = 'flex-1 text-right text-[12px] leading-[normal] font-[600] text-[var(
 export default function EmployeesIndex({ employees, filters, roles, can, selected }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
     const [dlg, setDlg] = useState<{ emp: Emp; kind: 'deactivate' | 'reset' } | null>(null);
-    const go = (next: Record<string, string | undefined>) => router.get('/employees', { ...filters, selected: undefined, ...next }, { preserveState: true, replace: true });
+    const go = (next: Record<string, string | undefined>) => router.get('/employees', { ...filters, selected: undefined, ...next }, { preserveState: true, preserveScroll: true, replace: true });
     const open = (id: number) => router.get('/employees', { ...filters, selected: id }, { preserveState: true, preserveScroll: true, only: ['selected'], replace: true });
     const fmt = (d: string | null, time = false) => (d ? formatDate(d) + (time ? '' : '') : NA);
     const statusText = (s: Emp['status']) => (s === 'ACTIVE' ? 'نشط' : s === 'INACTIVE' ? 'معطّل' : null);

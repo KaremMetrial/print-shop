@@ -31,7 +31,7 @@ const when = (iso: string) => {
 
 /** S-004 — الإشعارات. قراءة الإشعار لا تُغلق الإجراء المرتبط (BR-066). */
 export default function Notifications({ notifications: p, tab, counts }: Props) {
-    const go = (t: string) => router.get('/notifications', { tab: t }, { preserveState: true });
+    const go = (t: string) => router.get('/notifications', { tab: t }, { preserveState: true, preserveScroll: true });
     const post = (url: string) => router.post(url, {}, { preserveScroll: true });
     return (
         <AppLayout>
@@ -79,7 +79,7 @@ export default function Notifications({ notifications: p, tab, counts }: Props) 
                         </div>
                     ))}
                 </div>
-                <PenPagination page={p.current_page} pages={p.last_page} summary={`عرض ${p.from ?? 0} من ${p.total} إشعارًا • ${counts.unread} غير مقروء`} onPage={(n) => router.get('/notifications', { tab, page: n }, { preserveState: true })} />
+                <PenPagination page={p.current_page} pages={p.last_page} summary={`عرض ${p.from ?? 0} من ${p.total} إشعارًا • ${counts.unread} غير مقروء`} onPage={(n) => router.get('/notifications', { tab, page: n }, { preserveState: true, preserveScroll: true })} />
             </div>
         </AppLayout>
     );

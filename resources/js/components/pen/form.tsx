@@ -121,7 +121,14 @@ export function PenSelect(props: DropProps) {
     const [open, setOpen] = useState(false);
     const [hover, setHover] = useState<string | null>(null);
     const ref = useRef<HTMLDivElement>(null);
-    const selected = props.multiple ? props.value : props.value || options.some((o) => o.value === '') ? [props.value] : [];
+    const hasEmptyOption = options.some((o) => o.value === '');
+    const selected = props.multiple
+        ? (props.value ?? [])
+        : props.value !== undefined && props.value !== null && props.value !== ''
+            ? [props.value]
+            : hasEmptyOption
+                ? ['']
+                : [];
     useEffect(() => {
         const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
         document.addEventListener('mousedown', close);

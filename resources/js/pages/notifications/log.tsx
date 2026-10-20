@@ -43,7 +43,7 @@ export default function ActionsLog({ actions: p }: Props) {
                         </div>
                     ))}
                 </div>
-                <PenPagination page={p.current_page} pages={p.last_page} summary={`عرض ${p.from ?? 0}–${p.to ?? 0} من ${p.total}`} onPage={(n) => router.get('/actions/log', { page: n }, { preserveState: true })} />
+                <PenPagination page={p.current_page} pages={p.last_page} summary={`عرض ${p.from ?? 0}–${p.to ?? 0} من ${p.total}`} onPage={(n) => router.get('/actions/log', { page: n }, { preserveState: true, preserveScroll: true })} />
             </div>
         </AppLayout>
     );

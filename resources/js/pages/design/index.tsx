@@ -1,4 +1,5 @@
-import { PenBreadcrumb } from '@/components/pen/primitives';
+import { PenBreadcrumb, PenFilterMenu } from '@/components/pen/primitives';
+import { PenSelect } from '@/components/pen/form';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -52,7 +53,7 @@ export default function DesignIndex({ kpis, unassigned, tasks, workload, designe
         ['قيد التنفيذ', kpis.in_design, '#2563EB'],
         ['مهام غير مسندة', kpis.unassigned, '#B45309'],
     ];
-    const go = (next: Record<string, string | undefined>) => router.get('/design', { ...filters, ...next }, { preserveState: true });
+    const go = (next: Record<string, string | undefined>) => router.get('/design', { ...filters, ...next }, { preserveState: true, preserveScroll: true });
     return (
         <AppLayout active="/design">
             <Head title="إدارة التصميمات" />
@@ -95,22 +96,18 @@ export default function DesignIndex({ kpis, unassigned, tasks, workload, designe
                                 {l}
                             </div>
                         ))}
-                        <select value={filters.designer ?? ''} onChange={(e) => go({ designer: e.target.value || undefined })} aria-label="المصمم" className={`${filt} text-[var(--ink)]`}>
-                            <option value="">المصمم</option>
-                            {designers.map((d) => (
-                                <option key={d.id} value={d.id}>
-                                    {d.name}
-                                </option>
-                            ))}
-                        </select>
-                        <select value={filters.state ?? ''} onChange={(e) => go({ state: e.target.value || undefined })} aria-label="حالة المهمة" className={`${filt} text-[var(--ink)]`}>
-                            <option value="">حالة المهمة</option>
-                            {Object.entries(STATE_NAMES).map(([k, l]) => (
-                                <option key={k} value={k}>
-                                    {l}
-                                </option>
-                            ))}
-                        </select>
+                        <PenFilterMenu
+                            label="المصمم"
+                            value={filters.designer ?? ''}
+                            options={[{ value: '', label: 'المصمم' }, ...designers.map((d) => ({ value: String(d.id), label: d.name }))]}
+                            onChange={(v) => go({ designer: v || undefined })}
+                        />
+                        <PenFilterMenu
+                            label="حالة المهمة"
+                            value={filters.state ?? ''}
+                            options={[{ value: '', label: 'حالة المهمة' }, ...Object.entries(STATE_NAMES).map(([k, l]) => ({ value: k, label: l }))]}
+                            onChange={(v) => go({ state: v || undefined })}
+                        />
                     </div>
                 </div>
 
@@ -208,14 +205,13 @@ export default function DesignIndex({ kpis, unassigned, tasks, workload, designe
                 <div role="dialog" aria-modal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-[16px]">
                     <div className="flex w-[440px] max-w-full flex-col gap-[14px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)]">
                         <div className="w-full text-right text-[16px] leading-[26px] font-[700] text-[var(--ink)]">إسناد مصمم</div>
-                        <select value={designer} onChange={(e) => setDesigner(e.target.value)} aria-label="المصمم" className="h-[46px] w-full rounded-[10px] bg-[var(--background)] p-[0px_14px] text-right text-[14px] [outline:1px_solid_var(--control-border)]">
-                            <option value="">اختر المصمم</option>
-                            {designers.map((d) => (
-                                <option key={d.id} value={d.id}>
-                                    {d.name}
-                                </option>
-                            ))}
-                        </select>
+                        <PenSelect
+                            label="المصمم"
+                            value={designer}
+                            placeholder="اختر المصمم"
+                            options={designers.map((d) => ({ value: String(d.id), label: d.name }))}
+                            onValueChange={setDesigner}
+                        />
                         <div className="flex w-full shrink-0 justify-end gap-[12px]">
                             <button type="button" onClick={() => setAssigning(null)} className="flex h-[40px] items-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-[14px] [outline:1px_solid_var(--border)]">
                                 الرجوع

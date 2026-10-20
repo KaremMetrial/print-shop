@@ -32,7 +32,7 @@ const th = 'shrink-0 text-right text-[12px] leading-[19px] font-[600] text-[var(
 /** S-022 — قائمة العملاء (pendev: Kngwu). */
 export default function CustomersIndex({ customers, filters, tiers, can, total, now }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (next: Record<string, string | undefined>) => router.get('/customers', { ...filters, page: undefined, ...next }, { preserveState: true, replace: true });
+    const go = (next: Record<string, string | undefined>) => router.get('/customers', { ...filters, page: undefined, ...next }, { preserveState: true, preserveScroll: true, replace: true });
     const d = new Date(now);
     const hasFilters = Object.values(filters).some(Boolean);
 
@@ -122,7 +122,7 @@ export default function CustomersIndex({ customers, filters, tiers, can, total, 
                 ))}
             </div>
 
-            <PenPagination page={customers.current_page} pages={customers.last_page} summary={`عرض ${customers.from ?? 0}–${customers.to ?? 0} من ${customers.total} • صفحة ${customers.current_page} من ${customers.last_page}`} onPage={(p) => router.get('/customers', { ...filters, page: p }, { preserveState: true })} />
+            <PenPagination page={customers.current_page} pages={customers.last_page} summary={`عرض ${customers.from ?? 0}–${customers.to ?? 0} من ${customers.total} • صفحة ${customers.current_page} من ${customers.last_page}`} onPage={(p) => router.get('/customers', { ...filters, page: p }, { preserveState: true, preserveScroll: true })} />
         </AppLayout>
     );
 }

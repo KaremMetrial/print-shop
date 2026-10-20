@@ -1,4 +1,5 @@
 import { CustomerLayout } from '@/components/shell/customer-layout';
+import { PenSelect } from '@/components/pen/form';
 import { formatMoneyFixed } from '@/lib/money';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
@@ -90,14 +91,13 @@ export default function RequestCreate({ products, address }: { products: Product
                             </label>
                             <label className="flex flex-1 flex-col gap-[6px] text-right text-[13px] font-[600]">
                                 المنتج
-                                <select value={l.product_id ?? ''} onChange={(e) => patch(l.uid, { product_id: Number(e.target.value) || null, options: {} })} className={fld}>
-                                    <option value="">اختر المنتج</option>
-                                    {products.map((x) => (
-                                        <option key={x.id} value={x.id}>
-                                            {x.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            <PenSelect
+                                label="المنتج"
+                                value={String(l.product_id ?? '')}
+                                placeholder="اختر المنتج"
+                                options={products.map((x) => ({ value: String(x.id), label: x.name }))}
+                                onValueChange={(v) => patch(l.uid, { product_id: Number(v) || null, options: {} })}
+                            />
                             </label>
                         </div>
                         {p?.groups.map((g) => (

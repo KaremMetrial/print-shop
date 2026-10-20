@@ -36,7 +36,7 @@ const Card = ({ k, v, bg, fg }: { k: string; v: string; bg: string; fg: string }
         <div className="w-full text-right text-[20px] leading-[32px] font-[700]" style={{ color: fg }}>{v}</div>
     </div>
 );
-const pager = (p: Pg<unknown>) => <PenPagination page={p.current_page} pages={p.last_page} summary={`عرض ${p.from ?? 0}–${p.to ?? 0} من ${p.total}`} onPage={(n) => router.get(window.location.pathname, { page: n }, { preserveState: true })} />;
+const pager = (p: Pg<unknown>) => <PenPagination page={p.current_page} pages={p.last_page} summary={`عرض ${p.from ?? 0}–${p.to ?? 0} من ${p.total}`} onPage={(n) => router.get(window.location.pathname, { page: n }, { preserveState: true, preserveScroll: true })} />;
 
 /** S-025/026/027/030 — تبويبات ملف العميل المالية. pendev: Hri2c / WDiqf / Lxd8z / oodXi */
 export default function CustomerFinance({ tab, customer, orders, price, summary, ledger, can_ledger, payments, refunds }: Props) {

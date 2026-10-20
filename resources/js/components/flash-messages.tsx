@@ -23,10 +23,9 @@ const TONE: Record<Tone, { icon: string; color: string; bg: string }> = {
  * كلمة المرور المؤقتة تُعرض مرة واحدة (S-031) وتُنسخ بنقرة.
  */
 export function FlashMessages() {
-    const { flash, errors, ...rest } = usePage<SharedData & { errors: Record<string, string> }>().props;
+    const { flash, errors } = usePage<SharedData & { errors: Record<string, string> }>().props;
     const [queue, setQueue] = useState<Msg[]>([]);
     const [copied, setCopied] = useState(false);
-    const key = JSON.stringify([flash?.success, flash?.generated_password, errors?.business, (rest as { url?: string }).url]);
 
     useEffect(() => {
         const next: Msg[] = [];
@@ -39,10 +38,11 @@ export function FlashMessages() {
                 secret: flash.generated_password,
             });
         if (errors?.business) next.push({ tone: 'danger', title: 'تعذر تنفيذ العملية', body: errors.business });
-        setQueue(next);
-        setCopied(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [key]);
+        if (next.length > 0) {
+            setQueue((q) => [...q, ...next]);
+            setCopied(false);
+        }
+    }, [flash, errors]);
 
     const m = queue[0];
     const t = m ? TONE[m.tone] : TONE.success;

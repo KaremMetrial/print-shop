@@ -1,4 +1,5 @@
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
+import { PenSelect } from '@/components/pen/form';
 import { formatMoneyFixed } from '@/lib/money';
 import { router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
@@ -80,14 +81,13 @@ export function PaymentDialog({
                 className="flex flex-col gap-[12px]"
             >
                 {!customerId && (
-                    <select aria-label="العميل" value={cid} onChange={(e) => setCid(e.target.value)} className={fld}>
-                        <option value="">اختر العميل</option>
-                        {customers?.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
+                    <PenSelect
+                        label="العميل"
+                        value={cid}
+                        placeholder="اختر العميل"
+                        options={customers?.map((c) => ({ value: String(c.id), label: c.name })) ?? []}
+                        onValueChange={setCid}
+                    />
                 )}
                 {order && (
                     <div className="text-[13px] text-[var(--muted-foreground)]">
@@ -103,13 +103,13 @@ export function PaymentDialog({
                     onChange={(e) => setAmount(e.target.value)}
                     className={fld}
                 />
-                <select aria-label="طريقة الدفع" value={method} onChange={(e) => setMethod(e.target.value)} className={fld}>
-                    {Object.entries(enabled).map(([k, l]) => (
-                        <option key={k} value={k}>
-                            {l}
-                        </option>
-                    ))}
-                </select>
+                <PenSelect
+                    label="طريقة الدفع"
+                    value={method}
+                    placeholder="اختر طريقة الدفع"
+                    options={Object.entries(enabled).map(([value, label]) => ({ value, label }))}
+                    onValueChange={setMethod}
+                />
                 <input
                     aria-label="مرجع العملية"
                     placeholder="مرجع العملية (اختياري)"
@@ -170,13 +170,13 @@ export function ReasonDialog({
                     <input aria-label="المبلغ (ج.م)" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className={fld} />
                 )}
                 {withMethod && (
-                    <select aria-label="طريقة الرد" value={method} onChange={(e) => setMethod(e.target.value)} className={fld}>
-                        {Object.entries(enabled).map(([k, l]) => (
-                            <option key={k} value={k}>
-                                {l}
-                            </option>
-                        ))}
-                    </select>
+                    <PenSelect
+                        label="طريقة الرد"
+                        value={method}
+                        placeholder="اختر طريقة الرد"
+                        options={Object.entries(enabled).map(([value, label]) => ({ value, label }))}
+                        onValueChange={setMethod}
+                    />
                 )}
                 <textarea
                     aria-label={reasonLabel}

@@ -29,7 +29,7 @@ const td = 'shrink-0 text-right text-[11px] leading-[18px] font-[400] text-[var(
 /** S-033 — قائمة المنتجات (pendev: hxHrw) */
 export default function ProductsIndex({ products, filters, categories, specialties, counts, can }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (n: Record<string, string | undefined>) => router.get('/products', { ...filters, page: undefined, ...n }, { preserveState: true, replace: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/products', { ...filters, page: undefined, ...n }, { preserveState: true, preserveScroll: true, replace: true });
     return (
         <AppLayout>
             <Head title="المنتجات" />
@@ -97,7 +97,7 @@ export default function ProductsIndex({ products, filters, categories, specialti
                     </div>
                 ))}
             </div>
-            <PenPagination page={products.current_page} pages={products.last_page} summary={`عرض ${products.from ?? 0}–${products.to ?? 0} من ${products.total} • صفحة ${products.current_page} من ${products.last_page}`} onPage={(p) => router.get('/products', { ...filters, page: p }, { preserveState: true })} />
+            <PenPagination page={products.current_page} pages={products.last_page} summary={`عرض ${products.from ?? 0}–${products.to ?? 0} من ${products.total} • صفحة ${products.current_page} من ${products.last_page}`} onPage={(p) => router.get('/products', { ...filters, page: p }, { preserveState: true, preserveScroll: true })} />
         </AppLayout>
     );
 }

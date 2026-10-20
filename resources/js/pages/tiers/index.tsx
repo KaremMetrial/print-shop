@@ -21,7 +21,7 @@ const td = 'shrink-0 text-right text-[11px] leading-[18px] font-[400] text-[var(
 export default function TiersIndex({ tiers: tierPage, filters, activeCount, can }: { tiers: { data: Tier[]; current_page: number; last_page: number; from: number | null; to: number | null; total: number }; filters: Record<string, string>; activeCount: number; can: { manage: boolean } }) {
     const tiers = tierPage.data;
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (n: Record<string, string | undefined>) => router.get('/pricing', { ...filters, ...n }, { preserveState: true, replace: true });
+    const go = (n: Record<string, string | undefined>) => router.get('/pricing', { ...filters, ...n }, { preserveState: true, preserveScroll: true, replace: true });
     return (
         <AppLayout>
             <Head title="شرائح الأسعار" />
