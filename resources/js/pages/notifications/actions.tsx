@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
@@ -62,13 +63,7 @@ export default function Actions({ actions: p, filters, counts }: Props) {
                         </div>
                     ))}
                 </div>
-                <div className="flex h-[47px] w-full shrink-0 justify-end [border-bottom:1px_solid_var(--border)]">
-                    {[...TYPES].reverse().map(([k, l]) => (
-                        <button key={k} type="button" onClick={() => go({ type: k || undefined })} className="flex h-[47px] items-center p-[0px_18px] text-[14px] whitespace-nowrap" style={{ color: (filters.type ?? '') === k ? '#2563EB' : '#475569', fontWeight: (filters.type ?? '') === k ? 700 : 400, borderBottom: (filters.type ?? '') === k ? '2px solid #2563EB' : undefined, marginBottom: -1 }}>
-                            {l}
-                        </button>
-                    ))}
-                </div>
+                <PageTabs label="نوع الإجراء" value={filters.type ?? ''} onChange={(k) => go({ type: k || undefined })} tabs={[...TYPES].reverse().map(([key, label]) => ({ key, label }))} />
                 <div className="flex w-full shrink-0 items-center gap-[12px]">
                     <button type="button" onClick={() => router.get('/actions')} className={`${btn} h-[46px]`}>
                         مسح

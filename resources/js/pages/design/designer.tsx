@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
@@ -22,13 +23,13 @@ interface Props {
     can: { availability: boolean };
     availabilityOptions: { value: string; label: string }[];
 }
-const TABS: [Tab, string, number][] = [
-    ['availability', 'حالة التوفر', 90],
-    ['history', 'سجل الإسناد', 102],
-    ['done', 'المهام المكتملة', 122],
-    ['awaiting', 'بانتظار الاعتماد', 111],
-    ['active', 'المهام النشطة', 113],
-    ['overview', 'نظرة عامة', 93],
+const TABS: [Tab, string][] = [
+    ['availability', 'حالة التوفر'],
+    ['history', 'سجل الإسناد'],
+    ['done', 'المهام المكتملة'],
+    ['awaiting', 'بانتظار الاعتماد'],
+    ['active', 'المهام النشطة'],
+    ['overview', 'نظرة عامة'],
 ];
 const PILL: Record<string, [string, string]> = { NEW: ['#EEF2F6', '#475569'], IN_DESIGN: ['#E8F1FF', '#1D5FB8'], REVISION_REQUESTED: ['#FFF0EF', '#B42318'], AWAITING_APPROVAL: ['#FFF3D9', '#895A0D'], APPROVED: ['#E6F5EA', '#237A4B'] };
 const box = 'flex flex-col gap-[10px] rounded-[10px] bg-[var(--surface)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
@@ -113,16 +114,7 @@ export default function Designer({ designer: d, tab, tasks, history, can, availa
                         <div className="text-[15px] leading-[normal] font-[700] text-[var(--primary)]">{initials(d.name).replace('-', '')}</div>
                     </div>
                 </div>
-                <div className="flex h-[47.5px] w-full shrink-0 justify-end bg-[var(--surface)] [border-bottom:1px_solid_var(--border)]">
-                    {TABS.map(([k, l, w]) => {
-                        const on = k === tab;
-                        return (
-                            <Link key={k} href={`/design/designers/${d.id}${k === 'overview' ? '' : `?tab=${k}`}`} className="flex h-[47px] shrink-0 items-center p-[0px_17px]" style={{ width: w, borderBottom: `2px solid ${on ? '#2563EB' : '#FFFFFF'}`, marginBottom: -1 }}>
-                                <div className="text-left text-[13px] leading-[normal] whitespace-nowrap" style={{ color: on ? '#2563EB' : '#64748B', fontWeight: on ? 700 : 400 }}>{l}</div>
-                            </Link>
-                        );
-                    })}
-                </div>
+                <PageTabs label="أقسام المصمم" value={tab} tabs={TABS.map(([key, label]) => ({ key, label, href: `/design/designers/${d.id}${key === 'overview' ? '' : `?tab=${key}`}` }))} />
                 {tab === 'overview' && (
                     <>
                         <div className="flex w-full shrink-0 gap-[16px]">

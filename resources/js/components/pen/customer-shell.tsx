@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBadge, PenBreadcrumb, PenRowAction, type BadgeTone } from '@/components/pen/primitives';
 import { Link } from '@inertiajs/react';
 import { type ReactNode } from 'react';
@@ -27,7 +28,7 @@ const TABS: [string, string, string][] = [
 /** رأس ملف العميل + تبويباته (pen: Customer profile header / tabs — S-024…S-032) */
 export function CustomerShell({ customer, active, title, subtitle, crumb, children }: { customer: CustomerHead; active: string; title: string; subtitle?: string; crumb: string; children: ReactNode }) {
     const base = `/customers/${customer.id}`;
-    const full = active === 'overview'; // الشاشات الفرعية (S-025…S-032) تستخدم رأسًا مضغوطًا بلا أزرار
+    const full = true; // رأس موحّد في كل تبويبات ملف العميل (نفس الأزرار والأحجام)
     return (
         <>
             <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, { label: 'العملاء', href: '/customers' }, crumb]} />
@@ -56,16 +57,7 @@ export function CustomerShell({ customer, active, title, subtitle, crumb, childr
                         </div>
                     </div>
                 </div>
-                <nav className={`flex w-full shrink-0 items-center [border-bottom:1px_solid_var(--border)] ${full ? 'h-[38.5px]' : 'h-[36.5px]'}`} aria-label="أقسام ملف العميل">
-                    {TABS.map(([key, label, suffix]) => {
-                        const on = key === active;
-                        return (
-                            <Link key={key} href={base + suffix} aria-current={on ? 'page' : undefined} className={`flex flex-1 shrink-0 flex-col ${full ? 'p-[10px_6px]' : 'p-[9px_5px]'} ${on ? (full ? 'h-[38px]' : 'h-[36px]') + ' [border-bottom:2px_solid_var(--primary)]' : ''}`}>
-                                <span className={`w-full text-center text-[12px] leading-[19px] ${on ? 'font-[700] text-[var(--primary)]' : 'font-[500] text-[var(--muted-foreground)]'}`}>{label}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <PageTabs label="أقسام ملف العميل" value={active} tabs={TABS.map(([key, label, suffix]) => ({ key, label, href: base + suffix }))} />
             </div>
             {children}
         </>

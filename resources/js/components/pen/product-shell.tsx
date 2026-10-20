@@ -1,5 +1,5 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb } from '@/components/pen/primitives';
-import { Link } from '@inertiajs/react';
 import { type ReactNode } from 'react';
 
 export interface ProductHead {
@@ -35,16 +35,7 @@ export function ProductShell({ product, active, children, title = 'تعديل ا
                 </div>
             </div>
             {product && (
-                <nav className="flex h-[38.5px] w-full shrink-0 items-center [border-bottom:1px_solid_var(--border)]" aria-label="أقسام المنتج">
-                    {TABS.map(([key, label, suffix]) => {
-                        const on = key === active;
-                        return (
-                            <Link key={key} href={base + suffix} aria-current={on ? 'page' : undefined} className={`flex flex-1 shrink-0 flex-col p-[10px_7px] ${on ? 'h-[38px] [border-bottom:2px_solid_var(--primary)]' : ''}`}>
-                                <span className={`w-full text-center text-[12px] leading-[19px] ${on ? 'font-[700] text-[var(--primary)]' : 'font-[500] text-[var(--muted-foreground)]'}`}>{label}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <PageTabs label="أقسام المنتج" value={active} tabs={TABS.map(([key, label, suffix]) => ({ key, label, href: base + suffix }))} />
             )}
             {children}
         </>

@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import { PenSelect } from '@/components/pen/form';
 import { PenBreadcrumb } from '@/components/pen/primitives';
@@ -72,13 +73,7 @@ export default function OrderItemPage(p: Props) {
                         <div className="text-right text-[13px] leading-[21px] text-[var(--muted-foreground)]">{`المصمم: ${i.designer ?? 'غير معيّن'}`}</div>
                     </div>
                 </div>
-                <div className="flex h-[43.5px] w-full shrink-0 items-center gap-[2px] [border-bottom:1px_solid_var(--border)]">
-                    {TABS.filter(([k]) => k !== 'chat' || can.chat).map(([k, l]) => (
-                        <Link key={k} href={`/orders/${o.id}/items/${i.id}?tab=${k}`} preserveScroll className="flex h-[44px] flex-1 items-center justify-center text-[12px] leading-[19px]" style={{ background: k === tab ? '#EFF6FF' : '#fff', color: k === tab ? '#2563EB' : '#64748B', fontWeight: k === tab ? 700 : 500, borderBottom: k === tab ? '2px solid #2563EB' : undefined }}>
-                            {l}
-                        </Link>
-                    ))}
-                </div>
+                <PageTabs label="أقسام البند" value={tab} tabs={[...TABS].reverse().filter(([k]) => k !== 'chat' || can.chat).map(([key, label]) => ({ key, label, href: `/orders/${o.id}/items/${i.id}?tab=${key}` }))} />
 
                 {tab === 'specs' && (
                     <>

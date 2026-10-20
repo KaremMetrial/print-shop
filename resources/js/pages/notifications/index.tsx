@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatTime } from '@/lib/money';
@@ -46,13 +47,7 @@ export default function Notifications({ notifications: p, tab, counts }: Props) 
                         <div className="w-full text-right text-[14px] leading-[22px] text-[var(--muted-foreground)]">آخر تحديثات الطلبات والتصميم والتسليم في مكان واحد.</div>
                     </div>
                 </div>
-                <div className="flex h-[47px] w-full shrink-0 justify-end [border-bottom:1px_solid_var(--border)]">
-                    {[['unread', `غير المقروءة (${counts.unread})`], ['all', `الكل (${counts.all})`]].map(([k, l]) => (
-                        <button key={k} type="button" onClick={() => go(k)} className="flex h-[47px] items-center p-[0px_24px] text-[14px]" style={{ color: tab === k ? '#2563EB' : '#475569', fontWeight: tab === k ? 700 : 400, borderBottom: tab === k ? '2px solid #2563EB' : undefined, marginBottom: -1 }}>
-                            {l}
-                        </button>
-                    ))}
-                </div>
+                <PageTabs label="الإشعارات" value={tab} onChange={go} tabs={[{ key: 'all', label: `الكل (${counts.all})` }, { key: 'unread', label: `غير المقروءة (${counts.unread})` }]} />
                 <div className="flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     {p.data.length === 0 && <div className="w-full p-[40px] text-center text-[14px] text-[var(--muted-foreground)]">{tab === 'unread' ? 'لا توجد إشعارات غير مقروءة. أنت مطّلع على آخر التحديثات.' : 'لا توجد إشعارات بعد.'}</div>}
                     {p.data.map((n) => (

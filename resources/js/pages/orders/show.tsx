@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoney, formatTime } from '@/lib/money';
@@ -87,25 +88,7 @@ function StatusPill({ tone, children, w }: { tone: 'amber' | 'green'; children: 
 }
 
 function Tabs({ order, tab }: { order: Props['order']; tab: Tab }) {
-    return (
-        <div className="flex h-[43.5px] w-full shrink-0 items-center gap-[2px]">
-            {TABS.map(([k, l]) => {
-                const on = k === tab;
-                return (
-                    <Link
-                        key={k}
-                        href={`/orders/${order.id}${k === 'overview' ? '' : `?tab=${k}`}`}
-                        className="flex flex-1 flex-col items-center justify-center gap-[14px] p-[10px_14px]"
-                        style={{ background: on ? '#EFF6FF' : '#FFFFFF', height: on ? 43 : 44, borderBottom: on ? '2px solid #2563EB' : undefined, marginBottom: on ? -1 : 0 }}
-                    >
-                        <div className="w-full text-center text-[12px] leading-[19px]" style={{ color: on || k === 'overview' ? '#2563EB' : '#64748B', fontWeight: on || k === 'overview' ? 700 : 500 }}>
-                            {l}
-                        </div>
-                    </Link>
-                );
-            })}
-        </div>
-    );
+    return <PageTabs label="أقسام الأوردر" value={tab} tabs={TABS.map(([key, label]) => ({ key, label, href: `/orders/${order.id}${key === 'overview' ? '' : `?tab=${key}`}` }))} />;
 }
 
 const Line = ({ k, v, vc, h = 28.5, pad = '4px 0px', vs = 13, kv = 12 }: { k: string; v: ReactNode; vc?: string; h?: number; pad?: string; vs?: number; kv?: number }) => (

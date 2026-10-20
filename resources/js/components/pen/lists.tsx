@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import { Icon } from '@/pen/icon';
 import { Link } from '@inertiajs/react';
@@ -20,15 +21,7 @@ export function ListHead({ crumbs, title, subtitle, actions }: { crumbs: ({ labe
 }
 
 export function TabsBar({ tabs, value, onChange }: { tabs: [string, string][]; value: string; onChange: (v: string) => void }) {
-    return (
-        <div className="flex h-[47px] w-full shrink-0 justify-end [border-bottom:1px_solid_var(--border)]">
-            {[...tabs].reverse().map(([k, l]) => (
-                <button key={k} type="button" onClick={() => onChange(k)} className="flex h-[47px] items-center p-[0px_18px] text-[14px] whitespace-nowrap" style={{ color: value === k ? '#2563EB' : '#475569', fontWeight: value === k ? 700 : 400, borderBottom: value === k ? '2px solid #2563EB' : undefined, marginBottom: -1 }}>
-                    {l}
-                </button>
-            ))}
-        </div>
-    );
+    return <PageTabs tabs={[...tabs].reverse().map(([key, label]) => ({ key, label }))} value={value} onChange={onChange} />;
 }
 
 export function SearchBox({ value, onSubmit, placeholder }: { value: string; onSubmit: (q: string) => void; placeholder: string }) {

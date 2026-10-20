@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoneyFixed, formatTime } from '@/lib/money';
@@ -64,17 +65,7 @@ export default function OrderRequestsIndex({ requests, tab, filters, counts, rev
                     <Icon name="search" className="h-[18px] w-[18px] shrink-0" color="var(--muted-foreground)" />
                     <input dir="rtl" value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث برقم الطلب أو اسم العميل" aria-label="بحث" className="min-w-0 flex-1 bg-transparent text-right text-[14px] leading-[21px] font-[400] text-[var(--ink)] outline-hidden placeholder:text-[var(--muted-foreground)]" />
                 </form>
-                <div className="flex h-[47.5px] w-full shrink-0 justify-end bg-[var(--surface)]">
-                    {TABS.map(([k, l, w]) => {
-                        const on = k === tab;
-                        return (
-                            <button key={k} type="button" onClick={() => go({ tab: k })} className="flex h-[47px] shrink-0 items-center gap-[6px] p-[0px_18px]" style={{ width: w, borderBottom: `2px solid ${on ? '#2563EB' : '#FFFFFF'}`, marginBottom: -1 }}>
-                                <div className="text-left text-[11px] leading-[normal] whitespace-nowrap" style={{ color: on ? '#2563EB' : '#64748B' }}>{counts[k]}</div>
-                                <div className="text-left text-[14px] leading-[normal] whitespace-nowrap" style={{ color: on ? '#2563EB' : '#64748B', fontWeight: on ? 700 : 400 }}>{l}</div>
-                            </button>
-                        );
-                    })}
-                </div>
+                <PageTabs label="حالات الطلبات" value={tab} onChange={(k) => go({ tab: k })} tabs={TABS.map(([key, label]) => ({ key, label: `${label} (${counts[key]})` }))} />
                 <div className="flex w-full shrink-0 justify-end gap-[8px]">
                     <div className={filt} style={{ color: '#64748B' }}>
                         <Icon name="chevron-down" className="h-[16px] w-[16px] shrink-0" color="var(--muted-foreground)" />

@@ -1,3 +1,4 @@
+import { PageTabs } from '@/components/pen/page-tabs';
 import { DesignerLayout } from '@/components/shell/designer-layout';
 import { arDigits, arNum, formatDateTimeShort } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -114,16 +115,7 @@ export default function DesignerTask({ tab, designer, task: t, versions, can }: 
                 {t.designer && <div className="text-left text-[12px] leading-[normal] font-[400] whitespace-nowrap text-[var(--muted-foreground)]">المصمم {t.designer}</div>}
                 <div className="text-left text-[12px] leading-[normal] font-[400] whitespace-nowrap text-[var(--muted-foreground)]">الأوردر {t.order_number}</div>
             </div>
-            <div className="flex h-[42.5px] w-full shrink-0 items-center justify-end gap-[8px] [border-bottom:1px_solid_var(--border)]">
-                {TABS.map(([k, l]) => {
-                    const on = k === tab;
-                    return (
-                        <Link key={k} href={`/designer/tasks/${t.id}${k === 'specs' ? '' : `?tab=${k}`}`} className="flex h-[36px] w-fit shrink-0 items-center rounded-[6px] p-[0px_13px]" style={{ background: on ? '#EFF6FF' : '#FFFFFF' }}>
-                            <div className="text-left text-[12px] leading-[normal] whitespace-nowrap" style={{ color: on ? '#2563EB' : '#64748B', fontWeight: on ? 700 : 400 }}>{l}</div>
-                        </Link>
-                    );
-                })}
-            </div>
+            <PageTabs label="أقسام المهمة" value={tab} tabs={TABS.map(([key, label]) => ({ key, label, href: `/designer/tasks/${t.id}${key === 'specs' ? '' : `?tab=${key}`}` }))} />
 
             {view === 'specs' && (
                 <>
