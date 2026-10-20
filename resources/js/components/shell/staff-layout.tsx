@@ -5,6 +5,7 @@ import { designerNav, type ShellNavGroup } from './nav-config';
 import { usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
 import { StaffSidebar } from './staff-sidebar';
+import { RealtimeNotifications } from './realtime-notifications';
 import { StaffTopbar } from './staff-topbar';
 
 /**
@@ -19,6 +20,7 @@ export function StaffLayout({ children, nav }: { children: React.ReactNode; nav?
         <div dir="ltr" className="flex min-h-screen w-full bg-[var(--background)]">
             <div className="flex min-w-0 flex-1 flex-col">
                 <StaffTopbar onMenu={() => setOpen(true)} />
+                <RealtimeNotifications />
                 <main className="flex w-full shrink-0 flex-col gap-[20px] p-[16px] lg:p-[32px]">
                     <FlashMessages />
                     {children}

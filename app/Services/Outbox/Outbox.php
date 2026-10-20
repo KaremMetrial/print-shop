@@ -3,8 +3,10 @@
 namespace App\Services\Outbox;
 
 use App\Events\OutboxEventPublished;
+use App\Jobs\ProcessOutbox;
 use App\Models\OutboxEvent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class Outbox
@@ -14,12 +16,17 @@ class Outbox
     /** سجّل الحدث داخل نفس معاملة التغيير التجاري (قبل commit). */
     public function record(string $type, ?Model $aggregate = null, array $payload = []): OutboxEvent
     {
-        return OutboxEvent::create([
+        $event = OutboxEvent::create([
             'event_type' => $type,
             'aggregate_type' => $aggregate?->getMorphClass(),
             'aggregate_id' => $aggregate?->getKey(),
             'payload' => $payload,
         ]);
+        if (config('outbox.eager')) {
+            DB::afterCommit(fn () => ProcessOutbox::dispatch());
+        }
+
+        return $event;
     }
 
     /** يعالج الأحداث المعلّقة. يرجع عدد المنجز. فشل مستمع ≠ rollback للعملية التجارية. */

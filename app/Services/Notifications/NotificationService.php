@@ -2,6 +2,7 @@
 
 namespace App\Services\Notifications;
 
+use App\Events\StaffNotificationCreated;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +18,9 @@ class NotificationService
         foreach (User::where('status', 'ACTIVE')->get() as $u) {
             foreach ($permissions as $perm) {
                 if ($u->hasPermission($perm)) {
-                    DB::table('staff_notifications')->insert(['user_id' => $u->id, 'type' => $type, 'title' => $title, 'body' => $body, 'link' => $link, 'action_id' => $actionId, 'created_at' => now()]);
+                    $nid = DB::table('staff_notifications')->insertGetId(['user_id' => $u->id, 'type' => $type, 'title' => $title, 'body' => $body, 'link' => $link, 'action_id' => $actionId, 'created_at' => now()]);
+                    $uid = $u->id;
+                    DB::afterCommit(fn () => $this->broadcast($uid, $nid, $title, $body, $link, $type));
                     $n++;
                     break;
                 }
@@ -25,6 +28,17 @@ class NotificationService
         }
 
         return $n;
+    }
+
+    /** بث لحظي لا يكسر العملية لو Reverb متوقف (الإشعار محفوظ في القاعدة ويظهر عند التحديث). */
+    private function broadcast(int $userId, int $id, string $title, ?string $body, ?string $link, string $type): void
+    {
+        try {
+            $unread = DB::table('staff_notifications')->where('user_id', $userId)->whereNull('read_at')->count();
+            StaffNotificationCreated::dispatch($userId, $id, $title, $body, $link, $type, $unread);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /** ينشئ إجراءً مفتوحًا (idempotent بالمفتاح) ويرجع معرّفه؛ null لو كان موجودًا. */

@@ -1,11 +1,13 @@
 <?php
 
+use App\Events\StaffNotificationCreated;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Notifications\NotificationService;
 use App\Services\Outbox\Outbox;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 
 function fire(string $type, Order $o, array $extra = []): void
 {
@@ -76,4 +78,18 @@ it('creates a manual customer-notice action when an order becomes ready — no a
     expect(DB::table('staff_actions')->where('type', 'CUSTOMER_NOTICE')->count())->toBe(1);
     fire('OrderStatusChanged', $o, ['to' => 'COMPLETED']);
     expect(DB::table('staff_actions')->where('type', 'CUSTOMER_NOTICE')->value('status'))->toBe('DONE');
+});
+
+it('broadcasts each created notification on the recipient private channel with the fresh unread count', function () {
+    Event::fake([StaffNotificationCreated::class]);
+    $a = User::factory()->superAdmin()->create();
+    app(NotificationService::class)->notify(['orders.view'], 'TEST', 'عنوان', 'تفصيل', '/orders');
+    Event::assertDispatched(StaffNotificationCreated::class, fn ($e) => $e->userId === $a->id && $e->unread === 1 && $e->broadcastOn()[0]->name === "private-App.Models.User.{$a->id}");
+});
+
+it('does not fail the business flow when broadcasting is down', function () {
+    config(['broadcasting.default' => 'reverb', 'broadcasting.connections.reverb.options.host' => '127.0.0.1', 'broadcasting.connections.reverb.options.port' => 9]);
+    User::factory()->superAdmin()->create();
+    expect(app(NotificationService::class)->notify(['orders.view'], 'TEST', 'x'))->toBeGreaterThan(0);
+    expect(DB::table('staff_notifications')->where('title', 'x')->count())->toBeGreaterThan(0);
 });

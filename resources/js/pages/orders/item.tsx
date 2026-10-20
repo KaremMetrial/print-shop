@@ -123,7 +123,7 @@ export default function OrderItemPage(p: Props) {
                         ))}
                     </div>
                 )}
-                {tab === 'chat' && can.chat && <ChatPanel url={`/chat/items/${i.id}`} mine={['staff']} />}
+                {tab === 'chat' && can.chat && <ChatPanel url={`/chat/items/${i.id}`} mine={['staff']} itemId={i.id} />}
                 {tab === 'activity' && (
                     <div className={panel}>
                         {p.activity.length === 0 && <div className="text-right text-[13px] text-[var(--muted-foreground)]">لا يوجد نشاط بعد.</div>}
