@@ -1,6 +1,6 @@
 import { BASE, until, launch, login, step, sql, pickSelect, closeFlash, waitIdle, summary } from './e2e-lib.mjs';
 const { b, page, errs } = await launch();
-const portal = async () => { await page.context().clearCookies(); await page.goto(`${BASE}/portal/login`); await page.fill('input[inputmode=tel]', '01023456789'); await page.fill('input[type=password]', 'Fixture-0000'); await Promise.all([page.waitForURL((u) => !u.pathname.endsWith('/login')), page.click('button[type=submit]')]); };
+const portal = async () => { await page.context().clearCookies(); await page.goto(`${BASE}/portal/login`); await page.fill('input[inputmode=tel]:visible', '01023456789'); await page.fill('input[type=password]:visible', 'Fixture-0000'); await Promise.all([page.waitForURL((u) => !u.pathname.endsWith('/login')), page.click('button[type=submit]:visible')]); };
 await portal();
 const prod = sql("select name from products where is_active=1 and id not in (select product_id from product_option_groups where is_required=1) order by id limit 1");
 for (const n of [1, 2]) {

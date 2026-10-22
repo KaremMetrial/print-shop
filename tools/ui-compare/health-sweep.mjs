@@ -17,7 +17,7 @@ const run = async (who, paths, portal) => {
   page.on('pageerror', (e) => errs.push('JS: ' + String(e.message).slice(0, 110)));
   page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('console: ' + m.text().slice(0, 110)); });
   page.on('response', (r) => { if (r.status() >= 400 && !/broadcasting\/auth/.test(r.url())) bad.push(`${r.status()} ${r.url().replace(BASE, '')}`); });
-  if (portal) { await page.goto(BASE + '/portal/login'); await page.fill('input[inputmode=tel]', who); await page.fill('input[type=password]', 'Fixture-0000'); await Promise.all([page.waitForURL((u) => !u.pathname.endsWith('/login')), page.click('button[type=submit]')]); }
+  if (portal) { await page.goto(BASE + '/portal/login'); await page.fill('input[inputmode=tel]:visible', who); await page.fill('input[type=password]:visible', 'Fixture-0000'); await Promise.all([page.waitForURL((u) => !u.pathname.endsWith('/login')), page.click('button[type=submit]:visible')]); }
   else { await page.goto(BASE + '/login'); await page.fill('input[type=email]', who); await page.fill('input[type=password]', PW); await Promise.all([page.waitForURL((u) => !u.pathname.startsWith('/login')), page.click('button[type=submit]')]); }
   for (const u of paths) {
     errs.length = 0; bad.length = 0; pages++;

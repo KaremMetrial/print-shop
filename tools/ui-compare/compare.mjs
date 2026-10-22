@@ -18,13 +18,20 @@ const base = arg('base', 'http://localhost:8000'); const threshold = Number(arg(
 const pw = arg('password', 'Pbms@12345'); const action = arg('action');
 if (!ref || (!route && !fullUrl)) { console.error('--ref و (--path أو --url) مطلوبان'); process.exit(2); }
 
-const refPng = PNG.sync.read(fs.readFileSync(ref));
+let refPng = PNG.sync.read(fs.readFileSync(ref));
+// --skip-top N: يقتطع N بكسل من أعلى المرجع (شريط حالة الهاتف المرسوم في إطارات M-* وهو من النظام لا من التطبيق).
+const skipTop = Number(arg('skip-top', '0'));
+if (skipTop > 0) { const c = new PNG({ width: refPng.width, height: refPng.height - skipTop }); PNG.bitblt(refPng, c, 0, skipTop, refPng.width, refPng.height - skipTop, 0, 0); refPng = c; }
 const { width: W, height: H } = refPng;
 const out = 'storage/ui-diff'; fs.mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const page = await (await browser.newContext({ viewport: { width: W, height: H }, locale: 'ar', deviceScaleFactor: 1, reducedMotion: 'reduce' })).newPage();
-if (as) {
+if (as && arg('portal')) {
+  await page.goto(base + '/portal/login');
+  await page.fill('input[inputmode=tel]:visible', as); await page.fill('input[type=password]:visible', pw);
+  await Promise.all([page.waitForURL((u) => !u.pathname.startsWith('/portal/login')), page.click('button[type=submit]:visible')]);
+} else if (as) {
   await page.goto(base + '/login');
   await page.fill('input[type=email]', as); await page.fill('input[type=password]', pw);
   await Promise.all([page.waitForURL((u) => !u.pathname.startsWith('/login')), page.click('button[type=submit]')]);
