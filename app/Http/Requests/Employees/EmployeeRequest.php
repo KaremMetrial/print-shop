@@ -40,7 +40,8 @@ class EmployeeRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\s-]{7,20}$/'],
             // SUPER_ADMIN ليس خيارًا أبدًا: لا يُنشأ من الواجهة.
             'role' => [$isCreate ? 'required' : 'sometimes', Rule::enum(Role::class)->except([Role::SuperAdmin])],
-            'password' => [$isCreate ? 'required' : 'prohibited', Password::min(10)->letters()->numbers()],
+            // عند التعديل لا تُقبل كلمة مرور (إعادة التعيين إجراء منفصل)؛ القاعدة وحدها دون Password حتى لا يفشل الحقل الفارغ.
+            'password' => $isCreate ? ['required', Password::min(10)->letters()->numbers()] : ['prohibited'],
             // إعدادات المصمم تظهر وتُطلب فقط عند الدور «مصمم»
             'specialty_ids' => [Rule::requiredIf($this->isDesigner($target)), 'array', 'min:'.($this->isDesigner($target) ? 1 : 0)],
             'specialty_ids.*' => [Rule::exists('designer_specialties', 'id')->where('is_active', true)],
