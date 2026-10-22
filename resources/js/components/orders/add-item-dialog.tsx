@@ -1,7 +1,8 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenInput, PenSelect } from '@/components/pen/form';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 export interface CatalogProduct {
     id: number;
@@ -19,14 +20,13 @@ export function AddItemDialog({ orderId, catalog, onClose }: { orderId: number; 
     const [opts, setOpts] = useState<Record<number, number[]>>({});
     const [err, setErr] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const p = catalog.find((x) => String(x.id) === pid);
     const submit = () => {
         if (!p || !Number(qty) || p.groups.some((g) => g.is_required && !opts[g.id]?.length))
             return setErr('اختر المنتج والكمية وكل الخيارات المطلوبة.');
         setBusy(true);
         router.post(`/orders/${orderId}/items`, { product_id: p.id, quantity: Number(qty), options: opts } as never, {
-            headers: { 'Idempotency-Key': key.current },
+            headers: idemHeaders(),
             preserveScroll: true,
             onFinish: () => setBusy(false),
             onSuccess: onClose,

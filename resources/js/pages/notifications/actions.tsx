@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb, PenFilterMenu, PenPagination } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
@@ -40,7 +41,7 @@ const btn = 'flex h-[36px] w-fit shrink-0 items-center rounded-[8px] bg-[var(--s
 export default function Actions({ actions: p, filters, counts }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
     const go = (n: Record<string, string | undefined>) => router.get('/actions', { ...filters, ...n }, { preserveState: true, preserveScroll: true });
-    const post = (url: string) => router.post(url, {}, { preserveScroll: true, headers: { 'Idempotency-Key': crypto.randomUUID() } });
+    const post = (url: string) => router.post(url, {}, { preserveScroll: true, headers: idemHeaders() });
     return (
         <AppLayout active="/actions">
             <Head title="الإجراءات المطلوبة" />

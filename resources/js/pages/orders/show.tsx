@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PaymentDialog } from '@/components/finance/payment-dialog';
 import { AddItemDialog, type CatalogProduct } from '@/components/orders/add-item-dialog';
 import { AssignDesignerDialog } from '@/components/orders/assign-designer-dialog';
@@ -600,7 +601,7 @@ export default function OrderShow(props: Props) {
                                                 router.post(
                                                     `/orders/${o.id}/${can.next!.step}`,
                                                     {},
-                                                    { headers: { 'Idempotency-Key': crypto.randomUUID() } },
+                                                    { headers: idemHeaders() },
                                                 )
                                             }
                                         >

@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenInput, PenSelect, PenTextarea } from '@/components/pen/form';
 import { PenButton } from '@/components/pen/primitives';
 import { adminNav } from '@/components/shell/nav-config';
@@ -5,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { formatMoney, formatMoneyFixed } from '@/lib/money';
 import { Icon } from '@/pen/icon';
 import { Head, router } from '@inertiajs/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 interface Group {
     id: number;
@@ -158,7 +159,6 @@ export default function CreateOrder({ customer: initial, products, can, fixture 
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
     const [editDiscount, setEditDiscount] = useState(false);
-    const key = useRef(crypto.randomUUID());
 
     const complete = items.filter((i) => i.product_id && num(i.quantity) > 0);
     const feeMinor = method === 'DELIVERY' ? toMinor(fee) : 0;
@@ -235,7 +235,7 @@ export default function CreateOrder({ customer: initial, products, can, fixture 
                 notes: notes || null,
                 items: complete.map((i) => ({ product_id: i.product_id, quantity: num(i.quantity), options: i.options, notes: i.notes || null })),
             } as never,
-            { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onError: (e) => setError(Object.values(e)[0] as string) },
+            { headers: idemHeaders(), onFinish: () => setBusy(false), onError: (e) => setError(Object.values(e)[0] as string) },
         );
     };
 

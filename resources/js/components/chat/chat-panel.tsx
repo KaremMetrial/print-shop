@@ -1,3 +1,4 @@
+import { uuid as uid } from '@/lib/idempotency';
 import { useRealtime } from '@/hooks/use-realtime';
 import { formatDateTimeShort } from '@/lib/money';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -17,7 +18,6 @@ interface Meta {
 }
 
 const xsrf = (): string => decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '');
-const uid = (): string => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 /** شات البند — يعمل بالـpolling كل 4 ثوانٍ (يتحمل انقطاع الشبكة) وإرسال idempotent بـclient_id يُعاد استخدامه عند إعادة المحاولة. */
 /** اشتراك Reverb خاص بالموظف/المصمم فقط (العميل بلا حساب موظف فلا يشترك ويعتمد على الـpolling). */

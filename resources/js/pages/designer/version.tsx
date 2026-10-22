@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { DesignerLayout } from '@/components/shell/designer-layout';
 import { arDigits, formatDateTimeShort } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -55,7 +56,7 @@ export default function DesignerVersion({ designer, task: t, version: v, previou
     };
     const save = (submit: boolean) => {
         setBusy(true);
-        router.put(`/designer/versions/${v.id}`, { file_ids: files.map((f) => f.id), notes, submit } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() }, onFinish: () => setBusy(false), onError: (e) => setErr(Object.values(e)[0] as string) });
+        router.put(`/designer/versions/${v.id}`, { file_ids: files.map((f) => f.id), notes, submit } as never, { headers: idemHeaders(), onFinish: () => setBusy(false), onError: (e) => setErr(Object.values(e)[0] as string) });
     };
     const compact = m === 'revision';
     const rowH = compact ? 58 : 70;

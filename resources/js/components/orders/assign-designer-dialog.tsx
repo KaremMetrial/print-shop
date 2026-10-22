@@ -1,7 +1,8 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenSelect } from '@/components/pen/form';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 /** تغيير/إسناد مصمم لبند (صلاحية designers.assignment.manage). المصمم الجديد يرى البند فورًا والسابق يفقد وصوله. */
 export function AssignDesignerDialog({
@@ -15,7 +16,6 @@ export function AssignDesignerDialog({
 }) {
     const [d, setD] = useState(item.designer_id ? String(item.designer_id) : '');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     return (
         <Dialog open onOpenChange={(o) => !o && onClose()}>
             <DialogContent className="w-[440px] max-w-[95vw] gap-[14px] rounded-[12px] p-[20px]" dir="ltr">
@@ -46,7 +46,7 @@ export function AssignDesignerDialog({
                                 `/design/items/${item.id}/assign`,
                                 { designer_id: Number(d) },
                                 {
-                                    headers: { 'Idempotency-Key': key.current },
+                                    headers: idemHeaders(),
                                     preserveScroll: true,
                                     onFinish: () => setBusy(false),
                                     onSuccess: onClose,

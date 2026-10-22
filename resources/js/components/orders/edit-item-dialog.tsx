@@ -1,7 +1,8 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenInput, PenTextarea } from '@/components/pen/form';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 /** تعديل كمية وملاحظات بند قبل الطباعة. السعر يُعاد حسابه بالسيرفر. */
 export function EditItemDialog({
@@ -17,7 +18,6 @@ export function EditItemDialog({
     const [notes, setNotes] = useState(item.notes ?? '');
     const [err, setErr] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const save = () => {
         if (!Number(qty) || Number(qty) < 1) return setErr('أدخل كمية صحيحة.');
         setBusy(true);
@@ -25,7 +25,7 @@ export function EditItemDialog({
             `/orders/${orderId}/items/${item.id}`,
             { quantity: Number(qty), notes: notes || null },
             {
-                headers: { 'Idempotency-Key': key.current },
+                headers: idemHeaders(),
                 preserveScroll: true,
                 onFinish: () => setBusy(false),
                 onSuccess: onClose,

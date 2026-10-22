@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenInput, PenSelect } from '@/components/pen/form';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
@@ -15,14 +16,13 @@ export function ProofDialog({ url, remainingMinor, onClose }: { url: string; rem
     const [file, setFile] = useState<File | null>(null);
     const [err, setErr] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const pick = useRef<HTMLInputElement>(null);
     const submit = () => {
         if (!file || !Number(amount)) return setErr('اختر صورة الإثبات وأدخل المبلغ.');
         setBusy(true);
         router.post(url, { file, amount_minor: Math.round(Number(amount) * 100), method, reference: ref || null } as never, {
             forceFormData: true,
-            headers: { 'Idempotency-Key': key.current },
+            headers: idemHeaders(),
             preserveScroll: true,
             onFinish: () => setBusy(false),
             onSuccess: onClose,

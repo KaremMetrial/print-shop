@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PageTabs } from '@/components/pen/page-tabs';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import { PenSelect } from '@/components/pen/form';
@@ -6,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoney, formatMoneyFixed, formatTime } from '@/lib/money';
 import { Head, Link, router } from '@inertiajs/react';
-import { useRef, useState, type ReactNode } from 'react';
+import {useState, type ReactNode} from 'react';
 
 type Tab = 'specs' | 'files' | 'versions' | 'chat' | 'activity';
 interface Props {
@@ -33,7 +34,6 @@ const Row = ({ k, v, big }: { k: string; v: ReactNode; big?: boolean }) => (
 
 function AssignDialog({ p, onClose }: { p: Props; onClose: () => void }) {
     const [d, setD] = useState(p.item.designer_id ? String(p.item.designer_id) : '');
-    const key = useRef(crypto.randomUUID());
     return (
         <Dialog open onOpenChange={(o) => !o && onClose()}>
             <DialogContent className="w-[440px] max-w-[95vw] gap-[14px] rounded-[12px] p-[20px]" dir="ltr">
@@ -42,7 +42,7 @@ function AssignDialog({ p, onClose }: { p: Props; onClose: () => void }) {
                 <PenSelect v3 label="المصمم" value={d} placeholder="اختر المصمم" options={p.designers.map((x) => ({ value: String(x.id), label: x.name }))} onValueChange={setD} />
                 <div className="flex w-full justify-end gap-[12px]">
                     <button type="button" onClick={onClose} className={btn34}>الرجوع</button>
-                    <button type="button" disabled={!d} onClick={() => router.post(`/design/items/${p.item.id}/assign`, { designer_id: Number(d) }, { headers: { 'Idempotency-Key': key.current }, preserveScroll: true, onSuccess: onClose })} className="flex h-[34px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_12px] text-[12px] font-[600] text-white disabled:opacity-60">حفظ</button>
+                    <button type="button" disabled={!d} onClick={() => router.post(`/design/items/${p.item.id}/assign`, { designer_id: Number(d) }, { headers: idemHeaders(), preserveScroll: true, onSuccess: onClose })} className="flex h-[34px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_12px] text-[12px] font-[600] text-white disabled:opacity-60">حفظ</button>
                 </div>
             </DialogContent>
         </Dialog>

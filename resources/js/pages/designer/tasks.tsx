@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { DesignerLayout } from '@/components/shell/designer-layout';
 import { PenFilterMenu } from '@/components/pen/primitives';
 import { arDigits, formatDateTimeShort } from '@/lib/money';
@@ -174,7 +175,7 @@ export default function DesignerTasks({ tab, counts, tasks, workload, designer, 
                                                 router.post(
                                                     `/designer/tasks/${t.id}/start`,
                                                     {},
-                                                    { headers: { 'Idempotency-Key': crypto.randomUUID() } },
+                                                    { headers: idemHeaders() },
                                                 )
                                             }
                                             className="flex h-[38px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--primary)] p-[0px_16px] text-left text-[12px] leading-[normal] font-[700] whitespace-nowrap text-white [outline:1px_solid_var(--primary)] [outline-offset:-0.5px]"

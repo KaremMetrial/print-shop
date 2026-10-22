@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { DataGrid, ListHead, Pill, RowBtn, SearchBox, TabsBar } from '@/components/pen/lists';
 import { PenFilterMenu, PenPagination } from '@/components/pen/primitives';
@@ -71,7 +72,7 @@ export default function Delivery({ orders, tab, counts, filters, can }: Props) {
                         router.post(
                             `/orders/${pending.id}/${pending.s}`,
                             {},
-                            { preserveScroll: true, headers: { 'Idempotency-Key': crypto.randomUUID() } },
+                            { preserveScroll: true, headers: idemHeaders() },
                         );
                     setPending(null);
                 }}

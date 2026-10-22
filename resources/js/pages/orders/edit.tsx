@@ -1,9 +1,10 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenInput, PenSelect, PenTextarea } from '@/components/pen/form';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoney, formatTime } from '@/lib/money';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useRef, type ReactNode } from 'react';
+import {type ReactNode} from 'react';
 
 interface Props {
     order: {
@@ -50,7 +51,6 @@ const toMinor = (v: string) => Math.round(parseFloat(v.replace(/[^\d.]/g, '') ||
 
 /** S-015 — تعديل الأوردر (pendev: Cd7FX). الأسعار تُعاد من السيرفر عند الحفظ. */
 export default function OrderEdit({ order: o, items, approval, can }: Props) {
-    const key = useRef(crypto.randomUUID());
     const { data, setData, patch, processing, errors, transform } = useForm({
         delivery_method: o.delivery_method,
         delivery_address: o.delivery_address ?? '',
@@ -63,7 +63,7 @@ export default function OrderEdit({ order: o, items, approval, can }: Props) {
     const submit = (ev: React.FormEvent) => {
         ev.preventDefault();
         transform((d) => ({ delivery_method: d.delivery_method, delivery_address: delivery ? d.delivery_address : null, delivery_fee: delivery ? toMinor(d.fee) : 0, printing_eta_days: d.eta ? Number(d.eta) : null, notes: d.notes || null }));
-        patch(`/orders/${o.id}`, { headers: { 'Idempotency-Key': key.current } });
+        patch(`/orders/${o.id}`, { headers: idemHeaders() });
     };
     const upd = new Date(o.updated_at);
     const price = can.price && o.grand_total_minor !== undefined;

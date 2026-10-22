@@ -1,8 +1,9 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoneyFixed, formatTime } from '@/lib/money';
 import { Head, Link, router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 interface Item {
     id: number;
@@ -119,8 +120,7 @@ const CustomerCard = ({ c, sent, extra }: { c: Props['customer']; sent: string; 
 /** S-020-A / S-020-B / S-021-A / S-021-B — مراجعة طلب الأوردر (pendev: Vd6MM · LgN9R · HgTHs · kYJTt). */
 export default function OrderRequestShow(p: Props) {
     const { req: r, customer: c, items, can } = p;
-    const key = useRef(crypto.randomUUID());
-    const hdrs = { headers: { 'Idempotency-Key': key.current } };
+    const hdrs = { get headers() { return idemHeaders(); } };
     const [qty, setQty] = useState<Record<number, string>>(Object.fromEntries(items.map((i) => [i.id, String(i.quantity)])));
     const [editing, setEditing] = useState<number | null>(items.find((i) => i.quantity !== i.original_quantity)?.id ?? items[items.length - 1]?.id ?? null);
     const [rejecting, setRejecting] = useState(false);

@@ -69,7 +69,9 @@ describe('employee details', () => {
 
         expect(screen.getByRole('dialog')).toBeTruthy();
         expect(within(screen.getByRole('dialog')).getByText('mona@example.test')).toBeTruthy();
-        expect(within(screen.getByRole('dialog')).getByText('التخصصات: بطاقات')).toBeTruthy();
+        expect(within(screen.getByRole('dialog')).getByText('التخصصات')).toBeTruthy();
+        expect(within(screen.getByRole('dialog')).getByText('بطاقات')).toBeTruthy();
+        expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'إعادة تعيين كلمة المرور' })).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
 

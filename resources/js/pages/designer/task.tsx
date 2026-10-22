@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PageTabs } from '@/components/pen/page-tabs';
 import { DesignerLayout } from '@/components/shell/designer-layout';
 import { arDigits, arNum, formatDateTimeShort } from '@/lib/money';
@@ -63,7 +64,7 @@ export default function DesignerTask({ tab, designer, task: t, versions, can }: 
     const [label, bg, fg] = ST[t.state];
     const revision = t.state === 'REVISION_REQUESTED';
     const view = tab === 'versions' ? 'versions' : revision && tab === 'specs' ? 'revision' : 'specs';
-    const post = (url: string) => router.post(url, {}, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
+    const post = (url: string) => router.post(url, {}, { headers: idemHeaders() });
     const spec = (g: string) => t.specs_list.find((s) => s.group === g)?.value ?? '—';
     const rowA = ['نوع الورق', 'المقاس', 'الكمية', 'المنتج'];
     const rowB = ['خيارات المنتج', 'عدد الأوجه', 'نظام الألوان'];

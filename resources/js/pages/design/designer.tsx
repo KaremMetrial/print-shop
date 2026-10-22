@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PageTabs } from '@/components/pen/page-tabs';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
@@ -156,7 +157,7 @@ export default function Designer({ designer: d, tab, tasks, history, can, availa
                         {can.availability && (
                             <div className="flex w-full shrink-0 justify-end gap-[8px]">
                                 {availabilityOptions.map((o) => (
-                                    <button key={o.value} type="button" disabled={o.value === d.availability_value} onClick={() => router.post(`/design/designers/${d.id}/availability`, { status: o.value } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() } })} className="flex h-[40px] items-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-[13px] font-[600] text-[var(--primary)] [outline:1px_solid_var(--border)] disabled:opacity-50">
+                                    <button key={o.value} type="button" disabled={o.value === d.availability_value} onClick={() => router.post(`/design/designers/${d.id}/availability`, { status: o.value } as never, { headers: idemHeaders() })} className="flex h-[40px] items-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-[13px] font-[600] text-[var(--primary)] [outline:1px_solid_var(--border)] disabled:opacity-50">
                                         {o.label}
                                     </button>
                                 ))}

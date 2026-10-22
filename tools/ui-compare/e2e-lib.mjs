@@ -26,3 +26,6 @@ export function newOrder() {
   const out = execSync(`docker compose run --rm -e DB_DATABASE=pbms_e2e app php artisan tinker --execute='${code.replace(/'/g, "'\\''")}' 2>&1`, { encoding: 'utf8', timeout: 120000 });
   return out.match(/ORDER_ID=(\d+)/)[1];
 }
+
+/** ينتظر حتى تتحقق الدالة (حتى ~6 ثوانٍ) — لفحص أثر قاعدة البيانات بعد إجراء غير متزامن. */
+export async function until(fn, ms = 6000) { const t = Date.now(); while (Date.now() - t < ms) { if (await fn()) return true; await new Promise((r) => setTimeout(r, 250)); } return false; }

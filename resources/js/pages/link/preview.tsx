@@ -1,9 +1,10 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { LinkLayout } from '@/components/shell/link-layout';
 import { formatDate, formatTime } from '@/lib/money';
 import { Icon } from '@/pen/icon';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import { Head, Link, router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 interface Props {
     token: string;
@@ -20,7 +21,6 @@ export default function LinkPreview({ token, order, item, version: v }: Props) {
     const [zoom, setZoom] = useState(1);
     const [confirm, setConfirm] = useState(false);
     const [tab, setTab] = useState<'preview' | 'chat'>('preview');
-    const key = useRef(crypto.randomUUID());
     const approved = v?.status === 'APPROVED';
     const label = v ? `${approved ? 'معتمد' : 'بانتظار اعتماد العميل'} • النسخة ${ORD[v.no] ?? v.no}` : 'لا توجد نسخة بعد';
     const f = v?.files[cur];
@@ -121,7 +121,7 @@ export default function LinkPreview({ token, order, item, version: v }: Props) {
                             <button type="button" onClick={() => setConfirm(false)} className="flex h-[40px] items-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-[14px] [outline:1px_solid_var(--border)]">
                                 رجوع
                             </button>
-                            <button type="button" onClick={() => router.post(`/l/${token}/items/${item.id}/approve`, { version_id: v.id, revision: v.revision } as never, { headers: { 'Idempotency-Key': key.current }, onFinish: () => setConfirm(false) })} className="flex h-[40px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_16px] text-[14px] font-[600] text-white">
+                            <button type="button" onClick={() => router.post(`/l/${token}/items/${item.id}/approve`, { version_id: v.id, revision: v.revision } as never, { headers: idemHeaders(), onFinish: () => setConfirm(false) })} className="flex h-[40px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_16px] text-[14px] font-[600] text-white">
                                 تأكيد الاعتماد
                             </button>
                         </div>

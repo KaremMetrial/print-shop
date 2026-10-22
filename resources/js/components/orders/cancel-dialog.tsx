@@ -1,8 +1,9 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenSelect, PenTextarea } from '@/components/pen/form';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { formatMoney } from '@/lib/money';
 import { router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 interface Props {
     open: boolean;
@@ -40,7 +41,6 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
     const [step, setStep] = useState<'form' | 'confirm'>('form');
     const [err, setErr] = useState(false);
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const paid = order.paid_minor ?? 0;
     const showMoney = order.grand_total_minor !== undefined;
 
@@ -54,7 +54,7 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
         router.post(
             `/orders/${order.id}/cancel`,
             { reason, notes },
-            { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
+            { headers: idemHeaders(), onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
         );
     };
 

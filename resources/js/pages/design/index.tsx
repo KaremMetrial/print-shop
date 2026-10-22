@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenBreadcrumb, PenFilterMenu } from '@/components/pen/primitives';
 import { PenSelect } from '@/components/pen/form';
 import AppLayout from '@/layouts/app-layout';
@@ -236,7 +237,7 @@ export default function DesignIndex({ kpis, unassigned, tasks, workload, designe
                             <button
                                 type="button"
                                 disabled={!designer}
-                                onClick={() => router.post(`/design/items/${assigning}/assign`, { designer_id: Number(designer) } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() }, onSuccess: () => setAssigning(null) })}
+                                onClick={() => router.post(`/design/items/${assigning}/assign`, { designer_id: Number(designer) } as never, { headers: idemHeaders(), onSuccess: () => setAssigning(null) })}
                                 className="flex h-[40px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_16px] text-[14px] font-[600] text-white disabled:opacity-60"
                             >
                                 إسناد

@@ -1,8 +1,9 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
 import { PenSelect } from '@/components/pen/form';
 import { formatMoneyFixed } from '@/lib/money';
 import { router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 const fld =
     'h-[46px] w-full rounded-[10px] bg-[var(--background)] p-[0px_14px] text-right text-[14px] outline-hidden [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px] focus:[outline:2px_solid_var(--primary)]';
@@ -59,7 +60,6 @@ export function PaymentDialog({
     const [method, setMethod] = useState(Object.keys(enabled)[0] ?? 'CASH');
     const [ref, setRef] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     return (
         <Shell title={order ? `تسجيل دفعة للأوردر ${order.number}` : 'تسجيل دفعة'} onClose={onClose}>
             <form
@@ -75,7 +75,7 @@ export function PaymentDialog({
                             order_id: order?.id ?? null,
                             reference: ref || null,
                         } as never,
-                        { headers: { 'Idempotency-Key': key.current }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
+                        { headers: idemHeaders(), preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
                     );
                 }}
                 className="flex flex-col gap-[12px]"
@@ -148,7 +148,6 @@ export function ReasonDialog({
     const { enabled } = usePaymentMethods();
     const [method, setMethod] = useState(Object.keys(enabled)[0] ?? 'CASH');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     return (
         <Shell title={title} onClose={onClose}>
             <form
@@ -158,7 +157,7 @@ export function ReasonDialog({
                     const body: Record<string, unknown> = withMethod ? { notes: reason || null, method } : { reason };
                     if (withAmount) body.amount_minor = toMinor(amount);
                     router.post(url, body as never, {
-                        headers: { 'Idempotency-Key': key.current },
+                        headers: idemHeaders(),
                         preserveScroll: true,
                         onFinish: () => setBusy(false),
                         onSuccess: onClose,

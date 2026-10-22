@@ -1,6 +1,7 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { CustomerLayout } from '@/components/shell/customer-layout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 interface Props {
     order: { id: number; number: string };
@@ -11,7 +12,6 @@ interface Props {
 export default function PortalItemPreview({ order, item, version: v }: Props) {
     const [cur, setCur] = useState(0);
     const [confirm, setConfirm] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const f = v?.files[cur];
     const approved = v?.status === 'APPROVED';
     return (
@@ -51,7 +51,7 @@ export default function PortalItemPreview({ order, item, version: v }: Props) {
                         <div className="text-[13px] text-[var(--muted-foreground)]">بعد الاعتماد لا يمكنك التراجع بنفسك. تأكد من مراجعة كل الملفات.</div>
                         <div className="flex justify-end gap-[12px]">
                             <button type="button" onClick={() => setConfirm(false)} className="h-[40px] rounded-[8px] p-[0px_16px] text-[14px] [outline:1px_solid_var(--border)]">رجوع</button>
-                            <button type="button" onClick={() => router.post(`/portal/orders/${order.id}/items/${item.id}/approve`, { version_id: v.id, revision: v.revision } as never, { headers: { 'Idempotency-Key': key.current }, onFinish: () => setConfirm(false) })} className="h-[40px] rounded-[8px] bg-[var(--primary)] p-[0px_16px] text-[14px] font-[600] text-white">
+                            <button type="button" onClick={() => router.post(`/portal/orders/${order.id}/items/${item.id}/approve`, { version_id: v.id, revision: v.revision } as never, { headers: idemHeaders(), onFinish: () => setConfirm(false) })} className="h-[40px] rounded-[8px] bg-[var(--primary)] p-[0px_16px] text-[14px] font-[600] text-white">
                                 تأكيد الاعتماد
                             </button>
                         </div>

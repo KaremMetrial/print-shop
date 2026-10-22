@@ -1,7 +1,8 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenTextarea } from '@/components/pen/form';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 const actionBtn =
     'flex h-[46px] w-fit shrink-0 items-center justify-center rounded-[10px] px-[16px] text-left text-[14px] leading-[22px] font-[600] whitespace-nowrap transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-60';
@@ -13,14 +14,13 @@ export function CancelItemDialog({ orderId, item, onClose }: { orderId: number; 
     const [reason, setReason] = useState('');
     const [err, setErr] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const submit = () => {
         if (!reason.trim()) return setErr('اكتب سبب إلغاء البند.');
         setBusy(true);
         router.post(
             `/orders/${orderId}/items/${item.id}/cancel`,
             { reason },
-            { headers: { 'Idempotency-Key': key.current }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
+            { headers: idemHeaders(), preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
         );
     };
     return (

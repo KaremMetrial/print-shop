@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { DataGrid, ListHead, Pill, RowBtn, SearchBox, TabsBar } from '@/components/pen/lists';
 import { PenInput, PenTextarea } from '@/components/pen/form';
 import { PenPagination } from '@/components/pen/primitives';
@@ -5,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatMoneyFixed, formatTime } from '@/lib/money';
 import { Head, router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 interface Proof {
     id: number;
@@ -38,8 +39,7 @@ function Review({ p, onClose }: { p: Proof; onClose: () => void }) {
     const [amount, setAmount] = useState((p.amount_minor / 100).toString());
     const [reason, setReason] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
-    const done = { preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose, headers: { 'Idempotency-Key': key.current } };
+    const done = { preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose, headers: idemHeaders() };
     return (
         <Dialog open onOpenChange={(o) => !o && onClose()}>
             <DialogContent className="w-[640px] max-w-[95vw] gap-[14px] rounded-[12px] p-[20px]" dir="ltr">

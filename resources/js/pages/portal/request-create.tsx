@@ -1,8 +1,9 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { CustomerLayout } from '@/components/shell/customer-layout';
 import { PenSelect } from '@/components/pen/form';
 import { formatMoneyFixed } from '@/lib/money';
 import { Head, router } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useState} from 'react';
 
 interface Group {
     id: number;
@@ -39,7 +40,6 @@ export default function RequestCreate({ products, address }: { products: Product
     const [total, setTotal] = useState<number | null>(null);
     const [err, setErr] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const ready = lines.filter((l) => l.product_id && Number(l.quantity) > 0);
     const patch = (uid: number, p: Partial<Line>) => setLines((x) => x.map((l) => (l.uid === uid ? { ...l, ...p } : l)));
 
@@ -59,7 +59,7 @@ export default function RequestCreate({ products, address }: { products: Product
 
     const submit = () => {
         setBusy(true);
-        router.post('/portal/requests', { delivery_method: method, delivery_address: method === 'DELIVERY' ? addr : null, notes: notes || null, items: ready.map((l) => ({ product_id: l.product_id, quantity: Number(l.quantity), options: l.options, notes: l.notes || null })) } as never, { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onError: (e) => setErr(Object.values(e)[0] as string) });
+        router.post('/portal/requests', { delivery_method: method, delivery_address: method === 'DELIVERY' ? addr : null, notes: notes || null, items: ready.map((l) => ({ product_id: l.product_id, quantity: Number(l.quantity), options: l.options, notes: l.notes || null })) } as never, { headers: idemHeaders(), onFinish: () => setBusy(false), onError: (e) => setErr(Object.values(e)[0] as string) });
     };
     const ok = ready.length === lines.length && (method === 'PICKUP' || addr.trim().length > 3);
 

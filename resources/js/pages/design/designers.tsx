@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenBreadcrumb, PenFilterMenu } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
 import { Icon } from '@/pen/icon';
@@ -27,7 +28,7 @@ export const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w)
 export default function Designers({ designers, specialties, filters, can }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
     const go = (n: Record<string, string | undefined>) => router.get('/design/designers', { ...filters, ...n }, { preserveState: true, preserveScroll: true });
-    const cycle = (d: D) => router.post(`/design/designers/${d.id}/availability`, { status: d.availability_value === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE' } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
+    const cycle = (d: D) => router.post(`/design/designers/${d.id}/availability`, { status: d.availability_value === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE' } as never, { headers: idemHeaders() });
     return (
         <AppLayout active="/design">
             <Head title="المصممون" />

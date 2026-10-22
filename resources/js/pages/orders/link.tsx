@@ -1,3 +1,4 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { PenBreadcrumb } from '@/components/pen/primitives';
 import AppLayout from '@/layouts/app-layout';
@@ -31,7 +32,7 @@ export default function OrderLink({ order: o, link }: Props) {
             `/orders/${o.id}/link/${a}`,
             {},
             {
-                headers: { 'Idempotency-Key': crypto.randomUUID() },
+                headers: idemHeaders(),
                 preserveScroll: true,
                 onFinish: () => {
                     setBusy(false);

@@ -1,9 +1,10 @@
+import { idemHeaders } from '@/lib/idempotency';
 import { PenInput } from '@/components/pen/form';
 import { DataGrid, ListHead, Pill, RowBtn } from '@/components/pen/lists';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import {useState} from 'react';
 
 interface Cat {
     id: number;
@@ -18,11 +19,10 @@ function Form({ cat, onClose }: { cat: Cat | null; onClose: () => void }) {
     const [name, setName] = useState(cat?.name ?? '');
     const [err, setErr] = useState('');
     const [busy, setBusy] = useState(false);
-    const key = useRef(crypto.randomUUID());
     const go = () => {
         if (!name.trim()) return setErr('اسم التصنيف مطلوب.');
         setBusy(true);
-        const o = { preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose, onError: (e: Record<string, string>) => setErr(Object.values(e)[0]), headers: { 'Idempotency-Key': key.current } };
+        const o = { preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose, onError: (e: Record<string, string>) => setErr(Object.values(e)[0]), headers: idemHeaders() };
         if (cat) router.patch(`/categories/${cat.id}`, { name }, o);
         else router.post('/categories', { name }, o);
     };

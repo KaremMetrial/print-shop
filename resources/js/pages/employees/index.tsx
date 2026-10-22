@@ -129,40 +129,48 @@ export default function EmployeesIndex({ employees, filters, roles, can, selecte
 
             <Dialog open={!!selected} onOpenChange={(open) => !open && closeDetails()}>
                 {selected && (
-                    <DialogContent className="max-h-[calc(100dvh-2rem)] w-[640px] max-w-[95vw] gap-[18px] overflow-y-auto rounded-[12px] p-[24px]" dir="ltr">
+                    <DialogContent className="max-h-[calc(100dvh-2rem)] w-[680px] max-w-[95vw] gap-[20px] overflow-y-auto rounded-[14px] p-[24px]" dir="rtl">
                         <DialogTitle className="w-full text-right text-[20px] leading-[normal] font-[700] text-[var(--ink)]">تفاصيل الموظف</DialogTitle>
                         <DialogDescription className="sr-only">بيانات حساب الموظف وصلاحياته.</DialogDescription>
-                        <div className="w-full text-right text-[16px] leading-[normal] font-[600] text-[var(--ink)]">
-                            {selected.name} · {selected.role_label}
+                        <div className="flex w-full flex-wrap items-center justify-between gap-[12px] rounded-[12px] bg-[var(--background)] p-[16px]">
+                            <div className="flex min-w-0 flex-1 flex-col gap-[5px] text-right">
+                                <div className="text-[17px] leading-[25px] font-[700] text-[var(--ink)]">{selected.name}</div>
+                                <div className="text-[13px] leading-[20px] text-[var(--muted-foreground)]">{selected.role_label}</div>
+                            </div>
+                            <span className={`inline-flex h-[30px] shrink-0 items-center rounded-full px-[12px] text-[12px] font-[700] ${selected.status === 'ACTIVE' ? 'bg-[#E8F6EC] text-[#237A4B]' : 'bg-[#F1F5F9] text-[#475569]'}`}>
+                                {statusText(selected.status) ?? '—'}
+                            </span>
                         </div>
-                        <div className="grid w-full grid-cols-1 gap-[12px] text-right text-[13px] leading-[21px] text-[var(--text-secondary)] sm:grid-cols-2">
-                            <div>البريد الإلكتروني: {selected.email ? <bdi dir="ltr">{selected.email}</bdi> : '—'}</div>
-                            <div>رقم الهاتف: {selected.phone ? <bdi dir="ltr">{selected.phone}</bdi> : '—'}</div>
-                            <div>حالة الحساب: {statusText(selected.status) ?? '—'}</div>
-                            {selected.role === 'DESIGNER' && <div>حالة التوفر: {selected.availability ?? '—'}</div>}
-                            {selected.role === 'DESIGNER' && <div className="sm:col-span-2">التخصصات: {selected.specialties?.length ? selected.specialties.join('، ') : 'لم تُحدَّد تخصصات'}</div>}
-                            <div>تاريخ الإنشاء: {selected.created_at ? fmt(selected.created_at) : '—'}</div>
-                            <div>آخر دخول: {selected.last_login_at ? fmt(selected.last_login_at) : 'لم يسجّل الدخول بعد'}</div>
-                            <div>الصلاحيات الإضافية: {selected.extra_permissions ? `${selected.extra_permissions} صلاحية` : 'لا توجد صلاحيات إضافية'}</div>
+                        <div className="grid w-full grid-cols-1 gap-[10px] sm:grid-cols-2">
+                            {[
+                                { label: 'البريد الإلكتروني', value: selected.email ? <bdi dir="ltr">{selected.email}</bdi> : '—' },
+                                { label: 'رقم الهاتف', value: selected.phone ? <bdi dir="ltr">{selected.phone}</bdi> : '—' },
+                                { label: 'تاريخ الإنشاء', value: selected.created_at ? fmt(selected.created_at) : '—' },
+                                { label: 'آخر دخول', value: selected.last_login_at ? fmt(selected.last_login_at) : 'لم يسجّل الدخول بعد' },
+                                ...(selected.role === 'DESIGNER' ? [{ label: 'حالة التوفر', value: selected.availability ?? '—' }] : []),
+                                ...(selected.role === 'DESIGNER' ? [{ label: 'التخصصات', value: selected.specialties?.length ? selected.specialties.join('، ') : 'لم تُحدَّد تخصصات' }] : []),
+                                { label: 'الصلاحيات الإضافية', value: selected.extra_permissions ? `${selected.extra_permissions} صلاحية` : 'لا توجد صلاحيات إضافية' },
+                            ].map(({ label, value }) => (
+                                <div key={label} className="flex min-h-[72px] min-w-0 flex-col justify-center gap-[6px] rounded-[10px] bg-[var(--surface)] p-[12px_14px] text-right [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                                    <div className="text-[11px] leading-[17px] font-[500] text-[var(--muted-foreground)]">{label}</div>
+                                    <div className="break-words text-[13px] leading-[20px] font-[600] text-[var(--ink)]">{value}</div>
+                                </div>
+                            ))}
                         </div>
-                        <div className="flex w-full shrink-0 flex-wrap justify-end gap-[10px]">
+                        <div className="flex w-full shrink-0 flex-wrap items-center justify-start gap-[10px] border-t border-[var(--border)] pt-[16px]">
                             {selected.can_permissions && <Pen44 href={`/employees/${selected.id}/permissions`}>إدارة الصلاحيات</Pen44>}
                             {selected.can_edit && (
                                 <Pen44 href={`/employees/${selected.id}/edit`} variant="primary">
                                     تعديل البيانات
                                 </Pen44>
                             )}
-                        </div>
-                        {selected.can_edit && (
-                            <div className="flex w-full shrink-0 flex-wrap justify-end gap-[10px]">
-                                <Pen44 variant="small" onClick={() => setDlg({ emp: selected, kind: 'reset' })}>
-                                    إعادة تعيين كلمة المرور
-                                </Pen44>
-                                <Pen44 variant="smallDanger" onClick={() => setDlg({ emp: selected, kind: 'deactivate' })}>
+                            {selected.can_edit && <Pen44 px={16} onClick={() => setDlg({ emp: selected, kind: 'reset' })}>إعادة تعيين كلمة المرور</Pen44>}
+                            {selected.can_edit && (
+                                <button type="button" onClick={() => setDlg({ emp: selected, kind: 'deactivate' })} className="flex h-[44px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--danger-soft)] px-[16px] text-[14px] font-[600] text-[var(--danger-text)] [outline:1px_solid_#FECACA] [outline-offset:-0.5px]">
                                     تعطيل الحساب
-                                </Pen44>
-                            </div>
-                        )}
+                                </button>
+                            )}
+                        </div>
                     </DialogContent>
                 )}
             </Dialog>
