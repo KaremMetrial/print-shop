@@ -14,7 +14,9 @@ const page = await ctx.newPage();
 let attempted = 0; const jsErrors = new Set(); page.on('pageerror', (e) => jsErrors.add(String(e.message).slice(0, 110)));
 const portal = process.argv.includes('--portal');
 if (as && portal) { await page.goto(base + '/portal/login'); await page.fill('input[inputmode=tel]', as); await page.fill('input[type=password]', pw); await Promise.all([page.waitForURL((u) => !u.pathname.endsWith('/login')), page.click('button[type=submit]')]); } else if (as) { await page.goto(base + '/login'); await page.fill('input[type=email]', as); await page.fill('input[type=password]', pw); await Promise.all([page.waitForURL((u) => !u.pathname.startsWith('/login')), page.click('button[type=submit]')]); }
-await page.route('**/*', (r) => { const m = r.request().method(); if (!['GET', 'HEAD', 'OPTIONS'].includes(m) && !r.request().url().includes('broadcasting/auth')) { attempted++; return r.abort(); } return r.continue(); });
+const WRITES = process.argv.includes('--writes'); const bad = [];
+page.on('response', (r) => { if (WRITES && !['GET', 'HEAD', 'OPTIONS'].includes(r.request().method()) && r.status() >= 400 && !r.url().includes('broadcasting')) bad.push(`${r.status()} ${r.request().method()} ${r.url().replace(base, '')}`); });
+await page.route('**/*', (r) => { if (WRITES) return r.continue(); const m = r.request().method(); if (!['GET', 'HEAD', 'OPTIONS'].includes(m) && !r.request().url().includes('broadcasting/auth')) { attempted++; return r.abort(); } return r.continue(); });
 page.on('filechooser', (fc) => fc.setFiles([]).catch(() => {}));
 const sig = () => page.evaluate(() => `${location.pathname}${location.search}|${document.querySelectorAll('[role=dialog],[role=menu],[role=listbox],[data-state=open]').length}|${(document.body?.innerText.length ?? 0)}|${document.querySelectorAll('*').length}`).catch(() => 'err');
 let dead = 0, total = 0;
@@ -54,6 +56,7 @@ for (const path of paths) {
   console.log(results.length ? `DEAD ${path} (${labels.length} عنصر)\n${results.join('\n')}` : `ok   ${path} (${labels.length} عنصر)`);
   } catch (e) { console.log(`ERR  ${path}: ${String(e.message).split('\n')[0].slice(0, 100)}`); dead++; }
 }
+if (bad.length) console.log('\nاستجابات خطأ من الخادم بعد الضغط:\n  ' + [...new Set(bad)].join('\n  '));
 if (jsErrors.size) console.log('\nأخطاء JavaScript أثناء الفحص:\n  ' + [...jsErrors].join('\n  '));
 console.log(`\nإجمالي ما ضُغط: ${total} — بلا أثر/معطوب: ${dead} — محاولات كتابة محجوبة: ${attempted}`);
 await b.close(); process.exit(dead ? 1 : 0);

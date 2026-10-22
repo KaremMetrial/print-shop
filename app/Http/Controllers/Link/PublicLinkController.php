@@ -6,11 +6,13 @@ use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\DesignVersion;
 use App\Models\File;
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderLink;
 use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
+use App\Services\Finance\InvoiceService;
 use App\Services\Finance\PaymentProofService;
 use App\Services\Orders\OrderLinkService;
 use Illuminate\Http\JsonResponse;
@@ -115,7 +117,7 @@ class PublicLinkController extends Controller
         return [
             'number' => $o->order_number, 'customer' => $o->customer->name, 'status' => $o->status->value, 'status_label' => $o->status->label(),
             'created_at' => $o->created_at?->toIso8601String(), 'delivery_method' => $o->delivery_method, 'delivery_address' => $o->delivery_address, 'delivery_fee_minor' => $o->delivery_fee->minor,
-            'grand_total_minor' => $o->grand_total->minor, 'paid_minor' => $paid, 'remaining_minor' => $o->grand_total->minor - $paid,
+            'has_invoice' => Invoice::where('active_order_id', $o->id)->exists(), 'grand_total_minor' => $o->grand_total->minor, 'paid_minor' => $paid, 'remaining_minor' => $o->grand_total->minor - $paid,
             'items' => $o->items->whereNull('cancelled_at')->values()->map(fn (OrderItem $i) => [
                 'id' => $i->id, 'name' => $i->product_snapshot['name'], 'quantity' => $i->quantity, 'state' => $i->design_state, 'approved' => (bool) $i->approved_at,
                 'version_no' => DesignVersion::where('order_item_id', $i->id)->whereIn('status', ['SUBMITTED', 'APPROVED'])->max('version_no'),
@@ -150,5 +152,26 @@ class PublicLinkController extends Controller
         app(PaymentProofService::class)->submit(Order::findOrFail($link->order_id), $request->file('file'), (int) $d['amount_minor'], $d['method'], $d['reference'] ?? null, 'link', $link->id);
 
         return back()->with('success', 'تم إرسال إثبات الدفع للمراجعة. لن يُحتسب إلا بعد تأكيد المطبعة.');
+    }
+
+    public function invoice(string $token): \Inertia\Response|Response
+    {
+        $link = $this->resolve($token);
+        if (! $link instanceof OrderLink) {
+            return $this->unavailable();
+        }
+        $inv = Invoice::where('active_order_id', $link->order_id)->first();
+        $order = Order::with('customer:id,name')->findOrFail($link->order_id);
+
+        return Inertia::render('link/invoice', ['token' => $token, 'order' => ['number' => $order->order_number, 'customer' => $order->customer->name], 'invoice' => $inv ? app(InvoiceService::class)->payload($inv) : null]);
+    }
+
+    public function invoicePdf(string $token): Response
+    {
+        $link = $this->resolve($token);
+        abort_unless($link instanceof OrderLink, 404);
+        $inv = Invoice::where('active_order_id', $link->order_id)->firstOrFail();
+
+        return response(app(InvoiceService::class)->pdf($inv), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="invoice-'.$inv->number.'.pdf"', 'Cache-Control' => 'private, no-store']);
     }
 }

@@ -14,8 +14,10 @@ interface Props {
         delivery_address: string | null;
         delivery_fee_minor: number;
         grand_total_minor: number;
+        has_invoice: boolean;
         paid_minor: number;
         remaining_minor: number;
+        has_invoice: boolean;
         items: { id: number; name: string; quantity: number; state: string; approved: boolean; total_minor: number }[];
         payments: { number: string; at: string; amount_minor: number }[];
     };
@@ -65,9 +67,13 @@ export default function PortalOrderShow({ order: o }: Props) {
                     <KV k="الإجمالي" v={formatMoneyFixed(o.grand_total_minor)} />
                     <KV k="المدفوع المؤكد" v={formatMoneyFixed(o.paid_minor)} />
                     <KV k="المتبقي عليك" v={formatMoneyFixed(o.remaining_minor)} />
+                    {o.has_invoice && (
+                        <Link href={`/portal/orders/${o.id}/invoice`} className="text-right text-[13px] font-[700] text-[var(--primary)]">عرض الفاتورة</Link>
+                    )}
                     {o.remaining_minor > 0 && (
                         <button type="button" onClick={() => setProof(true)} className="text-right text-[13px] font-[700] text-[var(--primary)]">إرسال إثبات دفع</button>
                     )}
+                    {o.has_invoice && <Link href={`/portal/orders/${o.id}/invoice`} className="text-right text-[13px] font-[700] text-[var(--primary)]">عرض الفاتورة الداخلية</Link>}
                     {proof && <ProofDialog url={`/portal/orders/${o.id}/proofs`} remainingMinor={o.remaining_minor} onClose={() => setProof(false)} />}
                     {o.payments.map((p) => (
                         <div key={p.number} className="flex justify-between text-[12px] text-[var(--muted-foreground)]">

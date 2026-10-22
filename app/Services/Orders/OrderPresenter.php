@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Enums\OrderStatus;
 use App\Enums\Role;
 use App\Models\AuditLog;
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
@@ -42,6 +43,7 @@ class OrderPresenter
                     'grand_total_minor' => $order->grand_total->minor, 'paid_minor' => $paid, 'remaining_minor' => $order->grand_total->minor - $paid,
                 ] : []),
             ],
+            'invoice' => ($inv = Invoice::where('active_order_id', $order->id)->first(['id', 'number'])) ? ['id' => $inv->id, 'number' => $inv->number] : null,
             'approval' => ['approved' => $approved, 'total' => $active->count(), 'next' => $next ? ['id' => $next->id, 'name' => $next->product_snapshot['name']] : null],
             'items' => $order->items->values()->map(fn (OrderItem $i, int $n) => [
                 'id' => $i->id, 'label' => 'البند '.str_pad((string) ($n + 1), 2, '0', STR_PAD_LEFT).' — '.$i->product_snapshot['name'],
@@ -63,7 +65,7 @@ class OrderPresenter
             'link' => null,
             'can' => [
                 'update' => (bool) $viewer->hasPermission('orders.update'), 'items' => (bool) $viewer->hasPermission('orders.items.manage'),
-                'assign' => (bool) $viewer->hasPermission('designers.assignment.manage'), 'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
+                'assign' => (bool) $viewer->hasPermission('designers.assignment.manage'), 'invoice_view' => (bool) $viewer->hasPermission('invoices.view'), 'invoice_issue' => (bool) $viewer->hasPermission('invoices.issue') && ! in_array($order->status, [OrderStatus::DESIGN_STAGE, OrderStatus::CANCELLED], true), 'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
                 'next' => $this->nextStep($order, $viewer), 'price' => $showPrice,
             ],
         ];

@@ -22,6 +22,7 @@ use App\Http\Controllers\Operations\AccountingController;
 use App\Http\Controllers\Operations\AuditController;
 use App\Http\Controllers\Operations\DeliveryController;
 use App\Http\Controllers\Operations\ImageSearchController;
+use App\Http\Controllers\Operations\InvoiceController;
 use App\Http\Controllers\Operations\PaymentDetailsController;
 use App\Http\Controllers\Operations\PaymentProofController;
 use App\Http\Controllers\Operations\ReportsController;
@@ -198,6 +199,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('files/{file}/download', [FileController::class, 'download'])->name('files.download');
 
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->name('invoices.void')->middleware('idempotent');
+    Route::post('orders/{order}/invoice', [InvoiceController::class, 'issue'])->name('orders.invoice')->middleware('idempotent');
 });
 
 require __DIR__.'/settings.php';
@@ -212,6 +219,8 @@ Route::prefix('l/{token}')->middleware(['throttle:link-access'])->name('link.')-
     Route::get('files/{file}', 'file')->name('file');
     Route::match(['get', 'post'], 'items/{item}/chat', 'chat')->name('chat');
     Route::post('proofs', 'proof')->name('proof')->middleware('idempotent');
+    Route::get('invoice', 'invoice')->name('invoice');
+    Route::get('invoice/pdf', 'invoicePdf')->name('invoice.pdf');
 });
 
 // بوابة العميل المسجّل (جلسة منفصلة)
@@ -237,6 +246,8 @@ Route::prefix('portal')->name('portal.')->group(function () {
             Route::post('orders/{order}/items/{item}/approve', 'approve')->name('orders.approve')->middleware('idempotent');
             Route::get('files/{file}', 'file')->name('files');
             Route::post('orders/{order}/proofs', 'proof')->name('orders.proof')->middleware('idempotent');
+            Route::get('orders/{order}/invoice', 'invoice')->name('orders.invoice');
+            Route::get('orders/{order}/invoice/pdf', 'invoicePdf')->name('orders.invoice.pdf');
             Route::match(['get', 'post'], 'orders/{order}/items/{item}/chat', 'chat')->name('orders.chat');
             Route::get('account', 'account')->name('account');
         });

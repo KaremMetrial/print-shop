@@ -22,6 +22,7 @@ class Labels
         'item.assigned' => 'إسناد بند لمصمم',
         'order.created' => 'إنشاء أوردر', 'order.updated' => 'تعديل أوردر', 'order.cancelled' => 'إلغاء أوردر', 'order.status_changed' => 'تغيير حالة أوردر',
         'order.item_added' => 'إضافة بند للأوردر', 'order.item_updated' => 'تعديل بند في الأوردر', 'order.item_cancelled' => 'إلغاء بند من الأوردر',
+        'invoice.issued' => 'إصدار فاتورة', 'invoice.voided' => 'إلغاء فاتورة',
         'order_link.regenerated' => 'إعادة توليد رابط الأوردر', 'order_link.suspended' => 'إيقاف رابط الأوردر', 'order_link.reactivated' => 'إعادة تفعيل رابط الأوردر',
         'order_request.submitted' => 'إرسال طلب أوردر', 'order_request.review_started' => 'بدء مراجعة طلب', 'order_request.edited' => 'تعديل طلب أثناء المراجعة',
         'order_request.accepted' => 'قبول طلب أوردر', 'order_request.rejected' => 'رفض طلب أوردر',
@@ -37,7 +38,7 @@ class Labels
     public const ENTITIES = [
         'Order' => 'أوردر', 'OrderItem' => 'بند أوردر', 'OrderRequest' => 'طلب أوردر', 'OrderLink' => 'رابط أوردر', 'Customer' => 'عميل', 'User' => 'موظف',
         'Payment' => 'دفعة', 'Product' => 'منتج', 'ProductCategory' => 'تصنيف', 'PricingTier' => 'شريحة سعر', 'DesignVersion' => 'نسخة تصميم',
-        'ProductOptionGroup' => 'مجموعة خيارات', 'Role' => 'دور',
+        'ProductOptionGroup' => 'مجموعة خيارات', 'Role' => 'دور', 'Invoice' => 'فاتورة',
     ];
 
     public const FIELDS = [
@@ -52,7 +53,7 @@ class Labels
         'to' => 'إلى', 'values' => 'القيم', 'version' => 'النسخة', 'version_id' => 'النسخة', 'base_unit_price' => 'سعر الوحدة الأساسي', 'shop.name' => 'اسم المطبعة',
         'shop.branch' => 'الفرع', 'shop.phone' => 'هاتف المطبعة', 'orders.default_eta_days' => 'مدة الطباعة الافتراضية', 'orders.auto_complete_hours' => 'ساعات الإتمام التلقائي',
         'payments.methods' => 'طرق الدفع المتاحة', 'files.max_mb' => 'حد حجم الملف (MB)', 'availability' => 'التوفر', 'method' => 'طريقة الدفع', 'type' => 'النوع',
-        'is_default' => 'افتراضي', 'sort_order' => 'الترتيب', 'old_amount' => 'المبلغ السابق', 'new_amount' => 'المبلغ الجديد', 'permissions' => 'الصلاحيات',
+        'invoice_id' => 'الفاتورة', 'is_default' => 'افتراضي', 'sort_order' => 'الترتيب', 'old_amount' => 'المبلغ السابق', 'new_amount' => 'المبلغ الجديد', 'permissions' => 'الصلاحيات',
     ];
 
     public const VALUES = [

@@ -31,6 +31,7 @@ interface Props {
     tab: Tab;
     catalog: CatalogProduct[];
     designers: { id: number; name: string }[];
+    invoice: { id: number; number: string } | null;
     order: {
         id: number;
         number: string;
@@ -66,6 +67,8 @@ interface Props {
         price: boolean;
         cancel: boolean;
         pay: boolean;
+        invoice_view: boolean;
+        invoice_issue: boolean;
         next: { step: string; label: string } | null;
     };
     reasons: string[];
@@ -572,7 +575,7 @@ function Activity({ p }: { p: Props }) {
 
 /** S-012 (6 تبويبات) + S-013 البنود — pendev: Mo2G0 / O2atww / knyLb / XyDHA / rsbuP / OkEyj */
 export default function OrderShow(props: Props) {
-    const { order: o, tab, can } = props;
+    const { order: o, tab, can, invoice } = props;
     const [cancelOpen, setCancelOpen] = useState(false);
     const [payOpen, setPayOpen] = useState(false);
     return (
@@ -589,6 +592,19 @@ export default function OrderShow(props: Props) {
                                     <DropdownMenuItem asChild className="h-11 px-3">
                                         <Link href={`/orders/${o.id}/job-ticket`}>بطاقة تشغيل الطباعة</Link>
                                     </DropdownMenuItem>
+                                    {invoice && can.invoice_view && (
+                                        <DropdownMenuItem asChild className="h-11 px-3">
+                                            <Link href={`/invoices/${invoice.id}`}>عرض الفاتورة {invoice.number}</Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    {!invoice && can.invoice_issue && (
+                                        <DropdownMenuItem
+                                            className="h-11 px-3"
+                                            onSelect={() => router.post(`/orders/${o.id}/invoice`, {}, { headers: idemHeaders() })}
+                                        >
+                                            إصدار فاتورة داخلية
+                                        </DropdownMenuItem>
+                                    )}
                                     {can.links && (
                                         <DropdownMenuItem asChild className="h-11 px-3">
                                             <Link href={`/orders/${o.id}/link`}>إدارة رابط الأوردر</Link>

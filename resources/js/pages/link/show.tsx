@@ -19,6 +19,7 @@ interface Props {
         grand_total_minor: number;
         paid_minor: number;
         remaining_minor: number;
+        has_invoice: boolean;
         items: { id: number; name: string; quantity: number; state: string; approved: boolean; version_no: number | null }[];
     };
 }
@@ -105,6 +106,11 @@ export default function LinkShow({ token, order: o }: Props) {
                             </div>
                             <KV k="إجمالي الأوردر" v={formatMoneyFixed(o.grand_total_minor)} />
                             <KV k="المدفوع المؤكد" v={formatMoneyFixed(o.paid_minor)} />
+                            {o.has_invoice && (
+                                <Link href={`/l/${token}/invoice`} className="text-left text-[13px] leading-[normal] font-[700] text-[var(--primary)]">
+                                    عرض الفاتورة
+                                </Link>
+                            )}
                             {o.remaining_minor > 0 && (
                                 <button type="button" onClick={() => setProof(true)} className="text-left text-[13px] leading-[normal] font-[700] text-[var(--primary)]">
                                     إرسال إثبات دفع
@@ -123,7 +129,7 @@ export default function LinkShow({ token, order: o }: Props) {
                         </div>
                         <div className={card}>
                             <div className={h15}>الفاتورة</div>
-                            <div className="text-left text-[12px] leading-[normal] text-[var(--muted-foreground)]">الفاتورة غير متاحة حاليًا.</div>
+                            <Link href={`/l/${token}/invoice`} className="text-left text-[12px] leading-[normal] font-[700] text-[var(--primary)]">عرض الفاتورة الداخلية أو حالة إصدارها</Link>
                         </div>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col items-end gap-[12px]">
@@ -205,6 +211,9 @@ function MobileShow({ token, o, title, sub, onProof }: { token: string; o: Props
                 <div className="w-full text-right text-[14px] text-[#334155]">{`إجمالي الأوردر ${formatMoneyFixed(o.grand_total_minor)} · المدفوع المؤكد ${formatMoneyFixed(o.paid_minor)}`}</div>
                 {o.remaining_minor > 0 && (
                     <button type="button" onClick={onProof} className={`${mBtn} bg-[var(--primary)] font-[600] text-white`}>إرسال إثبات دفع</button>
+                )}
+                {o.has_invoice && (
+                    <Link href={`/l/${token}/invoice`} className="flex h-[44px] w-full items-center text-right text-[14px] font-[700] text-[var(--primary)]">عرض الفاتورة</Link>
                 )}
                 <button type="button" onClick={() => setDet((v) => !v)} className="h-[44px] w-full text-right text-[14px] font-[700] text-[var(--primary)]">تفاصيل المدفوعات ⌄</button>
                 {det && <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">لا توجد دفعات مسجلة بعد.</div>}

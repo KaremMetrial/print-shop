@@ -8,12 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\DesignVersion;
 use App\Models\File;
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderRequest;
 use App\Models\Product;
 use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
+use App\Services\Finance\InvoiceService;
 use App\Services\Finance\PaymentProofService;
 use App\Services\Finance\PaymentService;
 use App\Services\Pricing\PricingService;
@@ -132,6 +134,7 @@ class PortalController extends Controller
             'order' => [
                 'id' => $order->id, 'number' => $order->order_number, 'status' => $order->status->label(), 'status_key' => $order->status->value, 'created_at' => $order->created_at?->toIso8601String(),
                 'delivery_method' => $order->delivery_method, 'delivery_address' => $order->delivery_address, 'delivery_fee_minor' => $order->delivery_fee->minor, 'grand_total_minor' => $order->grand_total->minor,
+                'has_invoice' => Invoice::where('active_order_id', $order->id)->exists(),
                 'paid_minor' => $pay->paid($order), 'remaining_minor' => $pay->due($order),
                 'items' => $order->items->whereNull('cancelled_at')->values()->map(fn (OrderItem $i) => ['id' => $i->id, 'name' => $i->product_snapshot['name'], 'quantity' => $i->quantity, 'state' => $i->design_state, 'approved' => (bool) $i->approved_at, 'total_minor' => $i->item_total->minor])->all(),
                 'payments' => DB::table('payment_allocations')->join('payments', 'payments.id', '=', 'payment_allocations.payment_id')->where('payment_allocations.order_id', $order->id)->where('payments.status', 'CONFIRMED')->get(['payments.number', 'payments.received_at', 'payment_allocations.amount'])->map(fn ($p) => ['number' => $p->number, 'at' => Carbon::parse($p->received_at)->toIso8601String(), 'amount_minor' => (int) $p->amount])->all(),
@@ -199,5 +202,21 @@ class PortalController extends Controller
         app(PaymentProofService::class)->submit($order, $request->file('file'), (int) $d['amount_minor'], $d['method'], $d['reference'] ?? null, 'customer', $this->me($request)->id);
 
         return back()->with('success', 'تم إرسال إثبات الدفع للمراجعة. لن يُحتسب إلا بعد تأكيد المطبعة.');
+    }
+
+    public function invoice(Request $request, Order $order): Response
+    {
+        $this->orderOf($request, $order);
+        $inv = Invoice::where('active_order_id', $order->id)->first();
+
+        return Inertia::render('portal/invoice', ['order' => ['id' => $order->id, 'number' => $order->order_number], 'invoice' => $inv ? app(InvoiceService::class)->payload($inv) : null]);
+    }
+
+    public function invoicePdf(Request $request, Order $order): \Illuminate\Http\Response
+    {
+        $this->orderOf($request, $order);
+        $inv = Invoice::where('active_order_id', $order->id)->firstOrFail();
+
+        return response(app(InvoiceService::class)->pdf($inv), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="invoice-'.$inv->number.'.pdf"', 'Cache-Control' => 'private, no-store']);
     }
 }
