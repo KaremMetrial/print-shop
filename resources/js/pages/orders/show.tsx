@@ -70,6 +70,7 @@ interface Props {
         price: boolean;
         cancel: boolean;
         pay: boolean;
+        discount: boolean;
         invoice_view: boolean;
         invoice_issue: boolean;
         next: { step: string; label: string } | null;
