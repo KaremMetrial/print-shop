@@ -39,16 +39,16 @@ await step('الموظف: رفض طلب بسبب إلزامي', async () => {
   await page.goto(`${BASE}/order-requests/${id}`); await waitIdle(page);
   await page.getByRole('button', { name: 'بدء المراجعة' }).click(); await waitIdle(page, 900); await closeFlash(page);
   await page.getByRole('button', { name: 'رفض الطلب' }).click(); await page.waitForTimeout(400);
-  await page.getByRole('dialog').getByRole('button', { name: /رفض|تأكيد/ }).last().click(); await page.waitForTimeout(600); const needReason = (await page.getByText(/سبب/).count()) > 0;
-  await page.getByRole('dialog').locator('textarea').fill('رفض E2E'); await page.getByRole('dialog').getByRole('button', { name: /رفض|تأكيد/ }).last().click(); await waitIdle(page, 1200); await closeFlash(page);
+  const confirm = page.getByRole('button', { name: 'تأكيد الرفض' }); const needReason = await confirm.isDisabled();
+  await page.getByPlaceholder('سبب الرفض (إلزامي)').fill('رفض E2E'); await confirm.click(); await waitIdle(page, 1200); await closeFlash(page);
   return needReason && (await until(() => sql(`select status from order_requests where id=${id}`) === 'REJECTED'));
 });
 await step('مركز الإجراءات: استلام ثم إتمام إجراء', async () => {
   sql("insert into staff_actions (dedupe_key,type,title,status,created_at,updated_at) values ('e2e-1','OTHER','إجراء E2E','OPEN',now(),now())");
   await page.goto(`${BASE}/actions`); await waitIdle(page);
-  await page.getByRole('button', { name: /استلام|أنا/ }).first().click(); await waitIdle(page, 900); await closeFlash(page);
+  await page.getByRole('button', { name: 'أخذ الإجراء' }).last().click(); await waitIdle(page, 900); await closeFlash(page);
   const claimed = sql("select status from staff_actions where dedupe_key='e2e-1'") === 'CLAIMED';
-  await page.getByRole('button', { name: /إتمام|تم/ }).first().click(); await page.waitForTimeout(400);
+  await page.getByRole('button', { name: 'إتمام' }).last().click(); await page.waitForTimeout(400);
   const c = page.getByRole('dialog').getByRole('button', { name: /إتمام|تأكيد/ }); if (await c.count()) { const t = page.getByRole('dialog').locator('textarea'); if (await t.count()) await t.fill('تم E2E'); await c.last().click(); }
   await waitIdle(page, 900); await closeFlash(page);
   return claimed && (await until(() => sql("select status from staff_actions where dedupe_key='e2e-1'") === 'DONE'));

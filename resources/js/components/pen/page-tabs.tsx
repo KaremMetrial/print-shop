@@ -39,7 +39,7 @@ export function PageTabs({
         >
             {tabs.map((t) => {
                 const on = t.key === value;
-                const cls = `flex min-w-fit flex-1 shrink-0 items-center justify-center p-[10px_14px] text-center text-[12px] leading-[19px] whitespace-nowrap ${on ? 'h-[43px] bg-[var(--primary-soft)] font-[700] text-[var(--primary)] [border-bottom:2px_solid_var(--primary)]' : 'h-[43px] bg-[var(--surface)] font-[500] text-[var(--muted-foreground)]'}`;
+                const cls = `flex min-w-fit flex-1 shrink-0 cursor-pointer items-center justify-center p-[10px_14px] text-center text-[12px] leading-[19px] whitespace-nowrap transition-colors ${on ? 'h-[43px] bg-[var(--primary-soft)] font-[700] text-[var(--primary)] [border-bottom:2px_solid_var(--primary)]' : 'h-[43px] bg-[var(--surface)] font-[500] text-[var(--muted-foreground)] hover:bg-[var(--surface-subtle)]'}`;
                 return t.href ? (
                     <Link key={t.key} href={t.href} preserveScroll aria-current={on ? 'page' : undefined} className={cls}>
                         {t.label}

@@ -259,7 +259,13 @@ export function Pen44({
               : variant === 'smallDanger'
                 ? 'text-[12px] text-[var(--danger-text)]'
                 : 'text-[14px] text-[#334155]';
-    const cls = cx('flex w-fit shrink-0 items-center justify-center [outline-offset:-0.5px] disabled:opacity-60', base, outline);
+    const hover =
+        variant === 'primary'
+            ? 'hover:bg-[var(--primary-hover)]'
+            : variant === 'smallDanger'
+              ? 'hover:bg-[#FEE2E2]'
+              : 'hover:bg-[var(--surface-subtle)]';
+    const cls = cx('flex w-fit shrink-0 cursor-pointer items-center justify-center transition-colors [outline-offset:-0.5px] disabled:cursor-not-allowed disabled:opacity-60', base, outline, hover);
     const style = { padding: `0px ${variant === 'small' || variant === 'smallDanger' ? 12 : px}px` };
     const label = <span className={cx('text-left leading-[normal] font-[600] whitespace-nowrap', text)}>{children}</span>;
     return href ? (

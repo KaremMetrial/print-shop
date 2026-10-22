@@ -8,7 +8,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
  */
 const cx = (...a: (string | false | undefined)[]) => a.filter(Boolean).join(' ');
 
-const btnBase = 'flex h-[46px] w-fit shrink-0 items-center justify-center rounded-[10px] p-[0px_16px] disabled:opacity-60';
+const btnBase = 'flex h-[46px] w-fit shrink-0 cursor-pointer items-center justify-center rounded-[10px] p-[0px_16px] transition-colors disabled:cursor-not-allowed disabled:opacity-60';
 const lblBase = 'text-left text-[14px] leading-[normal] font-[600] whitespace-nowrap';
 
 /** Button / Primary — V3 */
@@ -51,7 +51,7 @@ export function PenButton({
 /** Table action / عرض الطلب: h32، radius 8، padding 0×10، outline، نص 12/600 */
 export function PenRowAction({ href, children, onClick }: { href?: string; children: ReactNode; onClick?: () => void }) {
     const c =
-        'flex h-[32px] w-fit shrink-0 items-center justify-center gap-[6px] rounded-[8px] bg-[var(--surface)] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)]';
+        'flex h-[32px] w-fit shrink-0 cursor-pointer items-center justify-center gap-[6px] rounded-[8px] bg-[var(--surface)] p-[0px_10px] transition-colors [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)]';
     const l = <span className="text-left text-[12px] leading-[19px] font-[600] whitespace-nowrap text-[var(--ink)]">{children}</span>;
     return href ? (
         <Link href={href} className={c}>
@@ -351,15 +351,16 @@ export function PenFilterMenu({
 /** شريط ترقيم الصفحات (pen: Pagination): [‹ التالي][الصفحة][السابق ›][ملخص] */
 export function PenPagination({ page, pages, summary, onPage }: { page: number; pages: number; summary: string; onPage: (p: number) => void }) {
     const b =
-        'flex h-[32px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] disabled:cursor-default';
+        'flex h-[32px] w-fit shrink-0 cursor-pointer items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_10px] transition-colors [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)] disabled:cursor-default';
+    const current = 'flex h-[32px] min-w-[32px] shrink-0 items-center justify-center px-[10px]';
     const l = 'text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-[var(--ink)]';
     return (
         <div className="flex w-full shrink-0 items-center gap-[12px] rounded-[10px] bg-[var(--surface)] p-[12px_16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
             <button type="button" className={b} disabled={page >= pages} onClick={() => onPage(page + 1)}>
                 <span className={l}>‹ التالي</span>
             </button>
-            <span className={b}>
-                <span className={l}>{page}</span>
+            <span aria-current="page" className={current}>
+                <span className="text-left text-[12px] leading-[normal] font-[700] whitespace-nowrap text-[var(--primary)]">{page}</span>
             </span>
             <button type="button" className={b} disabled={page <= 1} onClick={() => onPage(page - 1)}>
                 <span className={l}>السابق ›</span>
@@ -388,7 +389,7 @@ export function PenAction11({
     muted?: boolean;
 }) {
     const cls = cx(
-        'flex h-[32px] shrink-0 items-center justify-center gap-[12px] rounded-[8px] p-[0px_10px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)] disabled:opacity-50',
+        'flex h-[32px] shrink-0 cursor-pointer items-center justify-center gap-[12px] rounded-[8px] p-[0px_10px] transition-colors [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)] disabled:cursor-not-allowed disabled:opacity-50',
         muted ? 'bg-[var(--background)]' : 'bg-[var(--surface)]',
         !width && 'w-fit',
     );

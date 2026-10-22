@@ -106,6 +106,7 @@ class Idempotent
         if ($request->header('X-Inertia')) {
             return back()->with('error', $message);
         }
+
         return response()->json(['success' => false, 'error' => ['code' => $code, 'message' => $message]], $status);
     }
 }

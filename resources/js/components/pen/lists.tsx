@@ -140,7 +140,7 @@ export function MobileCards<T extends { id: number | string }>({ cols, rows, emp
 }
 
 export const RowBtn = ({ href, onClick, children, primary }: { href?: string; onClick?: () => void; children: ReactNode; primary?: boolean }) => {
-    const cls = `flex h-[34px] w-fit shrink-0 items-center rounded-[8px] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap ${primary ? 'bg-[var(--primary)] text-white' : 'bg-[var(--surface)] text-[var(--primary)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]'}`;
+    const cls = `flex h-[34px] w-fit shrink-0 cursor-pointer items-center rounded-[8px] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap transition-colors ${primary ? 'bg-[var(--primary)] text-white [outline:1px_solid_var(--primary)] hover:bg-[var(--primary-hover)]' : 'bg-[var(--surface)] text-[var(--primary)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] hover:bg-[var(--surface-subtle)]'}`;
     return href ? (
         <Link href={href} className={cls}>
             {children}
