@@ -8,3 +8,4 @@ storage/ui-*
 tests
 .env
 public/hot
+bootstrap/cache/*.php

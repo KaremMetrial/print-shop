@@ -9,7 +9,7 @@ class Settings
 {
     /** @var array<string, array{label: string, group: string, type: string, default: string}> */
     public const DEFAULTS = [
-        'shop.name' => ['label' => 'اسم المطبعة', 'group' => 'general', 'type' => 'text', 'default' => 'مطبعة الإتقان'],
+        'shop.name' => ['label' => 'اسم المطبعة', 'group' => 'general', 'type' => 'text', 'default' => ''], // الافتراضي = APP_NAME
         'shop.branch' => ['label' => 'الفرع', 'group' => 'general', 'type' => 'text', 'default' => 'الفرع الرئيسي • القاهرة'],
         'shop.phone' => ['label' => 'هاتف المطبعة (يظهر لعميل الرابط)', 'group' => 'general', 'type' => 'text', 'default' => ''],
         'orders.default_eta_days' => ['label' => 'مدة الطباعة الافتراضية (أيام)', 'group' => 'orders', 'type' => 'int', 'default' => '2'],
@@ -25,7 +25,9 @@ class Settings
     {
         $this->cache ??= DB::table('app_settings')->pluck('value', 'key')->all();
 
-        return $this->cache[$key] ?? (self::DEFAULTS[$key]['default'] ?? '');
+        $v = $this->cache[$key] ?? (self::DEFAULTS[$key]['default'] ?? '');
+
+        return ($v === '' && $key === 'shop.name') ? (string) config('app.name') : $v;
     }
 
     public function int(string $key): int

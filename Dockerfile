@@ -32,8 +32,8 @@ WORKDIR /var/www/html
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=assets /app/public/build ./public/build
-RUN rm -rf docker tests tools pendev node_modules .git storage/ui-* \
- && mkdir -p storage/framework/{cache,sessions,views} storage/logs storage/app/private storage/app/mpdf bootstrap/cache \
+RUN rm -rf docker tests tools pendev node_modules .git storage/ui-* bootstrap/cache/*.php \
+ && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/app/private storage/app/mpdf bootstrap/cache \
  && chown -R www-data:www-data storage bootstrap/cache
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://127.0.0.1/up >/dev/null || exit 1
