@@ -1,0 +1,7 @@
+/* خطوط مستضافة محليًا (لا اعتماد على Google Fonts). تُحمَّل بملف مستقل خارج Vite/Tailwind. */
+@font-face { font-family: 'Cairo'; font-style: normal; font-weight: 400; font-display: swap; src: url('cairo-400.woff2') format('woff2'); }
+@font-face { font-family: 'Cairo'; font-style: normal; font-weight: 500; font-display: swap; src: url('cairo-500.woff2') format('woff2'); }
+@font-face { font-family: 'Cairo'; font-style: normal; font-weight: 600; font-display: swap; src: url('cairo-600.woff2') format('woff2'); }
+@font-face { font-family: 'Cairo'; font-style: normal; font-weight: 700; font-display: swap; src: url('cairo-700.woff2') format('woff2'); }
+@font-face { font-family: 'Goldman'; font-style: normal; font-weight: 400; font-display: swap; src: url('goldman-400.woff2') format('woff2'); }
+@font-face { font-family: 'Goldman'; font-style: normal; font-weight: 700; font-display: swap; src: url('goldman-700.woff2') format('woff2'); }
