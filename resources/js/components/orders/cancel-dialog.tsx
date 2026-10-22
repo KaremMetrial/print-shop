@@ -54,7 +54,7 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
         router.post(
             `/orders/${order.id}/cancel`,
             { reason, notes },
-            { headers: { 'Idempotency-Key': crypto.randomUUID() }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
+            { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
         );
     };
 

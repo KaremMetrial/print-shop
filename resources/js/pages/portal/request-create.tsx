@@ -59,7 +59,7 @@ export default function RequestCreate({ products, address }: { products: Product
 
     const submit = () => {
         setBusy(true);
-        router.post('/portal/requests', { delivery_method: method, delivery_address: method === 'DELIVERY' ? addr : null, notes: notes || null, items: ready.map((l) => ({ product_id: l.product_id, quantity: Number(l.quantity), options: l.options, notes: l.notes || null })) } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() }, onFinish: () => setBusy(false), onError: (e) => setErr(Object.values(e)[0] as string) });
+        router.post('/portal/requests', { delivery_method: method, delivery_address: method === 'DELIVERY' ? addr : null, notes: notes || null, items: ready.map((l) => ({ product_id: l.product_id, quantity: Number(l.quantity), options: l.options, notes: l.notes || null })) } as never, { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onError: (e) => setErr(Object.values(e)[0] as string) });
     };
     const ok = ready.length === lines.length && (method === 'PICKUP' || addr.trim().length > 3);
 

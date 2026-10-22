@@ -7,7 +7,7 @@ await page.goto(`${BASE}/accounting`); await waitIdle(page);
 await step('المحاسبة: تسجيل دفعة جديدة من النافذة', async () => {
   const before = Number(sql('select count(*) from payments'));
   await page.getByRole('button', { name: 'تسجيل دفعة' }).click();
-  await page.getByRole('dialog').getByLabel('العميل').selectOption('104'); await page.getByLabel('المبلغ (ج.م)').fill('50');
+  await pickSelect(page, 'العميل', 'شركة النور للدعاية'); await page.getByLabel('المبلغ (ج.م)').fill('50');
   await page.getByRole('button', { name: /^تسجيل/ }).last().click(); await waitIdle(page); await closeFlash(page);
   return Number(sql('select count(*) from payments')) === before + 1 && sql('select amount from payments order by id desc limit 1') === '5000';
 });

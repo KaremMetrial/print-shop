@@ -20,7 +20,7 @@ export function CancelItemDialog({ orderId, item, onClose }: { orderId: number; 
         router.post(
             `/orders/${orderId}/items/${item.id}/cancel`,
             { reason },
-            { headers: { 'Idempotency-Key': crypto.randomUUID() }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
+            { headers: { 'Idempotency-Key': key.current }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
         );
     };
     return (

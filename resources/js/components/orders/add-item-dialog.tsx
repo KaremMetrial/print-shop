@@ -26,7 +26,7 @@ export function AddItemDialog({ orderId, catalog, onClose }: { orderId: number; 
             return setErr('اختر المنتج والكمية وكل الخيارات المطلوبة.');
         setBusy(true);
         router.post(`/orders/${orderId}/items`, { product_id: p.id, quantity: Number(qty), options: opts } as never, {
-            headers: { 'Idempotency-Key': crypto.randomUUID() },
+            headers: { 'Idempotency-Key': key.current },
             preserveScroll: true,
             onFinish: () => setBusy(false),
             onSuccess: onClose,
