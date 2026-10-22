@@ -22,7 +22,7 @@ class ReportsController extends Controller
         return Inertia::render('operations/reports', ['from' => $from, 'to' => $to, 'ops' => $ops, 'fin' => $fin]);
     }
 
-    public function export(Request $request)
+    public function export(Request $request): \Illuminate\Http\Response
     {
         [$from, $to, $ops, $fin] = $this->reportData($request);
         $rows = [['القسم', 'المؤشر', 'القيمة']];
