@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+        // خلف وكيل TLS (nginx/Cloudflare/Caddy): نثق بالرؤوس X-Forwarded-* ليُحسب https والـIP الحقيقي (قيّد النطاق إن عرفت عنوان الوكيل).
+        $middleware->trustProxies(at: '*');
         $middleware->alias(['idempotent' => Idempotent::class, 'portal' => PortalAuth::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -1,0 +1,10 @@
+.git
+node_modules
+vendor
+storage/logs/*
+storage/framework/*
+storage/app/private/*
+storage/ui-*
+tests
+.env
+public/hot

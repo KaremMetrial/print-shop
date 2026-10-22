@@ -1,0 +1,36 @@
+# تشغيل الإنتاج: صورة واحدة (nginx + php-fpm + queue + scheduler + reverb عبر supervisor) + MySQL + Redis.
+# 1) cp .env.production.example .env.production  وعدّل القيم   2) docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+services:
+  app:
+    build:
+      context: .
+      args:
+        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY}
+        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
+        VITE_REVERB_PORT: ${VITE_REVERB_PORT:-443}
+        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-https}
+        VITE_APP_NAME: ${APP_NAME}
+    restart: unless-stopped
+    env_file: .env.production
+    ports: ["80:80", "8080:8080"]   # ضع TLS (Caddy/Traefik/Cloudflare) أمام 80 و8080 (wss)
+    volumes: ["storage:/var/www/html/storage/app"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_started }
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone=+00:00 --log-bin-trust-function-creators=1
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes: ["mysql:/var/lib/mysql"]
+    healthcheck: { test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_ROOT_PASSWORD}"], interval: 10s, retries: 10 }
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes: ["redis:/data"]
+volumes: { mysql: {}, redis: {}, storage: {} }
