@@ -9,8 +9,14 @@ use App\Support\Labels;
 it('has an Arabic label for every audit action recorded anywhere in the code', function () {
     $codes = [];
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(app_path())) as $f) {
-        if ($f->getExtension() === 'php' && preg_match_all("/->record\('([a-z_]+\.[a-z_]+)'/", file_get_contents($f->getPathname()), $m)) {
-            array_push($codes, ...$m[1]);
+        if ($f->getExtension() !== 'php') {
+            continue;
+        }
+        // أي سطر فيه record( يُستخرج منه كل كود بصيغة module.action (يشمل الشرطي ؟: والمتغيرات الثابتة)
+        foreach (file($f->getPathname()) as $line) {
+            if (str_contains($line, 'record(') && preg_match_all("/'([a-z_]+\.[a-z_]+)'/", $line, $m)) {
+                array_push($codes, ...$m[1]);
+            }
         }
     }
     $missing = array_values(array_filter(array_unique($codes), fn ($c) => ! isset(Labels::ACTIONS[$c])));

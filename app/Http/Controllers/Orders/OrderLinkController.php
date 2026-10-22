@@ -18,7 +18,8 @@ class OrderLinkController extends Controller
     public function show(Request $request, Order $order, OrderLinkService $links): Response
     {
         Gate::authorize('orders.links.manage');
-        $link = $order->link()->firstOrFail();
+        // أوردر بلا رابط (بيانات قديمة/مستوردة): نُنشئ الرابط عند أول فتح بدل 404 (غير الأوردرات المنتهية)
+        $link = $order->link()->first() ?? ($order->status->isFinal() ? abort(404) : $links->create($order));
         $props = [
             'order' => ['id' => $order->id, 'number' => $order->order_number, 'customer' => $order->customer->name, 'phone' => $order->customer->phone_display, 'status_label' => app(OrderStatusLabels::class)->label($order->status), 'created_at' => $order->created_at?->toIso8601String()],
             'link' => ['status' => $link->status, 'created_at' => $link->created_at->toIso8601String(), 'last_regenerated_at' => $link->last_regenerated_at?->toIso8601String(), 'url' => $order->status->isFinal() ? null : $links->url($link), 'closed' => $order->status->isFinal()],
@@ -30,8 +31,8 @@ class OrderLinkController extends Controller
     public function act(Request $request, Order $order, string $action, OrderLinkService $links): RedirectResponse
     {
         Gate::authorize('orders.links.manage');
-        $link = $order->link()->firstOrFail();
         abort_if($order->status->isFinal(), 409, 'الرابط مغلق.');
+        $link = $order->link()->first() ?? $links->create($order);
         match ($action) {
             'regenerate' => $links->regenerate($request->user(), $link),
             'suspend' => $links->suspend($request->user(), $link),

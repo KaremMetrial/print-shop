@@ -88,3 +88,11 @@ it('lets staff manage the link and forbids others', function () {
     expect($o->link->refresh()->status)->toBe('SUSPENDED');
     $this->actingAs(User::factory()->designer()->create())->get("/orders/{$o->id}/link")->assertForbidden();
 });
+
+it('creates the link on first open for orders that have none instead of failing', function () {
+    $a = User::factory()->superAdmin()->create();
+    $o = Order::factory()->create();
+    expect($o->link()->exists())->toBeFalse();
+    $this->actingAs($a)->get("/orders/{$o->id}/link")->assertOk();
+    expect($o->link()->exists())->toBeTrue();
+});
