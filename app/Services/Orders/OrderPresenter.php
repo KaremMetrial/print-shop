@@ -39,7 +39,7 @@ class OrderPresenter
                 'delivery_method' => $order->delivery_method, 'delivery_address' => $order->delivery_address, 'eta_days' => $order->printing_eta_days,
                 'notes' => $order->notes, 'source_label' => $order->source === 'ACCEPTED_REQUEST' ? 'طلب عميل' : 'موظف المطبعة',
                 ...($showPrice ? [
-                    'subtotal_minor' => $order->subtotal->minor, 'discount_minor' => $order->discount_amount->minor, 'delivery_fee_minor' => $order->delivery_fee->minor,
+                    'subtotal_minor' => $order->subtotal->minor, 'discount_minor' => $order->discount_amount->minor, 'discount_type' => $order->discount_type, 'discount_value' => (string) (float) $order->discount_value, 'delivery_fee_minor' => $order->delivery_fee->minor,
                     'grand_total_minor' => $order->grand_total->minor, 'paid_minor' => $paid, 'remaining_minor' => $order->grand_total->minor - $paid,
                 ] : []),
             ],
@@ -65,7 +65,7 @@ class OrderPresenter
             'link' => null,
             'can' => [
                 'update' => (bool) $viewer->hasPermission('orders.update'), 'items' => (bool) $viewer->hasPermission('orders.items.manage'),
-                'assign' => (bool) $viewer->hasPermission('designers.assignment.manage'), 'invoice_view' => (bool) $viewer->hasPermission('invoices.view'), 'invoice_issue' => (bool) $viewer->hasPermission('invoices.issue') && ! in_array($order->status, [OrderStatus::DESIGN_STAGE, OrderStatus::CANCELLED], true), 'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
+                'assign' => (bool) $viewer->hasPermission('designers.assignment.manage'), 'discount' => (bool) $viewer->hasPermission('orders.discount.apply') && ! $order->status->isFinal(), 'invoice_view' => (bool) $viewer->hasPermission('invoices.view'), 'invoice_issue' => (bool) $viewer->hasPermission('invoices.issue') && ! in_array($order->status, [OrderStatus::DESIGN_STAGE, OrderStatus::CANCELLED], true), 'links' => (bool) $viewer->hasPermission('orders.links.manage'), 'pay' => (bool) $viewer->hasPermission('payments.create') && ! $order->status->isFinal(), 'cancel' => (bool) $viewer->hasPermission('orders.cancel') && ! $order->status->isFinal(),
                 'next' => $this->nextStep($order, $viewer), 'price' => $showPrice,
             ],
         ];

@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -134,6 +135,18 @@ class OrderController extends Controller
         $action->handle($request->user(), $order, $data);
 
         return redirect()->route('orders.show', $order)->with('success', 'تم حفظ تغييرات الأوردر.');
+    }
+
+    /** S-038 حوار الخصم: يطبّق/يغيّر/يزيل الخصم فقط (صلاحية orders.discount.apply؛ لا تغيير بعد دفعة بدون صلاحية التسعير). */
+    public function discount(Request $request, Order $order, UpdateOrder $action): RedirectResponse
+    {
+        $d = $request->validate(['discount_type' => ['required', Rule::in(['NONE', 'FIXED', 'PERCENT'])], 'discount_value' => ['nullable', 'numeric', 'min:0']], ['discount_value.min' => 'قيمة الخصم لا تقل عن صفر.']);
+        if ($d['discount_type'] === 'PERCENT' && (float) ($d['discount_value'] ?? 0) > 100) {
+            throw ValidationException::withMessages(['discount_value' => 'نسبة الخصم لا تتجاوز 100%.']);
+        }
+        $action->handle($request->user(), $order, ['discount_type' => $d['discount_type'], 'discount_value' => $d['discount_type'] === 'NONE' ? 0 : ($d['discount_value'] ?? 0)]);
+
+        return back()->with('success', 'تم تحديث الخصم وإعادة حساب الإجمالي.');
     }
 
     public function advance(Request $request, Order $order, string $step, AdvanceOrder $action): RedirectResponse

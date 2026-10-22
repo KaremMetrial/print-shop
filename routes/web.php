@@ -107,6 +107,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{order}/items/{item}', [OrderItemController::class, 'show'])->name('items.show');
         Route::get('{order}/job-ticket', [OrderItemController::class, 'jobTicket'])->name('job-ticket');
         Route::get('{order}/job-ticket/pdf', [OrderItemController::class, 'jobTicketPdf'])->name('job-ticket.pdf');
+        Route::patch('{order}/discount', 'discount')->name('discount')->middleware('idempotent');
         Route::post('{order}/items', 'addItem')->name('items.add')->middleware('idempotent');
         Route::patch('{order}/items/{item}', 'updateItem')->name('items.update')->middleware('idempotent');
         Route::post('{order}/items/{item}/cancel', 'cancelItem')->name('items.cancel')->middleware('idempotent');

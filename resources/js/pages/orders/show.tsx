@@ -1,6 +1,7 @@
 import { idemHeaders } from '@/lib/idempotency';
 import { PaymentDialog } from '@/components/finance/payment-dialog';
 import { AddItemDialog, type CatalogProduct } from '@/components/orders/add-item-dialog';
+import { DiscountDialog } from '@/components/orders/discount-dialog';
 import { AssignDesignerDialog } from '@/components/orders/assign-designer-dialog';
 import { CancelOrderDialog } from '@/components/orders/cancel-dialog';
 import { CancelItemDialog } from '@/components/orders/cancel-item-dialog';
@@ -46,6 +47,8 @@ interface Props {
         notes: string | null;
         source_label: string;
         subtotal_minor?: number;
+        discount_type?: string;
+        discount_value?: string;
         discount_minor?: number;
         delivery_fee_minor?: number;
         grand_total_minor?: number;
@@ -577,6 +580,7 @@ function Activity({ p }: { p: Props }) {
 export default function OrderShow(props: Props) {
     const { order: o, tab, can, invoice } = props;
     const [cancelOpen, setCancelOpen] = useState(false);
+    const [discOpen, setDiscOpen] = useState(false);
     const [payOpen, setPayOpen] = useState(false);
     return (
         <AppLayout active="/orders">

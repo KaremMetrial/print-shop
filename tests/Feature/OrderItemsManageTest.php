@@ -65,3 +65,14 @@ it('exposes designers and assign permission to the order page for managers only'
     [$o] = mkOrder($this->admin, 1);
     $this->actingAs($this->admin)->get("/orders/{$o->id}?tab=items")->assertInertia(fn ($p) => $p->where('can.assign', true)->has('designers'));
 });
+
+it('applies and removes a discount through the dedicated endpoint with validation and permission', function () {
+    [$o] = mkOrder($this->admin, 1);
+    $total = $o->grand_total->minor;
+    $this->actingAs($this->admin)->patch("/orders/{$o->id}/discount", ['discount_type' => 'PERCENT', 'discount_value' => 10], ['Idempotency-Key' => 'x1'])->assertRedirect();
+    expect($o->refresh()->grand_total->minor)->toBeLessThan($total)->and($o->discount_type)->toBe('PERCENT');
+    $this->patchJson("/orders/{$o->id}/discount", ['discount_type' => 'PERCENT', 'discount_value' => 150], ['Idempotency-Key' => 'x2'])->assertStatus(422);
+    $this->patch("/orders/{$o->id}/discount", ['discount_type' => 'NONE'], ['Idempotency-Key' => 'x3'])->assertRedirect();
+    expect($o->refresh()->grand_total->minor)->toBe($total);
+    $this->actingAs(User::factory()->designer()->create())->patch("/orders/{$o->id}/discount", ['discount_type' => 'FIXED', 'discount_value' => 100], ['Idempotency-Key' => 'x4'])->assertForbidden();
+});
