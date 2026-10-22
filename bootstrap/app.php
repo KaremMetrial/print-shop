@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -39,5 +40,26 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return redirect()->back(fallback: '/')->withErrors(['business' => 'انتهت صلاحية الجلسة. حاول مرة أخرى.'])->withInput($request->except(['password', 'password_confirmation']));
+        });
+
+        // صفحات الأخطاء العربية الموحّدة لطلبات المتصفح (JSON يبقى كما هو). 500 يُخفي التفاصيل خارج وضع التطوير.
+        $exceptions->respond(function ($response, Throwable $e, Request $request) {
+            $status = $response->getStatusCode();
+            if (! in_array($status, [403, 404, 429, 500, 503], true)) {
+                return $response;
+            }
+            if ($request->header('X-Inertia')) {
+                // تنقّل داخلي (Inertia) إلى صفحة خطأ: إعادة تحميل كاملة تعرض صفحة الخطأ العربية بدل نافذة HTML خام.
+                return $request->isMethod('GET') ? Inertia::location($request->fullUrl()) : $response;
+            }
+            if ($request->expectsJson()) {
+                return $response;
+            }
+            if ($status === 500 && config('app.debug')) {
+                return $response;
+            }
+            $home = $request->is('portal*') ? '/portal' : ($request->is('l/*') ? '/' : '/dashboard');
+
+            return Inertia::render('error', ['status' => $status, 'home' => $home])->toResponse($request)->setStatusCode($status);
         });
     })->create();
