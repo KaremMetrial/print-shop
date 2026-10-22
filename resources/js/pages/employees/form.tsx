@@ -7,6 +7,7 @@ interface Employee {
     id: number;
     name: string;
     email: string;
+    phone: string | null;
     role: string | null;
     status: 'ACTIVE' | 'INACTIVE';
     created_at: string | null;
@@ -27,6 +28,7 @@ export default function EmployeeForm({ employee, roles, specialties, availabilit
     const { data, setData, post, patch, processing, errors } = useForm({
         name: employee?.name ?? '',
         email: employee?.email ?? '',
+        phone: employee?.phone ?? '',
         role: employee?.role ?? '',
         password: '',
         specialty_ids: employee?.specialty_ids ?? ([] as string[]),
@@ -48,9 +50,10 @@ export default function EmployeeForm({ employee, roles, specialties, availabilit
                 <h1 className={h1}>{title}</h1>
 
                 <PenSection title="البيانات الأساسية">
-                    <div className="flex w-full shrink-0 gap-[16px]">
+                    <div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
                         <PenInput label="البريد الإلكتروني *" type="email" ltr placeholder="name@company.com" value={data.email} onChange={(e) => setData('email', e.target.value)} error={errors.email} wrapperClassName="flex-1" autoComplete="off" />
                         <PenInput label="الاسم الكامل *" placeholder="أدخل الاسم الكامل" value={data.name} onChange={(e) => setData('name', e.target.value)} error={errors.name} wrapperClassName="flex-1" />
+                        <PenInput label="رقم الهاتف" type="tel" ltr placeholder="01xxxxxxxxx" value={data.phone} onChange={(e) => setData('phone', e.target.value)} error={errors.phone} wrapperClassName="flex-1" autoComplete="tel" />
                     </div>
                     {edit && <div className="w-full text-right text-[13px] leading-[normal] font-[400] text-[var(--muted-foreground)]">مرجع الموظف: EMP-{String(employee.id).padStart(4, '0')} · تاريخ الإنشاء: {employee.created_at ? formatDate(employee.created_at) : 'غير متاح'} · للقراءة فقط</div>}
                 </PenSection>

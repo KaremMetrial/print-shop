@@ -15,6 +15,7 @@ use App\Models\OrderRequest;
 use App\Models\Product;
 use App\Services\Chat\ChatService;
 use App\Services\Design\DesignService;
+use App\Services\Files\FileService;
 use App\Services\Finance\InvoiceService;
 use App\Services\Finance\PaymentProofService;
 use App\Services\Finance\PaymentService;
@@ -89,11 +90,16 @@ class PortalController extends Controller
     {
         $c = $this->me($request);
         $products = Product::where('is_active', true)->with(['optionGroups' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with(['values' => fn ($v) => $v->where('is_active', true)->orderBy('sort_order')])])->orderBy('name')->get()->map(fn (Product $p) => [
-            'id' => $p->id, 'name' => $p->name, 'minimum_quantity' => $p->minimum_quantity,
+            'id' => $p->id, 'name' => $p->name, 'description' => $p->description, 'minimum_quantity' => $p->minimum_quantity,
             'groups' => $p->optionGroups->map(fn ($g) => ['id' => $g->id, 'name' => $g->name, 'selection_type' => $g->selection_type, 'is_required' => $g->is_required, 'values' => $g->values->map(fn ($v) => ['id' => $v->id, 'name' => $v->name, 'addition_minor' => $v->unit_price_addition->minor])->all()])->all(),
         ]);
 
-        return Inertia::render('portal/request-create', ['products' => $products, 'address' => $c->address]);
+        $props = ['products' => $products, 'address' => $c->address];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props = array_replace($props, PenFixtures::portalWizard((int) $request->query('step', 1)));
+        }
+
+        return Inertia::render('portal/request-create', $props);
     }
 
     /** عرض سعر مبدئي بشريحة العميل نفسه (الخادم هو المرجع). */
@@ -112,6 +118,7 @@ class PortalController extends Controller
             'delivery_method' => ['required', 'in:PICKUP,DELIVERY'], 'delivery_address' => ['nullable', 'string', 'max:500'], 'notes' => ['nullable', 'string', 'max:2000'],
             'items' => ['required', 'array', 'min:1'], 'items.*.product_id' => ['required', 'integer', 'exists:products,id'], 'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000000'],
             'items.*.options' => ['nullable', 'array'], 'items.*.notes' => ['nullable', 'string', 'max:1000'],
+            'items.*.file_ids' => ['nullable', 'array', 'max:10'], 'items.*.file_ids.*' => ['integer'],
         ], ['items.required' => 'أضف منتجًا واحدًا على الأقل.']);
         $r = $action->handle($this->me($request), $d);
 
@@ -192,6 +199,15 @@ class PortalController extends Controller
         abort_unless($ok, 404);
 
         return Storage::disk($file->disk)->response($file->storage_key, $file->original_filename, ['Content-Type' => $file->mime_type, 'X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'private, no-store', 'Content-Security-Policy' => "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox"], 'inline');
+    }
+
+    /** رفع ملف مرجعي للطلب (قبل الإرسال): يبقى «معلّقًا» لدى العميل حتى يُربط ببند الطلب عند الإرسال. */
+    public function upload(Request $request, FileService $files): JsonResponse
+    {
+        $request->validate(['file' => ['required', 'file']]);
+        $f = $files->store($request->file('file'), 'customer_reference', ['customer', $this->me($request)->id]);
+
+        return response()->json(['data' => ['id' => $f->id, 'name' => $f->original_filename, 'size' => $f->size_bytes]], 201);
     }
 
     public function account(Request $request): Response

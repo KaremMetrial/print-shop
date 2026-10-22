@@ -1,4 +1,5 @@
 import {
+    ArrowRight,
     Bell,
     ChartNoAxesCombined,
     Check,
@@ -17,6 +18,7 @@ import {
     Files,
     Folder,
     History,
+    House,
     Inbox,
     LayoutDashboard,
     Link2Off,
@@ -36,6 +38,7 @@ import {
     Truck,
     User,
     UserRound,
+    Upload,
     Users,
     Wallet,
     type LucideIcon,
@@ -44,6 +47,7 @@ import {
 const toPascal = (s: string) => s.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
 
 const ICONS: Record<string, LucideIcon> = {
+    'arrow-right': ArrowRight,
     bell: Bell,
     'chart-no-axes-combined': ChartNoAxesCombined,
     check: Check,
@@ -62,6 +66,7 @@ const ICONS: Record<string, LucideIcon> = {
     files: Files,
     folder: Folder,
     history: History,
+    house: House,
     inbox: Inbox,
     'layout-dashboard': LayoutDashboard,
     'link-2-off': Link2Off,
@@ -81,6 +86,7 @@ const ICONS: Record<string, LucideIcon> = {
     truck: Truck,
     user: User,
     'user-round': UserRound,
+    upload: Upload,
     users: Users,
     wallet: Wallet,
 };

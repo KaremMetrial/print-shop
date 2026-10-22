@@ -3,6 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Models\Customer;
+use App\Models\File;
 use App\Models\OrderRequest;
 use App\Models\Product;
 use App\Services\Notifications\NotificationService;
@@ -28,7 +29,10 @@ class SubmitOrderRequest
                 'delivery_address' => $data['delivery_method'] === 'DELIVERY' ? ($data['delivery_address'] ?? $customer->address) : null, 'notes' => $data['notes'] ?? null, 'submitted_at' => now(),
             ]);
             foreach ($data['items'] as $row) {
-                $r->items()->create(['product_id' => $row['product_id'], 'quantity' => $row['quantity'], 'original_quantity' => $row['quantity'], 'options' => $row['options'] ?? [], 'notes' => $row['notes'] ?? null]);
+                $item = $r->items()->create(['product_id' => $row['product_id'], 'quantity' => $row['quantity'], 'original_quantity' => $row['quantity'], 'options' => $row['options'] ?? [], 'notes' => $row['notes'] ?? null]);
+                // ملفات مرجعية رفعها هذا العميل نفسه ولم تُربط بعد (لا يمكن ربط ملف عميل آخر أو ملف مربوط).
+                File::whereIn('id', $row['file_ids'] ?? [])->where('uploaded_by_type', 'customer')->where('uploaded_by_id', $customer->id)->where('category', 'customer_reference')->whereNull('parent_type')
+                    ->update(['parent_type' => 'order_request_item', 'parent_id' => $item->id]);
             }
             DB::table('audit_logs')->insert(['actor_type' => 'customer', 'actor_id' => $customer->id, 'actor_role_snapshot' => 'CUSTOMER', 'entity_type' => $r->getMorphClass(), 'entity_id' => $r->id, 'action' => 'order_request.submitted', 'new_values' => json_encode(['items' => count($data['items'])]), 'created_at' => now()]);
             $ref = (string) $r->refresh()->request_number;

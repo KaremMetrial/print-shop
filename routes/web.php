@@ -247,6 +247,7 @@ Route::prefix('portal')->name('portal.')->group(function () {
             Route::get('orders/{order}/items/{item}', 'item')->name('orders.item');
             Route::post('orders/{order}/items/{item}/approve', 'approve')->name('orders.approve')->middleware('idempotent');
             Route::get('files/{file}', 'file')->name('files');
+            Route::post('files', 'upload')->name('files.upload')->middleware('throttle:30,1');
             Route::post('orders/{order}/proofs', 'proof')->name('orders.proof')->middleware('idempotent');
             Route::get('orders/{order}/invoice', 'invoice')->name('orders.invoice');
             Route::get('orders/{order}/invoice/pdf', 'invoicePdf')->name('orders.invoice.pdf');

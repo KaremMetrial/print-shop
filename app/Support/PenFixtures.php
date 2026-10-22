@@ -23,6 +23,26 @@ final class PenFixtures
         ];
     }
 
+    /** M-A03..A07 — معالج طلب الأوردر على الموبايل. @return array<string, mixed> */
+    public static function portalWizard(int $step): array
+    {
+        $g = fn (int $id, string $name, array $values) => ['id' => $id, 'name' => $name, 'selection_type' => 'SINGLE', 'is_required' => true,
+            'values' => array_map(fn ($v, $k) => ['id' => $id * 10 + $k, 'name' => $v, 'addition_minor' => 0], $values, array_keys($values))];
+
+        return [
+            'products' => [
+                ['id' => 1, 'name' => 'كروت شخصية', 'description' => 'بطاقات للتواصل والتعريف', 'minimum_quantity' => 100, 'unit' => 'كارت', 'groups' => [
+                    $g(1, 'نوع الورق', ['كوشيه 300 جم', 'كوشيه 350 جم']), $g(2, 'الألوان', ['ألوان كاملة', 'لون واحد']), $g(3, 'عدد الأوجه', ['وجه واحد', 'وجهان']), $g(4, 'التغليف', ['تغليف مطفي', 'تغليف لامع'])]],
+                ['id' => 2, 'name' => 'فلاير', 'description' => 'منشورات دعائية خفيفة', 'minimum_quantity' => 100, 'unit' => 'فلاير', 'groups' => []],
+                ['id' => 3, 'name' => 'بروشور', 'description' => 'مطوية تعريفية متعددة الصفحات', 'minimum_quantity' => 50, 'unit' => 'بروشور', 'groups' => []],
+            ],
+            'pen' => ['step' => max(1, min(5, $step)), 'total_minor' => 248000, 'lines' => [
+                ['product_id' => 1, 'quantity' => '1000', 'options' => [1 => [10], 2 => [20], 3 => [31], 4 => [40]], 'files' => [['id' => 1, 'name' => 'logo-reference.png']]],
+                ['product_id' => 2, 'quantity' => '400', 'options' => [], 'files' => [['id' => 2, 'name' => 'flyer-text.pdf']]],
+            ]],
+        ];
+    }
+
     /** M-A02 — لوحة العميل على الموبايل. @return array<string, mixed> */
     public static function portalDashboard(): array
     {

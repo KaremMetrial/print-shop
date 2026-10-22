@@ -15,6 +15,7 @@ interface Item {
     total_minor: number;
     specs: string;
     notes: string | null;
+    files?: { id: number; name: string }[];
 }
 interface Props {
     req: {
@@ -228,7 +229,15 @@ export default function OrderRequestShow(p: Props) {
                                         </div>
                                         <div className="w-full text-right text-[12px] leading-[18px] text-[var(--muted-foreground)]">المواصفات: {i.specs || 'لا توجد مواصفات إضافية مسجلة.'}</div>
                                         <div className="w-full text-right text-[12px] leading-[18px] text-[var(--muted-foreground)]">ملاحظات العميل: {i.notes || 'لا توجد ملاحظات.'}</div>
-                                        <div className="w-full text-right text-[12px] leading-[18px] text-[var(--muted-foreground)]">المرفقات: لا توجد مرفقات.</div>
+                                        <div className="w-full text-right text-[12px] leading-[18px] text-[var(--muted-foreground)]">
+                                            المرفقات:{' '}
+                                            {i.files?.length ? i.files.map((f, k) => (
+                                                <span key={f.id}>
+                                                    {k > 0 && ' · '}
+                                                    <a href={`/files/${f.id}/preview`} target="_blank" rel="noreferrer" className="font-[600] text-[var(--primary)]">{f.name}</a>
+                                                </span>
+                                            )) : 'لا توجد مرفقات.'}
+                                        </div>
                                     </div>
                                 ))}
                             </div>

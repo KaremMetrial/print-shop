@@ -7,6 +7,7 @@ use App\Enums\OrderRequestStatus;
 use App\Exceptions\BusinessException;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\File;
 use App\Models\OrderRequest;
 use App\Models\OrderRequestItem;
 use App\Models\User;
@@ -83,6 +84,7 @@ class OrderRequestController extends Controller
                 'id' => $i->id, 'label' => 'البند '.str_pad((string) ($n + 1), 2, '0', STR_PAD_LEFT).' — '.$i->product->name, 'product' => $i->product->name, 'product_id' => $i->product_id,
                 'quantity' => $i->quantity, 'original_quantity' => $i->original_quantity, 'unit_minor' => $q['unit'], 'total_minor' => $q['total'], 'specs' => $q['specs'],
                 'notes' => $i->notes, 'options' => $i->options,
+                'files' => File::where('parent_type', 'order_request_item')->where('parent_id', $i->id)->get(['id', 'original_filename'])->map(fn ($f) => ['id' => $f->id, 'name' => $f->original_filename])->all(),
             ];
         });
         $subtotal = $items->sum('total_minor');
