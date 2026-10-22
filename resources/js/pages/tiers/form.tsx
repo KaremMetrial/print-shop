@@ -91,7 +91,7 @@ export default function TierForm({ tier, mode, products, can }: Props) {
                 </div>
 
                 {!pct && (
-                    <div id="products" className="flex w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                    <div id="products" className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                         <div className="flex w-full shrink-0 flex-col items-center justify-center gap-[10px] p-[12px_10px]">
                             <div className="w-full text-right text-[18px] leading-[29px] font-[700] text-[var(--ink)]">أسعار المنتجات</div>
                         </div>

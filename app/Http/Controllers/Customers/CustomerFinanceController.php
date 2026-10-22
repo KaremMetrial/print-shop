@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\Finance\PaymentService;
+use App\Services\Orders\OrderStatusLabels;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -26,7 +27,7 @@ class CustomerFinanceController extends Controller
         abort_unless($request->user()->hasPermission('orders.view'), 403);
         $showPrice = ! $request->user()->isDesigner();
         $rows = Order::where('customer_id', $customer->id)->withCount(['items as active_items_count' => fn ($q) => $q->whereNull('cancelled_at')])->latest('id')->paginate(10)->withQueryString()
-            ->through(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => $o->status->value, 'status_label' => $o->status->label(), 'items' => $o->active_items_count, 'created_at' => $o->created_at?->toIso8601String()] + ($showPrice ? ['total_minor' => $o->grand_total->minor] : []));
+            ->through(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => $o->status->value, 'status_label' => app(OrderStatusLabels::class)->label($o->status), 'items' => $o->active_items_count, 'created_at' => $o->created_at?->toIso8601String()] + ($showPrice ? ['total_minor' => $o->grand_total->minor] : []));
 
         return Inertia::render('customers/finance', ['tab' => 'orders', 'customer' => $profile->profile($customer, $request), 'orders' => $rows, 'price' => $showPrice]);
     }

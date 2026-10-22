@@ -67,7 +67,7 @@ export default function CustomerActivity({ customer, activity, filters, actors, 
                 <div className="flex w-full shrink-0 flex-col gap-[16px] rounded-[10px] bg-[var(--surface-subtle)] p-[12px]">
                     <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">سجل للقراءة فقط.</div>
                 </div>
-                <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[44px] w-full shrink-0 items-center gap-[10px] bg-[var(--surface-subtle)] p-[0px_14px]">
                         <div className={`${th} w-[190px]`}>الإجراءات</div>
                         <div className={`${th} flex-1`}>التفاصيل</div>

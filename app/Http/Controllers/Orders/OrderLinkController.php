@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Orders;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Orders\OrderLinkService;
+use App\Services\Orders\OrderStatusLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,7 +20,7 @@ class OrderLinkController extends Controller
         Gate::authorize('orders.links.manage');
         $link = $order->link()->firstOrFail();
         $props = [
-            'order' => ['id' => $order->id, 'number' => $order->order_number, 'customer' => $order->customer->name, 'phone' => $order->customer->phone_display, 'status_label' => $order->status->label(), 'created_at' => $order->created_at?->toIso8601String()],
+            'order' => ['id' => $order->id, 'number' => $order->order_number, 'customer' => $order->customer->name, 'phone' => $order->customer->phone_display, 'status_label' => app(OrderStatusLabels::class)->label($order->status), 'created_at' => $order->created_at?->toIso8601String()],
             'link' => ['status' => $link->status, 'created_at' => $link->created_at->toIso8601String(), 'last_regenerated_at' => $link->last_regenerated_at?->toIso8601String(), 'url' => $order->status->isFinal() ? null : $links->url($link), 'closed' => $order->status->isFinal()],
         ];
 

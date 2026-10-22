@@ -43,6 +43,10 @@ class SettingsController extends Controller
             if ($meta['type'] === 'int') {
                 abort_unless(is_numeric($v) && (int) $v >= 0, 422, 'قيمة رقمية غير صالحة.');
             }
+            if ($meta['type'] === 'status_label') {
+                abort_unless(($v === null || is_string($v)) && mb_strlen(trim((string) $v)) <= 40, 422, 'مسمى الحالة يجب ألا يتجاوز 40 حرفًا.');
+                $v = trim((string) $v);
+            }
             if ($meta['type'] === 'methods') {
                 $codes = array_values(array_unique(array_filter(array_map('trim', explode(',', (string) $v)))));
                 abort_if($codes === [] || array_diff($codes, array_keys(PaymentMethod::labels())) !== [], 422, 'اختر طريقة دفع واحدة على الأقل من الطرق المتاحة.');

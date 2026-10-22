@@ -52,10 +52,11 @@ interface Props {
     actions: { total: number; items: { title: string; sub: string; href: string }[] };
     recent: Recent[];
     branch: string;
+    statusLabels: Record<string, string>;
 }
 
 /** S-007 — لوحة التحكم (pendev: frame Xqpp0). التخطيط literal كما في التصدير. */
-export default function Dashboard({ period, user_first_name, now, urgent, kpis, summary, finance, alerts, actions, recent, branch }: Props) {
+export default function Dashboard({ period, user_first_name, now, urgent, kpis, summary, finance, alerts, actions, recent, branch, statusLabels }: Props) {
     const d = new Date(now);
     return (
         <AppLayout>
@@ -102,8 +103,8 @@ export default function Dashboard({ period, user_first_name, now, urgent, kpis, 
 
             <h2 className={penH2}>نظرة على العمليات</h2>
             <div className="flex w-full shrink-0 gap-[16px]">
-                <PenKpi className="flex-1" label="جاهز للاستلام أو التوصيل" value={kpis.ready} hint="عرض الطلبات الجاهزة ←" href="/delivery" />
-                <PenKpi className="flex-1" label="قيد الطباعة" value={kpis.in_printing} hint="متابعة الإنتاج ←" href="/orders?status=IN_PRINTING" />
+                <PenKpi className="flex-1" label={`${statusLabels.READY_FOR_PICKUP} أو ${statusLabels.READY_FOR_DELIVERY}`} value={kpis.ready} hint="عرض الطلبات الجاهزة ←" href="/delivery" />
+                <PenKpi className="flex-1" label={statusLabels.IN_PRINTING} value={kpis.in_printing} hint="متابعة الإنتاج ←" href="/orders?status=IN_PRINTING" />
                 <PenKpi
                     className="flex-1"
                     label="تصاميم تحتاج متابعة"

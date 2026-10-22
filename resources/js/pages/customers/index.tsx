@@ -82,7 +82,7 @@ export default function CustomersIndex({ customers, filters, tiers, can, total, 
                 </div>
             </div>
 
-            <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+            <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                 <div className="flex h-[43.5px] w-full shrink-0 items-center gap-[10px] bg-[var(--surface-subtle)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
                     <div className={`${th} w-[190px]`}>الإجراءات</div>
                     <div className={`${th} w-[110px]`}>تاريخ الإضافة</div>

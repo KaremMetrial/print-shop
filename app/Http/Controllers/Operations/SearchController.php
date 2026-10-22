@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\Orders\OrderStatusLabels;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,7 +23,7 @@ class SearchController extends Controller
         if (mb_strlen($q) >= 2) {
             if ($u->hasPermission('orders.view')) {
                 $res['orders'] = Order::with('customer:id,name')->where(fn ($w) => $w->where('order_number', 'like', "%{$q}%")->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$q}%")))->latest('id')->limit(10)->get()
-                    ->map(fn (Order $o) => ['id' => $o->id, 'title' => $o->order_number, 'sub' => $o->customer->name, 'status' => $o->status->label(), 'href' => "/orders/{$o->id}"])->all();
+                    ->map(fn (Order $o) => ['id' => $o->id, 'title' => $o->order_number, 'sub' => $o->customer->name, 'status' => app(OrderStatusLabels::class)->label($o->status), 'href' => "/orders/{$o->id}"])->all();
                 $res['items'] = OrderItem::with('order:id,order_number')->where('product_snapshot->name', 'like', "%{$q}%")->latest('id')->limit(10)->get()
                     ->map(fn (OrderItem $i) => ['id' => $i->id, 'title' => $i->code(), 'sub' => $i->product_snapshot['name'], 'status' => $i->order->order_number, 'href' => "/orders/{$i->order_id}?tab=items"])->all();
             }

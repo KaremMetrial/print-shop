@@ -48,52 +48,80 @@ export default function Settings({ fields, groups, methods }: Props) {
                         تعذر الحفظ: تحقق من القيم.
                     </div>
                 )}
-                {groups.map((g) => (
-                    <div
-                        key={g}
-                        className="flex w-full flex-col gap-[14px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]"
-                    >
-                        <div className="w-full text-right text-[18px] font-[700]">{G[g]}</div>
-                        {fields
-                            .filter((f) => f.group === g)
-                            .map((f) =>
-                                f.type === 'methods' ? (
-                                    <fieldset key={f.key} className="flex w-full flex-col gap-[10px]">
-                                        <legend className="w-full text-right text-[13px] font-[600] text-[var(--text-secondary)]">{f.label}</legend>
-                                        {Object.entries(methods).map(([code, label]) => {
-                                            const on = data.values[f.key].split(',').includes(code);
-                                            return (
-                                                <label key={code} className="flex items-center justify-end gap-[10px] text-[14px] text-[var(--ink)]">
-                                                    {label}
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={on}
-                                                        onChange={() => {
-                                                            const cur = data.values[f.key].split(',').filter(Boolean);
-                                                            const next = on ? cur.filter((c) => c !== code) : [...cur, code];
-                                                            setData('values', { ...data.values, [f.key]: next.join(',') });
-                                                        }}
-                                                        className="h-[20px] w-[20px]"
-                                                    />
-                                                </label>
-                                            );
-                                        })}
-                                        <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">
-                                            الطرق غير المفعّلة لا تظهر عند تسجيل دفعة جديدة، وتبقى ظاهرة في الدفعات القديمة.
-                                        </div>
-                                    </fieldset>
-                                ) : (
-                                    <PenInput
-                                        key={f.key}
-                                        label={f.label}
-                                        value={data.values[f.key]}
-                                        inputMode={f.type === 'int' ? 'numeric' : undefined}
-                                        onChange={(e) => setData('values', { ...data.values, [f.key]: e.target.value })}
-                                    />
-                                ),
+                {groups.map((g) => {
+                    const groupFields = fields.filter((f) => f.group === g);
+                    const statusFields = groupFields.filter((f) => f.type === 'status_label');
+                    const regularFields = groupFields.filter((f) => f.type !== 'status_label');
+
+                    return (
+                        <div key={g} className="contents">
+                            {regularFields.length > 0 && (
+                                <section className="flex w-full flex-col gap-[14px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                                    <h2 className="w-full text-right text-[18px] font-[700]">{G[g]}</h2>
+                                    {regularFields.map((f) =>
+                                        f.type === 'methods' ? (
+                                            <fieldset key={f.key} className="flex w-full flex-col gap-[10px]">
+                                                <legend className="w-full text-right text-[13px] font-[600] text-[var(--text-secondary)]">{f.label}</legend>
+                                                {Object.entries(methods).map(([code, label]) => {
+                                                    const on = data.values[f.key].split(',').includes(code);
+                                                    return (
+                                                        <label key={code} className="flex items-center justify-end gap-[10px] text-[14px] text-[var(--ink)]">
+                                                            {label}
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={on}
+                                                                onChange={() => {
+                                                                    const cur = data.values[f.key].split(',').filter(Boolean);
+                                                                    const next = on ? cur.filter((c) => c !== code) : [...cur, code];
+                                                                    setData('values', { ...data.values, [f.key]: next.join(',') });
+                                                                }}
+                                                                className="h-[20px] w-[20px]"
+                                                            />
+                                                        </label>
+                                                    );
+                                                })}
+                                                <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">
+                                                    الطرق غير المفعّلة لا تظهر عند تسجيل دفعة جديدة، وتبقى ظاهرة في الدفعات القديمة.
+                                                </div>
+                                            </fieldset>
+                                        ) : (
+                                            <PenInput
+                                                key={f.key}
+                                                label={f.label}
+                                                value={data.values[f.key]}
+                                                inputMode={f.type === 'int' ? 'numeric' : undefined}
+                                                onChange={(e) => setData('values', { ...data.values, [f.key]: e.target.value })}
+                                            />
+                                        ),
+                                    )}
+                                </section>
                             )}
-                    </div>
-                ))}
+                            {statusFields.length > 0 && (
+                                <section className="flex w-full flex-col gap-[16px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                                    <div className="flex w-full flex-col gap-[5px]">
+                                        <h2 className="w-full text-right text-[18px] font-[700]">مسميات حالات الأوردر</h2>
+                                        <p className="w-full text-right text-[12px] leading-[20px] text-[var(--muted-foreground)]">
+                                            هذه الأسماء تظهر في صفحات النظام ورابط العميل. تغييرها لا يؤثر على ترتيب الحالات أو شروط انتقال الأوردر.
+                                        </p>
+                                    </div>
+                                    <div className="grid w-full grid-cols-1 gap-[14px] md:grid-cols-2">
+                                        {statusFields.map((f) => (
+                                            <PenInput
+                                                key={f.key}
+                                                label={f.label.replace(/^مسمى حالة /, '')}
+                                                value={data.values[f.key]}
+                                                onChange={(e) => setData('values', { ...data.values, [f.key]: e.target.value })}
+                                            />
+                                        ))}
+                                    </div>
+                                    <p className="w-full text-right text-[12px] leading-[20px] text-[var(--muted-foreground)]">
+                                        اترك الحقل فارغًا لاستعادة الاسم الافتراضي. الحد الأقصى لكل مسمى 40 حرفًا.
+                                    </p>
+                                </section>
+                            )}
+                        </div>
+                    );
+                })}
             </form>
         </AppLayout>
     );

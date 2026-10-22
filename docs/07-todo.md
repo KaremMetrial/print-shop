@@ -1,5 +1,7 @@
 # 07 — To-Do بالترتيب (نمشي عليه من فوق لتحت)
 
+> هذه خطة تنفيذ أولية. حالة المشروع الحالية والمهام المفتوحة موثقة في `docs/12-progress-handoff.md`؛ لا تعتمد مربعات الخطة وحدها لتحديد ما اكتمل.
+
 القاعدة: **مهمة واحدة شغالة**، ما ننتقل للي بعدها قبل ما اختبارها يخضر. التواريخ من [PBMS-schedule.xlsx](PBMS-schedule.xlsx).
 المراجع: التفاصيل في [04-tasks.md](04-tasks.md) · الفلو في [06-build-checklist.md](06-build-checklist.md) · القواعد في [project.md](project.md).
 
@@ -134,7 +136,7 @@
 - [ ] **Exit 10:** دورة كاملة حتى Completed وإغلاق الرابط (§43.2)
 
 ## اليوم 11 — الأحد 1/11 — المالية (Backend)
-- [ ] 11.00 قرار D7 (فواتير قانونية)
+- [x] 11.00 قرار D7: فاتورة داخلية غير ضريبية (حُسم 2026-10-23)
 - [ ] 11.01 migrations: payments · allocations · adjustments · proofs · refund_obligations · payouts · invoices · receipts (+CHECK)
 - [ ] 11.02 PaymentService + Allocation (Targeted/FIFO + lockForUpdate) + منع Overpayment
 - [ ] 11.03 Payment proofs (confirm/reject)
@@ -147,7 +149,7 @@
 ## اليوم 12 — الإثنين 2/11 — المالية (واجهات) + الإشعارات والبحث
 - [ ] 12.01 FE: S-051..058 + S-028/029 + Ledger/Receivables/Refunds
 - [ ] 12.02 FE: عرض Data Entry المحدود (S-026/027)
-- [ ] 12.03 Invoices + Receipts PDF عربي
+- [ ] 12.03 Receipts PDF عربي — فواتير S-056/057/094 لها واجهات وPDF داخلي غير ضريبي
 - [ ] 12.04 notifications + actions (dedupe, claim, complete) + listeners
 - [ ] 12.05 FE: S-004/005/006 · Bell realtime
 - [ ] 12.06 Global Search S-062 (MySQL FULLTEXT ngram + فهارس)

@@ -59,7 +59,7 @@ export default function ProductOptions({ product, group, can }: Props) {
                     <PenInput v3 label="ترتيب العرض" inputMode="numeric" value={data.sort_order} onChange={(e) => setData('sort_order', e.target.value)} error={errors.sort_order} readOnly={!can.manage} />
                 </div>
 
-                <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[44px] w-full shrink-0 items-center gap-[12px] bg-[var(--surface-subtle)] p-[0px_14px]">
                         <div className={`${th} w-[120px]`}>الإجراءات</div>
                         <div className={`${th} w-[90px]`}>ترتيب العرض</div>

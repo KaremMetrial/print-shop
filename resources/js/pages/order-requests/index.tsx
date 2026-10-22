@@ -85,7 +85,7 @@ export default function OrderRequestsIndex({ requests, tab, filters, counts, rev
                         onChange={(v) => go({ reviewer: v || undefined })}
                     />
                 </div>
-                <div className="flex w-full shrink-0 flex-col rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[47.5px] w-full shrink-0 items-center bg-[var(--background)] p-[0px_16px]">
                         <div className={`${th} w-[120px]`}>الإجراءات</div>
                         <div className={`${th} w-[90px]`}>المراجع</div>

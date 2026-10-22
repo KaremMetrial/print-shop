@@ -11,6 +11,8 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Services\Audit\AuditService;
 use App\Support\Money;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -41,7 +43,41 @@ class PaymentService
     /** إجمالي مستحقات العميل على أوردراته النشطة. */
     public function customerDue(Customer $c): int
     {
-        return Order::where('customer_id', $c->id)->where('status', '!=', OrderStatus::CANCELLED->value)->get()->sum(fn (Order $o) => $this->due($o));
+        return (int) $this->receivableOrdersQuery()->where('o.customer_id', $c->id)->sum(DB::raw($this->dueExpression()));
+    }
+
+    /** إجمالي المستحقات النشطة لكل العملاء باستعلام تجميعي واحد. */
+    public function totalReceivables(): int
+    {
+        return (int) $this->receivableOrdersQuery()->sum(DB::raw($this->dueExpression()));
+    }
+
+    /** @return Collection<int, \stdClass> */
+    public function customerReceivables(): Collection
+    {
+        $due = $this->dueExpression();
+
+        return $this->receivableOrdersQuery()->join('customers as c', 'c.id', '=', 'o.customer_id')
+            ->select('c.id', 'c.name', 'c.phone_display')
+            ->selectRaw("SUM($due) as due_minor")
+            ->groupBy('c.id', 'c.name', 'c.phone_display')
+            ->havingRaw("SUM($due) > 0")
+            ->orderByDesc('due_minor')
+            ->get();
+    }
+
+    private function receivableOrdersQuery(): Builder
+    {
+        $paid = DB::table('payment_allocations as pa')->join('payments as p', 'p.id', '=', 'pa.payment_id')
+            ->where('p.status', 'CONFIRMED')->select('pa.order_id')->selectRaw('SUM(pa.amount) as paid_minor')->groupBy('pa.order_id');
+
+        return DB::table('orders as o')->leftJoinSub($paid, 'paid', fn ($join) => $join->on('paid.order_id', '=', 'o.id'))
+            ->where('o.status', '!=', OrderStatus::CANCELLED->value);
+    }
+
+    private function dueExpression(): string
+    {
+        return 'GREATEST(o.grand_total - COALESCE(paid.paid_minor, 0), 0)';
     }
 
     public function record(User $actor, Customer $customer, int $amountMinor, string $method, ?Order $target = null, ?string $reference = null, ?string $notes = null): Payment

@@ -43,7 +43,7 @@ export default function ProductActivity({ product, activity }: { product: Produc
         <AppLayout>
             <Head title="سجل نشاط المنتج" />
             <ProductShell product={product} active="activity">
-                <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[44px] w-full shrink-0 items-center gap-[12px] bg-[var(--surface-subtle)] p-[0px_14px]">
                         <div className={`${th} flex-1`}>التفاصيل</div>
                         <div className={`${th} w-[150px]`}>الإجراء</div>

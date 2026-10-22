@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Operations;
 
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
 use App\Models\Payment;
 use App\Services\Finance\PaymentService;
 use Illuminate\Http\Request;
@@ -31,7 +30,7 @@ class AccountantDashboardController extends Controller
             'refunds' => DB::table('refund_obligations as r')->join('orders as o', 'o.id', '=', 'r.order_id')->join('customers as c', 'c.id', '=', 'r.customer_id')->get(['r.id', 'r.amount_due', 'o.order_number', 'c.name'])
                 ->map(fn ($r) => ['id' => $r->id, 'customer' => $r->name, 'order' => $r->order_number, 'remaining_minor' => (int) $r->amount_due - (int) DB::table('refund_payouts')->where('obligation_id', $r->id)->sum('amount')])
                 ->filter(fn ($r) => $r['remaining_minor'] > 0)->take(5)->values()->all(),
-            'receivables' => Customer::orderBy('name')->get()->map(fn (Customer $c) => ['id' => $c->id, 'name' => $c->name, 'due_minor' => $svc->customerDue($c)])->filter(fn ($r) => $r['due_minor'] > 0)->sortByDesc('due_minor')->take(5)->values()->all(),
+            'receivables' => $svc->customerReceivables()->take(5)->map(fn ($r) => ['id' => $r->id, 'name' => $r->name, 'due_minor' => (int) $r->due_minor])->all(),
         ]);
     }
 }

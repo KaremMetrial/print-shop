@@ -53,7 +53,7 @@ export default function JobTicket({ order: o, items }: Props) {
                         <Row k="طريقة التسليم" v={o.delivery_label} />
                         <Row k="ملاحظات التشغيل" v={o.notes || 'تم اعتماد جميع نسخ التصميم — ابدأ الإنتاج'} />
                     </div>
-                    <div className="flex w-full flex-col overflow-hidden rounded-[12px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                    <div className="flex w-full min-w-0 flex-col overflow-x-auto rounded-[12px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                         <div className="flex h-[47.5px] w-full items-center gap-[12px] bg-[#F1F5F9] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
                             <div className={`${th} flex-1`}>ملاحظات التشغيل</div>
                             <div className={`${th} w-[150px]`}>النسخة المعتمدة</div>

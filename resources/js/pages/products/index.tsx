@@ -65,7 +65,7 @@ export default function ProductsIndex({ products, filters, categories, specialti
                 <PenFilterMenu label="حالة المنتج" value={filters.status ?? ''} onChange={(v) => go({ status: v || undefined })} options={[{ value: '', label: 'الكل' }, { value: 'active', label: 'نشط' }, { value: 'inactive', label: 'غير نشط' }]} />
                 <PenFilterMenu label="التصنيف" value={filters.category ?? ''} onChange={(v) => go({ category: v || undefined })} options={[{ value: '', label: 'الكل' }, ...categories.map((c) => ({ value: String(c.id), label: c.name }))]} />
             </div>
-            <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+            <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                 <div className="flex h-[44px] w-full shrink-0 items-center gap-[8px] bg-[var(--surface-subtle)] p-[0px_14px]">
                     <div className={`${th} w-[220px]`}>الإجراءات</div>
                     <div className={`${th} w-[110px]`}>آخر تحديث</div>

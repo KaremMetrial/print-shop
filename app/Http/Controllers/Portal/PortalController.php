@@ -18,6 +18,7 @@ use App\Services\Design\DesignService;
 use App\Services\Finance\InvoiceService;
 use App\Services\Finance\PaymentProofService;
 use App\Services\Finance\PaymentService;
+use App\Services\Orders\OrderStatusLabels;
 use App\Services\Pricing\PricingService;
 use App\Support\Money;
 use Illuminate\Http\JsonResponse;
@@ -53,7 +54,7 @@ class PortalController extends Controller
 
         return Inertia::render('portal/dashboard', [
             'due_minor' => $pay->customerDue($c),
-            'active' => $active->take(5)->map(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => $o->status->label(), 'remaining_minor' => $pay->due($o)])->values(),
+            'active' => $active->take(5)->map(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => app(OrderStatusLabels::class)->label($o->status), 'remaining_minor' => $pay->due($o)])->values(),
             'awaiting' => $needs->map(fn (OrderItem $i) => ['order_id' => $i->order_id, 'item_id' => $i->id, 'name' => $i->product_snapshot['name']])->values(),
             'requests' => OrderRequest::where('customer_id', $c->id)->where('status', 'PENDING')->count(),
         ]);
@@ -120,7 +121,7 @@ class PortalController extends Controller
         $c = $this->me($request);
         $tab = in_array($request->query('tab'), ['done', 'cancelled'], true) ? $request->query('tab') : 'active';
         $q = Order::where('customer_id', $c->id)->when($tab === 'active', fn ($b) => $b->whereNotIn('status', ['COMPLETED', 'CANCELLED']))->when($tab === 'done', fn ($b) => $b->where('status', 'COMPLETED'))->when($tab === 'cancelled', fn ($b) => $b->where('status', 'CANCELLED'));
-        $rows = $q->latest('id')->paginate(10)->withQueryString()->through(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => $o->status->label(), 'at' => $o->created_at?->toIso8601String(), 'total_minor' => $o->grand_total->minor]);
+        $rows = $q->latest('id')->paginate(10)->withQueryString()->through(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => app(OrderStatusLabels::class)->label($o->status), 'at' => $o->created_at?->toIso8601String(), 'total_minor' => $o->grand_total->minor]);
 
         return Inertia::render('portal/orders', ['orders' => $rows, 'tab' => $tab]);
     }
@@ -132,7 +133,7 @@ class PortalController extends Controller
 
         return Inertia::render('portal/order-show', [
             'order' => [
-                'id' => $order->id, 'number' => $order->order_number, 'status' => $order->status->label(), 'status_key' => $order->status->value, 'created_at' => $order->created_at?->toIso8601String(),
+                'id' => $order->id, 'number' => $order->order_number, 'status' => app(OrderStatusLabels::class)->label($order->status), 'status_key' => $order->status->value, 'created_at' => $order->created_at?->toIso8601String(),
                 'delivery_method' => $order->delivery_method, 'delivery_address' => $order->delivery_address, 'delivery_fee_minor' => $order->delivery_fee->minor, 'grand_total_minor' => $order->grand_total->minor,
                 'has_invoice' => Invoice::where('active_order_id', $order->id)->exists(),
                 'paid_minor' => $pay->paid($order), 'remaining_minor' => $pay->due($order),

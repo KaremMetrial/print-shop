@@ -21,7 +21,7 @@ export default function ActionsLog({ actions: p }: Props) {
                     </Link>
                     <h1 className="flex-1 text-right text-[32px] leading-[44px] font-[700] text-[var(--ink)]">سجل الإجراءات</h1>
                 </div>
-                <div className="flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[44px] w-full shrink-0 items-center gap-[8px] bg-[var(--background)] p-[0px_16px]">
                         <div className={`${th} w-[160px]`}>وقت الإنهاء</div>
                         <div className={`${th} w-[130px]`}>أنهاه</div>

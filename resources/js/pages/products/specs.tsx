@@ -19,7 +19,7 @@ export default function ProductSpecs({ product, groups, can }: { product: Produc
         <AppLayout>
             <Head title="مواصفات المنتج" />
             <ProductShell product={product} active="specs">
-                <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[44px] w-full shrink-0 items-center gap-[12px] bg-[var(--surface-subtle)] p-[0px_16px]">
                         <div className={`${th} w-[92px]`}>الإجراءات</div>
                         <div className={`${th} w-[480px]`}>القيم المتاحة</div>

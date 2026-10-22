@@ -15,6 +15,7 @@ use App\Services\Design\DesignService;
 use App\Services\Finance\InvoiceService;
 use App\Services\Finance\PaymentProofService;
 use App\Services\Orders\OrderLinkService;
+use App\Services\Orders\OrderStatusLabels;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -115,7 +116,8 @@ class PublicLinkController extends Controller
         $paid = $o->paidMinor();
 
         return [
-            'number' => $o->order_number, 'customer' => $o->customer->name, 'status' => $o->status->value, 'status_label' => $o->status->label(),
+            'number' => $o->order_number, 'customer' => $o->customer->name, 'status' => $o->status->value, 'status_label' => app(OrderStatusLabels::class)->label($o->status),
+            'status_labels' => app(OrderStatusLabels::class)->all(),
             'created_at' => $o->created_at?->toIso8601String(), 'delivery_method' => $o->delivery_method, 'delivery_address' => $o->delivery_address, 'delivery_fee_minor' => $o->delivery_fee->minor,
             'has_invoice' => Invoice::where('active_order_id', $o->id)->exists(), 'grand_total_minor' => $o->grand_total->minor, 'paid_minor' => $paid, 'remaining_minor' => $o->grand_total->minor - $paid,
             'items' => $o->items->whereNull('cancelled_at')->values()->map(fn (OrderItem $i) => [

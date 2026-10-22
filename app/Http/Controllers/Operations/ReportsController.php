@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Orders\OrderStatusLabels;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +20,7 @@ class ReportsController extends Controller
     {
         [$from, $to, $ops, $fin] = $this->reportData($request);
 
-        return Inertia::render('operations/reports', ['from' => $from, 'to' => $to, 'ops' => $ops, 'fin' => $fin]);
+        return Inertia::render('operations/reports', ['from' => $from, 'to' => $to, 'ops' => $ops, 'fin' => $fin, 'statusLabels' => app(OrderStatusLabels::class)->all()]);
     }
 
     public function export(Request $request): \Illuminate\Http\Response
@@ -32,7 +33,7 @@ class ReportsController extends Controller
             $rows[] = ['تشغيلي', 'أوردرات مكتملة', $ops['completed']];
             $rows[] = ['تشغيلي', 'أوردرات ملغاة', $ops['cancelled']];
             foreach ($ops['by_status'] as $status => $count) {
-                $rows[] = ['تشغيلي', 'حسب الحالة — '.OrderStatus::from($status)->label(), $count];
+                $rows[] = ['تشغيلي', 'حسب الحالة — '.app(OrderStatusLabels::class)->label(OrderStatus::from($status)), $count];
             }
         }
 

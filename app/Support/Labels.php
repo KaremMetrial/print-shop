@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\Role;
+use App\Services\Orders\OrderStatusLabels;
 
 /** تسميات عربية موحّدة لسجل التدقيق: الإجراءات، الكيانات، الأدوار، أسماء الحقول، وقيمها. أي مفتاح جديد يُضاف هنا (يفحصه اختبار). */
 class Labels
@@ -52,6 +53,9 @@ class Labels
         'quantity' => 'الكمية', 'reason' => 'السبب', 'reviewer_id' => 'المراجع', 'role' => 'الدور', 'specialty_ids' => 'التخصصات', 'status' => 'الحالة', 'target' => 'الأوردر المستهدف',
         'to' => 'إلى', 'values' => 'القيم', 'version' => 'النسخة', 'version_id' => 'النسخة', 'base_unit_price' => 'سعر الوحدة الأساسي', 'shop.name' => 'اسم المطبعة',
         'shop.branch' => 'الفرع', 'shop.phone' => 'هاتف المطبعة', 'orders.default_eta_days' => 'مدة الطباعة الافتراضية', 'orders.auto_complete_hours' => 'ساعات الإتمام التلقائي',
+        'orders.status_label.DESIGN_STAGE' => 'مسمى حالة مرحلة التصميم', 'orders.status_label.IN_PRINTING' => 'مسمى حالة قيد الطباعة',
+        'orders.status_label.READY_FOR_PICKUP' => 'مسمى حالة جاهز للاستلام', 'orders.status_label.READY_FOR_DELIVERY' => 'مسمى حالة جاهز للتوصيل',
+        'orders.status_label.OUT_FOR_DELIVERY' => 'مسمى حالة خرج للتوصيل', 'orders.status_label.COMPLETED' => 'مسمى حالة مكتمل', 'orders.status_label.CANCELLED' => 'مسمى حالة ملغي',
         'payments.methods' => 'طرق الدفع المتاحة', 'files.max_mb' => 'حد حجم الملف (MB)', 'availability' => 'التوفر', 'method' => 'طريقة الدفع', 'type' => 'النوع',
         'invoice_id' => 'الفاتورة', 'is_default' => 'افتراضي', 'sort_order' => 'الترتيب', 'old_amount' => 'المبلغ السابق', 'new_amount' => 'المبلغ الجديد', 'permissions' => 'الصلاحيات',
     ];
@@ -112,7 +116,7 @@ class Labels
             return number_format(((int) $v) / 100, 2).' ج.م';
         }
         if ($key === 'status' && OrderStatus::tryFrom($s)) {
-            return OrderStatus::from($s)->label();
+            return app(OrderStatusLabels::class)->label(OrderStatus::from($s));
         }
 
         return self::VALUES[$s] ?? $s;

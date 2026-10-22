@@ -33,7 +33,7 @@ class OrderPresenter
 
         return [
             'order' => [
-                'id' => $order->id, 'number' => $order->order_number, 'status' => $order->status->value, 'status_label' => $order->status->label(),
+                'id' => $order->id, 'number' => $order->order_number, 'status' => $order->status->value, 'status_label' => app(OrderStatusLabels::class)->label($order->status),
                 'customer' => ['id' => $c->id, 'name' => $c->name, 'phone' => $c->phone_normalized, 'phone_display' => $c->phone_display],
                 'created_at' => $order->created_at?->toIso8601String(), 'updated_at' => $order->updated_at?->toIso8601String(),
                 'delivery_method' => $order->delivery_method, 'delivery_address' => $order->delivery_address, 'eta_days' => $order->printing_eta_days,

@@ -9,16 +9,8 @@ interface Props {
     to: string;
     ops: { created: number; by_status: Record<string, number>; completed: number; cancelled: number } | null;
     fin: { orders_value: number; collected: number; refunds_due: number; by_method: Record<string, number> } | null;
+    statusLabels: Record<string, string>;
 }
-const ST: Record<string, string> = {
-    DESIGN_STAGE: 'مرحلة التصميم',
-    IN_PRINTING: 'قيد الطباعة',
-    READY_FOR_PICKUP: 'جاهز للاستلام',
-    READY_FOR_DELIVERY: 'جاهز للتوصيل',
-    OUT_FOR_DELIVERY: 'خرج للتوصيل',
-    COMPLETED: 'مكتمل',
-    CANCELLED: 'ملغي',
-};
 const Card = ({ k, v }: { k: string; v: string | number }) => (
     <div className="flex flex-1 flex-col gap-[4px] rounded-[12px] bg-[var(--surface)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
         <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">{k}</div>
@@ -27,7 +19,7 @@ const Card = ({ k, v }: { k: string; v: string | number }) => (
 );
 
 /** S-060/061 — التقارير التشغيلية والمالية لفترة محددة. */
-export default function Reports({ from, to, ops, fin }: Props) {
+export default function Reports({ from, to, ops, fin, statusLabels }: Props) {
     const { labels } = usePaymentMethods();
     const go = (n: Record<string, string>) => router.get('/reports', { from, to, ...n }, { preserveState: true, preserveScroll: true });
     const fld = 'h-[46px] rounded-[10px] bg-[var(--background)] p-[0px_14px] text-[14px] [outline:1px_solid_var(--control-border)]';
@@ -62,7 +54,7 @@ export default function Reports({ from, to, ops, fin }: Props) {
                         </div>
                         <div className="flex w-full flex-wrap gap-[12px]">
                             {Object.entries(ops.by_status).map(([k, v]) => (
-                                <Card key={k} k={ST[k] ?? k} v={v} />
+                                <Card key={k} k={statusLabels[k] ?? k} v={v} />
                             ))}
                         </div>
                     </>

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderRequest;
 use App\Services\Finance\PaymentService;
+use App\Services\Orders\OrderStatusLabels;
 use App\Services\Settings\Settings;
 use App\Support\PenFixtures;
 use Illuminate\Http\Request;
@@ -54,7 +54,7 @@ class DashboardController extends Controller
             'finance' => $canFinance ? [
                 'collected_today' => (int) DB::table('payments')->where('status', 'CONFIRMED')->where('received_at', '>=', $from)->sum('amount'),
                 'collected_week' => (int) DB::table('payments')->where('status', 'CONFIRMED')->where('received_at', '>=', now()->startOfWeek())->sum('amount'),
-                'receivables' => Customer::get()->sum(fn (Customer $c) => app(PaymentService::class)->customerDue($c)),
+                'receivables' => app(PaymentService::class)->totalReceivables(),
                 'order_value_today' => (int) Order::where('created_at', '>=', $from)->where('status', '!=', 'CANCELLED')->sum('grand_total'),
                 'refund_due' => (int) DB::table('refund_obligations')->sum('amount_due') - (int) DB::table('refund_payouts')->sum('amount'),
             ] : null,
@@ -64,13 +64,14 @@ class DashboardController extends Controller
                 'items' => (clone $openActions)->orderBy('created_at')->limit(3)->get()->map(fn ($a) => ['title' => $a->title, 'sub' => trim(($a->customer ?? '').' • '.($a->order_ref ?? ''), ' •'), 'href' => '/actions'])->all(),
             ],
             'recent' => Order::with('customer:id,name')->latest('id')->limit(5)->get()->map(fn (Order $o) => [
-                'id' => $o->id, 'no' => $o->order_number, 'subject' => $o->customer->name, 'status' => $o->status->label(),
+                'id' => $o->id, 'no' => $o->order_number, 'subject' => $o->customer->name, 'status' => app(OrderStatusLabels::class)->label($o->status),
                 'tone' => match ($o->status->value) {
                     'DESIGN_STAGE' => 'design', 'IN_PRINTING' => 'info', 'CANCELLED' => 'danger', 'COMPLETED' => 'neutral', default => 'ok'
                 },
                 'due' => $this->due($o), 'total_minor' => $o->grand_total->minor, 'href' => "/orders/{$o->id}",
             ])->all(),
             'branch' => app(Settings::class)->get('shop.branch'),
+            'statusLabels' => app(OrderStatusLabels::class)->all(),
         ];
 
         // بيانات عينة الـpen للمقارنة البصرية فقط (local) — لا تُستعمل خارج بيئة التطوير.

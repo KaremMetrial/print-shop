@@ -1,13 +1,96 @@
-import { icons } from 'lucide-react';
+import {
+    Bell,
+    ChartNoAxesCombined,
+    Check,
+    ChevronDown,
+    ChevronUp,
+    Circle,
+    CircleAlert,
+    CircleCheck,
+    ClipboardList,
+    CloudUpload,
+    Contact,
+    Eye,
+    EyeOff,
+    FileImage,
+    FileText,
+    Files,
+    Folder,
+    History,
+    Inbox,
+    LayoutDashboard,
+    Link2Off,
+    ListChecks,
+    LockKeyhole,
+    Package,
+    PenTool,
+    Printer,
+    Receipt,
+    ScanSearch,
+    Search,
+    Settings,
+    ShieldCheck,
+    SquarePlus,
+    Tags,
+    TriangleAlert,
+    Truck,
+    User,
+    UserRound,
+    Users,
+    Wallet,
+    type LucideIcon,
+} from 'lucide-react';
 
 const toPascal = (s: string) => s.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
+
+const ICONS: Record<string, LucideIcon> = {
+    bell: Bell,
+    'chart-no-axes-combined': ChartNoAxesCombined,
+    check: Check,
+    'chevron-down': ChevronDown,
+    'chevron-up': ChevronUp,
+    circle: Circle,
+    'circle-alert': CircleAlert,
+    'circle-check': CircleCheck,
+    'clipboard-list': ClipboardList,
+    'cloud-upload': CloudUpload,
+    contact: Contact,
+    eye: Eye,
+    'eye-off': EyeOff,
+    'file-image': FileImage,
+    'file-text': FileText,
+    files: Files,
+    folder: Folder,
+    history: History,
+    inbox: Inbox,
+    'layout-dashboard': LayoutDashboard,
+    'link-2-off': Link2Off,
+    'list-checks': ListChecks,
+    'lock-keyhole': LockKeyhole,
+    package: Package,
+    'pen-tool': PenTool,
+    printer: Printer,
+    receipt: Receipt,
+    'scan-search': ScanSearch,
+    search: Search,
+    settings: Settings,
+    'shield-check': ShieldCheck,
+    'square-plus': SquarePlus,
+    tags: Tags,
+    'triangle-alert': TriangleAlert,
+    truck: Truck,
+    user: User,
+    'user-round': UserRound,
+    users: Users,
+    wallet: Wallet,
+};
 
 /**
  * أيقونات الـpen = lucide بالاسم نفسه (data-icon-name). حجم/لون من className/color كما في التصميم.
  * التصدير من الـpen يرسم الأيقونة كـfill؛ هنا نستخدم stroke lucide الأصلي بنفس الحجم واللون.
  */
 export function Icon({ name, className, color }: { name: string; className?: string; color?: string }) {
-    const Cmp = icons[toPascal(name) as keyof typeof icons];
+    const Cmp = ICONS[name] ?? ICONS[toPascal(name)];
     if (!Cmp) return <span className={className} aria-hidden />;
     // var(--x) غير مسموح كـ attribute في SVG → نمرر اللون عبر style/currentColor.
     return <Cmp className={className} color="currentColor" style={{ color }} aria-hidden />;

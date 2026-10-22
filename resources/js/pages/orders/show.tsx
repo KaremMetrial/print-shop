@@ -92,15 +92,15 @@ const dt = (iso: string, seconds = false) => `${formatDate(iso)}، ${formatTime(
 const dShort = (iso: string) => `${formatDate(iso, { year: false })}، ${formatTime(iso)}`;
 const eta = (n: number | null) => (n === null ? '—' : n === 2 ? 'يومان' : n === 1 ? 'يوم' : `${n} أيام`);
 const deliveryLabel = (m: string) => (m === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة');
-const waitText = (s: string) =>
+const waitText = (s: string, label: string) =>
     ({
         DESIGN_STAGE: 'بانتظار اعتماد جميع التصميمات قبل الطباعة.',
-        IN_PRINTING: 'الأوردر قيد الطباعة.',
-        READY_FOR_PICKUP: 'الأوردر جاهز للاستلام من المطبعة.',
-        READY_FOR_DELIVERY: 'الأوردر جاهز للتوصيل.',
-        OUT_FOR_DELIVERY: 'الأوردر خرج للتوصيل.',
-        COMPLETED: 'تم إتمام الأوردر.',
-        CANCELLED: 'الأوردر ملغي.',
+        IN_PRINTING: `الأوردر ${label}.`,
+        READY_FOR_PICKUP: `الأوردر ${label} من المطبعة.`,
+        READY_FOR_DELIVERY: `الأوردر ${label}.`,
+        OUT_FOR_DELIVERY: `الأوردر ${label}.`,
+        COMPLETED: `تم وضع الأوردر كـ ${label}.`,
+        CANCELLED: `الأوردر ${label}.`,
     })[s] ?? '';
 
 const panel = 'flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
@@ -414,7 +414,7 @@ function Payments({ p, onPay }: { p: Props; onPay: () => void }) {
                 )}
                 <div className="flex-1 text-right text-[18px] leading-[29px] font-[700] text-[var(--ink)]">سجل المدفوعات</div>
             </div>
-            <div className={panel}>
+            <div className={`${panel} min-w-0 overflow-x-auto`}>
                 <div className="flex h-[47.5px] w-full shrink-0 items-center gap-[12px] bg-[#F1F5F9] p-[0px_16px]">
                     <div className={`${th} w-[220px] shrink-0`}>الإجراءات</div>
                     <div className={`${th} w-[90px] shrink-0`}>الحالة</div>
@@ -469,7 +469,7 @@ function Delivery({ p }: { p: Props }) {
             <div className={`${panel} gap-[10px] p-[18px]`}>
                 <div className="w-full text-right text-[16px] leading-[26px] font-[700] text-[var(--ink)]">الحالة الحالية</div>
                 <StatusPill tone="amber">{o.status_label}</StatusPill>
-                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">{waitText(o.status)}</div>
+                <div className="w-full text-right text-[12px] leading-[19px] font-[400] text-[var(--muted-foreground)]">{waitText(o.status, o.status_label)}</div>
                 <div className="flex w-full shrink-0 items-center justify-end gap-[12px]">
                     {p.can.update && (
                         <Link href={`/orders/${o.id}/edit`} className={btn34}>
@@ -551,7 +551,7 @@ function Activity({ p }: { p: Props }) {
     return (
         <>
             <div className="w-full text-right text-[19px] leading-[30px] font-[700] text-[var(--ink)]">سجل نشاط الأوردر</div>
-            <div className={panel}>
+            <div className={`${panel} min-w-0 overflow-x-auto`}>
                 <div className="flex h-[47.5px] w-full shrink-0 items-center gap-[12px] bg-[#F1F5F9] p-[0px_16px]">
                     <div className={`${th} flex-1`}>التفاصيل</div>
                     <div className={`${th} w-[190px] shrink-0`}>الإجراء</div>

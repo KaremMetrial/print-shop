@@ -80,7 +80,7 @@ export default function EmployeesIndex({ employees, filters, roles, can, selecte
                 <div className={penNote}>توفر المصمم ينطبق على حسابات المصممين فقط.</div>
             </div>
 
-            <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+            <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                 <div className="flex w-full shrink-0 gap-[12px] bg-[var(--background)] p-[14px_16px]">
                     {['الإجراءات', 'آخر دخول', 'تاريخ الإنشاء', 'توفر المصمم', 'حالة الحساب', 'الدور', 'البريد الإلكتروني', 'الموظف'].map((h) => (
                         <div key={h} className={th}>

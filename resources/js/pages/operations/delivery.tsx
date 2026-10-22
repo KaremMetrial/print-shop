@@ -29,32 +29,13 @@ interface Props {
     tab: Tab;
     counts: Record<Tab, number>;
     filters: Record<string, string>;
+    statusLabels: Record<string, string>;
     can: { printing: boolean; delivery: boolean; complete: boolean };
 }
-const TABS: [Tab, string][] = [
-    ['printing', 'قيد الطباعة'],
-    ['pickup', 'جاهز للاستلام'],
-    ['delivery', 'جاهز للتوصيل'],
-    ['out', 'خرج للتوصيل'],
-    ['done', 'مكتمل'],
-];
-const TITLE: Record<Tab, string> = {
-    printing: 'الأوردرات قيد الطباعة',
-    pickup: 'الأوردرات الجاهزة للاستلام',
-    delivery: 'الأوردرات الجاهزة للتوصيل',
-    out: 'الأوردرات التي خرجت للتوصيل',
-    done: 'الأوردرات المكتملة',
-};
-const EMPTY: Record<Tab, string> = {
-    printing: 'لا توجد أوردرات قيد الطباعة.',
-    pickup: 'لا توجد أوردرات جاهزة للاستلام. ستظهر هنا بعد انتهاء طباعتها وتجهيزها للاستلام.',
-    delivery: 'لا توجد أوردرات جاهزة للتوصيل.',
-    out: 'لا توجد أوردرات خارجة للتوصيل.',
-    done: 'لا توجد أوردرات مكتملة.',
-};
+const STATUS_KEY: Record<Tab, string> = { printing: 'IN_PRINTING', pickup: 'READY_FOR_PICKUP', delivery: 'READY_FOR_DELIVERY', out: 'OUT_FOR_DELIVERY', done: 'COMPLETED' };
 
 /** S-059 — الطباعة والتسليم. الانتقال يتم عبر زر واحد للأوردر كله (BR-031/032) وبتأكيد. */
-export default function Delivery({ orders, tab, counts, filters, can }: Props) {
+export default function Delivery({ orders, tab, counts, filters, can, statusLabels }: Props) {
     const go = (n: Record<string, string | undefined>) => router.get('/delivery', { tab, ...filters, ...n }, { preserveState: true, preserveScroll: true });
     const [pending, setPending] = useState<{ id: number; s: string; msg: string } | null>(null);
     const step = (id: number, s: string, msg: string) => setPending({ id, s, msg });
@@ -83,7 +64,7 @@ export default function Delivery({ orders, tab, counts, filters, can }: Props) {
                     title="الطباعة والتسليم"
                     subtitle="متابعة تنفيذ الأوردرات وتجهيزها للتسليم."
                 />
-                <TabsBar tabs={TABS.map(([k, l]) => [k, `${l} (${counts[k]})`])} value={tab} onChange={(t) => go({ tab: t, page: undefined })} />
+                <TabsBar tabs={(Object.keys(STATUS_KEY) as Tab[]).map((k) => [k, `${statusLabels[STATUS_KEY[k]]} (${counts[k]})`])} value={tab} onChange={(t) => go({ tab: t, page: undefined })} />
                 <div className="flex w-full shrink-0 items-center gap-[12px]">
                     <PenFilterMenu
                         label="طريقة التسليم"
@@ -93,9 +74,9 @@ export default function Delivery({ orders, tab, counts, filters, can }: Props) {
                     />
                     <SearchBox value={filters.q ?? ''} onSubmit={(q) => go({ q: q || undefined })} placeholder="ابحث برقم الأوردر أو اسم العميل" />
                 </div>
-                <div className="w-full text-right text-[18px] leading-[28px] font-[700] text-[var(--ink)]">{TITLE[tab]}</div>
+                <div className="w-full text-right text-[18px] leading-[28px] font-[700] text-[var(--ink)]">أوردرات {statusLabels[STATUS_KEY[tab]]}</div>
                 <DataGrid
-                    empty={EMPTY[tab]}
+                    empty={`لا توجد أوردرات بحالة ${statusLabels[STATUS_KEY[tab]]}.`}
                     rows={orders.data}
                     cols={[
                         {

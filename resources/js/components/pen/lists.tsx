@@ -65,32 +65,25 @@ export interface Col<T> {
 }
 /** جدول: الأعمدة بترتيب DOM (الأول أقصى اليسار) كما في الـpen. */
 export function DataGrid<T extends { id: number | string }>({ cols, rows, empty }: { cols: Col<T>[]; rows: T[]; empty: string }) {
+    const template = cols.map((c) => c.w ? `minmax(${c.w}px, ${c.w}fr)` : 'minmax(140px, 1fr)').join(' ');
+    const minWidth = cols.reduce((width, col) => width + (col.w ?? 140), 0) + Math.max(0, cols.length - 1) * 10 + 32;
+    const tableStyle = { gridTemplateColumns: template, width: `max(100%, ${minWidth}px)` };
+
     return (
         <>
-            <div className="hidden w-full shrink-0 flex-col overflow-hidden rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] md:flex">
-                <div className="flex h-[44px] w-full shrink-0 items-center gap-[10px] bg-[var(--background)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
+            <div className="hidden w-full min-w-0 overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] md:block">
+                <div className="grid h-[44px] items-center gap-[10px] bg-[var(--background)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]" style={tableStyle}>
                     {cols.map((c) => (
-                        <div
-                            key={c.h}
-                            className={`${c.w ? '' : 'flex-1'} shrink-0 text-right text-[12px] leading-[19px] font-[600] text-[#475569]`}
-                            style={c.w ? { width: c.w } : undefined}
-                        >
+                        <div key={c.h} className="min-w-0 text-right text-[12px] leading-[19px] font-[600] text-[#475569]">
                             {c.h}
                         </div>
                     ))}
                 </div>
-                {rows.length === 0 && <div className="w-full p-[40px] text-center text-[14px] text-[var(--muted-foreground)]">{empty}</div>}
+                {rows.length === 0 && <div className="p-[40px] text-center text-[14px] text-[var(--muted-foreground)]" style={tableStyle}>{empty}</div>}
                 {rows.map((r) => (
-                    <div
-                        key={r.id}
-                        className="flex min-h-[60px] w-full shrink-0 items-center gap-[10px] p-[8px_16px] [border-bottom:1px_solid_var(--border)] last:border-b-0"
-                    >
+                    <div key={r.id} className="grid min-h-[60px] items-center gap-[10px] p-[8px_16px] [border-bottom:1px_solid_var(--border)] last:border-b-0" style={tableStyle}>
                         {cols.map((c) => (
-                            <div
-                                key={c.h}
-                                className={`${c.w ? '' : 'flex-1'} min-w-0 shrink-0 text-right text-[12px] leading-[19px] text-[var(--ink)]`}
-                                style={c.w ? { width: c.w } : undefined}
-                            >
+                            <div key={c.h} className="min-w-0 text-right text-[12px] leading-[19px] text-[var(--ink)]">
                                 {c.cell(r)}
                             </div>
                         ))}

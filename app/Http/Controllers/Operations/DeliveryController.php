@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Operations;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Orders\OrderStatusLabels;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -34,6 +35,7 @@ class DeliveryController extends Controller
 
         return Inertia::render('operations/delivery', [
             'orders' => $rows, 'tab' => $tab, 'counts' => $counts, 'filters' => $request->only(['q', 'method']),
+            'statusLabels' => app(OrderStatusLabels::class)->all(),
             'can' => ['printing' => (bool) $u->hasPermission('orders.printing.complete'), 'delivery' => (bool) $u->hasPermission('orders.delivery.update'), 'complete' => (bool) $u->hasPermission('orders.complete')],
         ]);
     }

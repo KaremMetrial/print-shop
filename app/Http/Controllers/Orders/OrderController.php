@@ -15,6 +15,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\Orders\OrderPresenter;
+use App\Services\Orders\OrderStatusLabels;
 use App\Support\PenFixtures;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -213,13 +214,13 @@ class OrderController extends Controller
 
         $rows = $q->paginate(15)->withQueryString()->through(fn (Order $o) => [
             'id' => $o->id, 'number' => $o->order_number, 'customer' => $o->customer->name, 'phone' => $o->customer->phone_display,
-            'status' => $o->status->value, 'status_label' => $o->status->label(), 'delivery_method' => $o->delivery_method,
+            'status' => $o->status->value, 'status_label' => app(OrderStatusLabels::class)->label($o->status), 'delivery_method' => $o->delivery_method,
             'items_count' => $o->active_items_count, 'grand_total_minor' => $o->grand_total->minor, 'created_at' => $o->created_at?->toIso8601String(),
         ]);
 
         return Inertia::render('orders/index', [
             'orders' => $rows, 'filters' => $request->only(['q', 'status', 'delivery']),
-            'statuses' => collect(OrderStatus::cases())->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()])->all(),
+            'statuses' => collect(OrderStatus::cases())->map(fn ($s) => ['value' => $s->value, 'label' => app(OrderStatusLabels::class)->label($s)])->all(),
             'can' => ['create' => (bool) $request->user()->hasPermission('orders.create')],
             'total' => Order::count(),
         ]);

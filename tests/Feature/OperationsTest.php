@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Audit\AuditService;
 use App\Services\Finance\PaymentService;
 use App\Services\Notifications\NotificationService;
+use App\Services\Orders\OrderStatusLabels;
 use App\Services\Settings\Settings;
 use Illuminate\Support\Facades\DB;
 
@@ -67,6 +68,23 @@ it('updates settings only for known keys and permitted groups, with audit', func
     $this->patchJson('/settings/system', ['values' => ['hack.key' => 'x']])->assertForbidden();
     $this->patchJson('/settings/system', ['values' => ['orders.default_eta_days' => 'abc']])->assertStatus(422);
     $this->actingAs(User::factory()->designer()->create())->get('/settings/system')->assertForbidden();
+});
+
+it('customizes displayed order status names without changing their workflow keys', function () {
+    $admin = User::factory()->admin()->create();
+    $this->actingAs($admin);
+    $order = Order::factory()->create(['status' => OrderStatus::IN_PRINTING]);
+
+    $this->patch('/settings/system', ['values' => ['orders.status_label.IN_PRINTING' => 'تحت الطباعة']])->assertRedirect();
+    $this->get('/orders')->assertInertia(fn ($p) => $p
+        ->where('orders.data.0.status', OrderStatus::IN_PRINTING->value)
+        ->where('orders.data.0.status_label', 'تحت الطباعة')
+        ->where('statuses.1.label', 'تحت الطباعة'));
+    expect(app(OrderStatusLabels::class)->label($order->status))->toBe('تحت الطباعة');
+
+    $this->patch('/settings/system', ['values' => ['orders.status_label.IN_PRINTING' => '']])->assertRedirect();
+    expect(app(OrderStatusLabels::class)->label($order->status))->toBe('قيد الطباعة');
+    $this->patch('/settings/system', ['values' => ['orders.status_label.IN_PRINTING' => str_repeat('ط', 41)]], ['Accept' => 'application/json'])->assertStatus(422);
 });
 
 it('records, corrects, voids payments and pays refunds through the accounting endpoints', function () {

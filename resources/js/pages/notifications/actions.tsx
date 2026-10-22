@@ -87,7 +87,7 @@ export default function Actions({ actions: p, filters, counts }: Props) {
                     </form>
                 </div>
                 <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">الأولوية للأعمال المتأخرة وغير المسندة • الأقدم أولًا</div>
-                <div className="flex w-full shrink-0 flex-col rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+                <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[12px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                     <div className="flex h-[44px] w-full shrink-0 items-center gap-[8px] bg-[var(--background)] p-[0px_16px]">
                         <div className={`${th} w-[170px]`}>الإجراء</div>
                         <div className={`${th} w-[90px]`}>الحالة</div>

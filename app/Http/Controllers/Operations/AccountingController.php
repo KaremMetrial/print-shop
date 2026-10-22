@@ -39,7 +39,7 @@ class AccountingController extends Controller
             $props['customers'] = $u->hasPermission('payments.create') ? Customer::orderBy('name')->limit(300)->get(['id', 'name']) : [];
         }
         if ($tab === 'receivables') {
-            $rows = Customer::orderBy('name')->get()->map(fn (Customer $c) => ['id' => $c->id, 'name' => $c->name, 'phone' => $c->phone_display, 'due_minor' => $svc->customerDue($c)])->filter(fn ($r) => $r['due_minor'] > 0)->sortByDesc('due_minor')->values();
+            $rows = $svc->customerReceivables()->map(fn ($r) => ['id' => $r->id, 'name' => $r->name, 'phone' => $r->phone_display, 'due_minor' => (int) $r->due_minor]);
             $props['receivables'] = $rows;
             $props['total_due_minor'] = $rows->sum('due_minor');
         }

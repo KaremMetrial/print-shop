@@ -71,7 +71,7 @@ export default function OrdersIndex({ orders, filters, statuses, can, total }: P
             </div>
             <div className="w-full text-right text-[13px] leading-[21px] font-[400] text-[var(--muted-foreground)]">{orders.total === 0 ? 'لا توجد نتائج' : `عرض ${orders.from}–${orders.to} من ${orders.total} أوردرًا`}</div>
 
-            <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+            <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[10px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
                 <div className="flex h-[43.5px] w-full shrink-0 items-center gap-[10px] bg-[var(--surface-subtle)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
                     <div className={`${th} w-[110px]`}>الإجراءات</div>
                     <div className={`${th} w-[110px]`}>تاريخ الإنشاء</div>

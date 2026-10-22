@@ -4,7 +4,10 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
+
 @custom-variant dark (&:is(.dark *));
+
+
 
 @theme {
     --font-sans:
@@ -253,6 +256,8 @@
 }
 
 html { font-family: var(--font-sans); scrollbar-gutter: stable; overflow-y: scroll; }
+/* النافذة تحجب تمرير body لكن شريط html يظل محجوزًا أعلاه؛ لا تضف هامش التعويض مرة ثانية. */
+html body[data-scroll-locked] { margin-right: 0 !important; padding-right: 0 !important; }
 /* قائمة الشريط الجانبي تتمرر بدون إظهار شريط تمرير يزيح التخطيط */
 nav[aria-label="القائمة الرئيسية"] { scrollbar-width: none; }
 nav[aria-label="القائمة الرئيسية"]::-webkit-scrollbar { display: none; }

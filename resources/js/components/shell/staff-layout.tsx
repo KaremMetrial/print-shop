@@ -21,7 +21,7 @@ export function StaffLayout({ children, nav }: { children: React.ReactNode; nav?
             <div className="flex min-w-0 flex-1 flex-col">
                 <StaffTopbar onMenu={() => setOpen(true)} />
                 <RealtimeNotifications />
-                <main className="flex w-full shrink-0 flex-col gap-[20px] p-[16px] lg:p-[32px]">
+                <main className="flex w-full min-w-0 flex-col gap-[20px] p-[16px] lg:p-[32px]">
                     <FlashMessages />
                     {children}
                 </main>

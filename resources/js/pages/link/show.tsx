@@ -12,6 +12,7 @@ interface Props {
         customer: string;
         status: string;
         status_label: string;
+        status_labels: Record<string, string>;
         created_at: string;
         delivery_method: 'PICKUP' | 'DELIVERY';
         delivery_address: string | null;
@@ -24,11 +25,11 @@ interface Props {
     };
 }
 const STAGES = [
-    ['COMPLETED', 'مكتمل'],
-    ['OUT_FOR_DELIVERY', 'خرج للتوصيل'],
-    ['READY_FOR_DELIVERY', 'جاهز للتوصيل'],
-    ['IN_PRINTING', 'قيد الطباعة'],
-    ['DESIGN_STAGE', 'مرحلة التصميم'],
+    'COMPLETED',
+    'OUT_FOR_DELIVERY',
+    'READY_FOR_DELIVERY',
+    'IN_PRINTING',
+    'DESIGN_STAGE',
 ] as const;
 const ORDER = ['DESIGN_STAGE', 'IN_PRINTING', 'READY_FOR_DELIVERY', 'OUT_FOR_DELIVERY', 'COMPLETED'];
 const ORD = ['', 'الأولى', 'الثانية', 'الثالثة', 'الرابعة'];
@@ -40,12 +41,12 @@ const KV = ({ k, v }: { k: string; v: string }) => (
         <div className="text-left text-[12px] leading-[normal] font-[400] text-[var(--muted-foreground)]">{k}</div>
     </div>
 );
-const MSG: Record<string, [string, string]> = {
-    DESIGN_STAGE: ['الأوردر حاليًا في مرحلة التصميم.', 'تبدأ الطباعة بعد اعتماد جميع التصميمات.'],
-    IN_PRINTING: ['طلبك قيد الطباعة', 'تم اعتماد جميع التصميمات وبدأت الطباعة. سنُعلمك عند الجاهزية.'],
-    READY_FOR_PICKUP: ['طلبك جاهز للاستلام', 'يمكنك استلام طلبك من المطبعة.'],
-    READY_FOR_DELIVERY: ['طلبك جاهز للتوصيل', 'سيتم تسليم الأوردر قريبًا.'],
-    OUT_FOR_DELIVERY: ['طلبك خرج للتوصيل', 'المندوب في الطريق إلى العنوان المسجّل.'],
+const MSG: Record<string, string> = {
+    DESIGN_STAGE: 'تبدأ الطباعة بعد اعتماد جميع التصميمات.',
+    IN_PRINTING: 'تم اعتماد جميع التصميمات وبدأت الطباعة. سنُعلمك عند الجاهزية.',
+    READY_FOR_PICKUP: 'يمكنك استلام طلبك من المطبعة.',
+    READY_FOR_DELIVERY: 'سيتم تسليم الأوردر قريبًا.',
+    OUT_FOR_DELIVERY: 'المندوب في الطريق إلى العنوان المسجّل.',
 };
 const itemBadge = (s: string, a: boolean): [string, string, string] => (a ? ['معتمد', '#E9F7EE', '#207A44'] : s === 'AWAITING_APPROVAL' ? ['بانتظار اعتماد العميل', '#FFF4DD', '#925B10'] : s === 'REVISION_REQUESTED' ? ['مطلوب تعديل', '#FEF2F2', '#B42318'] : ['قيد التصميم', '#EFF6FF', '#2563EB']);
 
@@ -54,7 +55,8 @@ export default function LinkShow({ token, order: o }: Props) {
     const [open, setOpen] = useState(false);
     const [proof, setProof] = useState(false);
     const idx = ORDER.indexOf(o.status === 'READY_FOR_PICKUP' ? 'READY_FOR_DELIVERY' : o.status);
-    const [title, sub] = MSG[o.status] ?? ['', ''];
+    const title = `حالة الأوردر: ${o.status_label}`;
+    const sub = MSG[o.status] ?? '';
     const designStage = o.status === 'DESIGN_STAGE';
     return (
         <LinkLayout orderRef={{ number: o.number, customer: o.customer }}>
@@ -77,7 +79,7 @@ export default function LinkShow({ token, order: o }: Props) {
                 <div className={`${card} gap-[12px] p-[17px]`}>
                     <div className={h15}>{designStage ? 'حالة الأوردر' : 'تقدم الأوردر'}</div>
                     <div className="flex w-full shrink-0 gap-[10px]">
-                        {STAGES.map(([k, l]) => {
+                        {STAGES.map((k) => {
                             const i = ORDER.indexOf(k);
                             const done = i < idx;
                             const cur = i === idx;
@@ -86,7 +88,7 @@ export default function LinkShow({ token, order: o }: Props) {
                                     <div className="flex h-[24px] w-[24px] items-center justify-center rounded-[12px]" style={{ background: cur ? '#2563EB' : done ? '#DBEAFE' : '#F1F5F9' }}>
                                         <Icon name={cur ? 'check' : 'circle'} className="h-[12px] w-[12px]" color={cur ? '#FFFFFF' : '#94A3B8'} />
                                     </div>
-                                    <div className="text-left text-[12px] leading-[normal] whitespace-nowrap" style={{ color: cur ? '#2563EB' : '#64748B', fontWeight: cur ? 700 : 400 }}>{l}</div>
+                                    <div className="text-left text-[12px] leading-[normal] whitespace-nowrap" style={{ color: cur ? '#2563EB' : '#64748B', fontWeight: cur ? 700 : 400 }}>{o.status_labels[k] ?? k}</div>
                                 </div>
                             );
                         })}
@@ -125,11 +127,15 @@ export default function LinkShow({ token, order: o }: Props) {
                             <KV k="الطريقة" v={o.delivery_method === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة'} />
                             {o.delivery_method === 'DELIVERY' && <KV k="العنوان" v={o.delivery_address ?? '—'} />}
                             {o.delivery_method === 'DELIVERY' && <KV k="الرسوم" v={formatMoneyFixed(o.delivery_fee_minor)} />}
-                            <KV k="الحالة" v={o.status === 'OUT_FOR_DELIVERY' ? 'خرج للتوصيل' : o.delivery_method === 'DELIVERY' ? 'لم يبدأ التوصيل بعد' : 'استلام من المطبعة'} />
+                            <KV k="الحالة" v={o.status === 'OUT_FOR_DELIVERY' ? o.status_label : o.delivery_method === 'DELIVERY' ? 'لم يبدأ التوصيل بعد' : 'استلام من المطبعة'} />
                         </div>
                         <div className={card}>
                             <div className={h15}>الفاتورة</div>
-                            <Link href={`/l/${token}/invoice`} className="text-left text-[12px] leading-[normal] font-[700] text-[var(--primary)]">عرض الفاتورة الداخلية أو حالة إصدارها</Link>
+                            {o.has_invoice ? (
+                                <Link href={`/l/${token}/invoice`} className="text-left text-[12px] leading-[normal] font-[700] text-[var(--primary)]">عرض الفاتورة الداخلية</Link>
+                            ) : (
+                                <div className="text-left text-[12px] leading-[normal] text-[var(--muted-foreground)]">لم تُصدر فاتورة لهذا الأوردر بعد.</div>
+                            )}
                         </div>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col items-end gap-[12px]">

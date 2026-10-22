@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Services\Files\FileAccessRegistry;
+use App\Services\Orders\OrderStatusLabels;
 use App\Services\Search\ImageHasher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -103,21 +104,24 @@ class ImageSearchController extends Controller
     {
         $q = DB::table('image_search_index as x')->join('orders as o', 'o.id', '=', 'x.order_id')->join('customers as c', 'c.id', '=', 'o.customer_id')->join('order_items as i', 'i.id', '=', 'x.order_item_id')
             ->when(! $archived, fn ($b) => $b->whereNotIn('o.status', [OrderStatus::COMPLETED->value, OrderStatus::CANCELLED->value]))
-            ->whereNull('i.cancelled_at')
-            ->get(['x.file_id', 'x.dhash', 'x.ahash', 'o.id as oid', 'o.order_number', 'o.status', 'c.name', 'i.id as iid', 'i.product_snapshot']);
+            ->whereNull('i.cancelled_at');
         $scored = [];
-        foreach ($q as $r) {
-            $dist = $hasher->distance($h['dhash'], $h['ahash'], $r->dhash, $r->ahash);
-            if ($dist <= self::MAX_DISTANCE) {
-                $scored[] = ['dist' => $dist, 'r' => $r];
-            }
-        }
-        usort($scored, fn ($a, $b) => $a['dist'] <=> $b['dist']);
+        $q->select(['x.id as cursor_id', 'x.file_id', 'x.dhash', 'x.ahash', 'o.id as oid', 'o.order_number', 'o.status', 'c.name', 'i.id as iid', 'i.product_snapshot'])
+            ->chunkById(500, function ($rows) use (&$scored, $h, $hasher) {
+                foreach ($rows as $r) {
+                    $dist = $hasher->distance($h['dhash'], $h['ahash'], $r->dhash, $r->ahash);
+                    if ($dist <= self::MAX_DISTANCE) {
+                        $scored[] = ['dist' => $dist, 'r' => $r];
+                    }
+                }
+                usort($scored, fn ($a, $b) => ($a['dist'] <=> $b['dist']) ?: ($a['r']->file_id <=> $b['r']->file_id));
+                $scored = array_slice($scored, 0, 12);
+            }, 'x.id', 'cursor_id');
 
         return array_map(fn ($s) => [
             'file_id' => $s['r']->file_id, 'similarity' => (int) round((1 - $s['dist'] / 128) * 100), 'order' => $s['r']->order_number, 'order_id' => $s['r']->oid, 'item_id' => $s['r']->iid,
-            'customer' => $s['r']->name, 'product' => json_decode($s['r']->product_snapshot, true)['name'] ?? '', 'status' => OrderStatus::from($s['r']->status)->label(),
+            'customer' => $s['r']->name, 'product' => json_decode($s['r']->product_snapshot, true)['name'] ?? '', 'status' => app(OrderStatusLabels::class)->label(OrderStatus::from($s['r']->status)),
             'preview' => $this->canPreview((int) $s['r']->file_id, $request),
-        ], array_slice($scored, 0, 12));
+        ], $scored);
     }
 }

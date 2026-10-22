@@ -49,7 +49,7 @@ export default function Designer({ designer: d, tab, tasks, history, can, availa
     const [, pillFg] = PILL.IN_DESIGN;
     void pillFg;
     const stateRows = (rows: Task[]) => (
-        <div className="flex w-full shrink-0 flex-col rounded-[9px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
+        <div className="flex w-full min-w-0 shrink-0 flex-col overflow-x-auto rounded-[9px] bg-[var(--surface)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
             <div className="flex h-[43.5px] w-full shrink-0 items-center bg-[var(--background)] p-[0px_16px] [border-bottom:1px_solid_var(--border)]">
                 <div className={`${th} w-[120px]`}>الإجراءات</div>
                 <div className={`${th} w-[190px]`}>آخر تحديث</div>
