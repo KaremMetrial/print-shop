@@ -1,4 +1,5 @@
 import { DesignerLayout } from '@/components/shell/designer-layout';
+import { PenFilterMenu } from '@/components/pen/primitives';
 import { arDigits, formatDateTimeShort } from '@/lib/money';
 import { Icon } from '@/pen/icon';
 import { Head, Link, router } from '@inertiajs/react';
@@ -22,6 +23,7 @@ interface Props {
     tab: Tab;
     counts: Record<Tab, number>;
     tasks: Task[];
+    products: { value: string; label: string }[];
     workload: number;
     designer: { name: string };
     filters: Record<string, string>;
@@ -55,8 +57,6 @@ const ST: Record<string, [string, string, string]> = {
     AWAITING_APPROVAL: ['بانتظار اعتماد العميل', '#FFF3D9', '#895A0D'],
     APPROVED: ['معتمدة', '#E6F5EA', '#237A4B'],
 };
-const filt =
-    'flex h-[46px] w-fit shrink-0 items-center justify-between gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px] text-[14px] leading-[normal] font-[400] text-[var(--ink)]';
 const plural = (n: number, one: string, two: string, many: string, none: string) =>
     n === 0 ? none : n === 1 ? one : n === 2 ? two : `${arDigits(n)} ${many}`;
 
@@ -74,9 +74,9 @@ function summary(tab: Tab, n: number, workload: number) {
 }
 
 /** S-043-01..04 — مهامي (pendev: FSGkX · PM7wz · UOvaG · zCk7b). */
-export default function DesignerTasks({ tab, counts, tasks, workload, designer, filters }: Props) {
+export default function DesignerTasks({ tab, counts, tasks, workload, designer, filters, products }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
-    const go = (t: Tab) => router.get('/designer/tasks', { tab: t }, { preserveState: true, preserveScroll: true });
+    const go = (next: Record<string, string | undefined>) => router.get('/designer/tasks', { tab, ...filters, ...next }, { preserveState: true, preserveScroll: true });
     const [dateLabel, productLabel] =
         tab === 'new' ? ['تاريخ الإسناد', 'المنتج'] : tab === 'in_progress' ? ['تاريخ الإسناد', 'المنتج'] : ['تاريخ التحديث', 'المنتج'];
     return (
@@ -98,7 +98,7 @@ export default function DesignerTasks({ tab, counts, tasks, workload, designer, 
                         <button
                             key={k}
                             type="button"
-                            onClick={() => go(k)}
+                            onClick={() => go({ tab: k })}
                             className="flex h-[38px] w-fit shrink-0 items-center gap-[6px] rounded-[7px] p-[0px_13px]"
                             style={{ background: on ? '#EFF6FF' : '#FFFFFF' }}
                         >
@@ -122,18 +122,22 @@ export default function DesignerTasks({ tab, counts, tasks, workload, designer, 
                 <div className="text-left text-[18px] leading-[normal] font-[700] whitespace-nowrap text-[var(--ink)]">{TITLE[tab]}</div>
             </div>
             <div className="flex min-h-[46px] w-full shrink-0 flex-wrap items-center gap-[8px]">
-                <div className={filt}>
-                    <Icon name="chevron-down" className="h-[16px] w-[16px] shrink-0" color="var(--muted-foreground)" />
-                    {dateLabel}
-                </div>
-                <div className={filt}>
-                    <Icon name="chevron-down" className="h-[16px] w-[16px] shrink-0" color="var(--muted-foreground)" />
-                    {productLabel}
-                </div>
+                <PenFilterMenu
+                    label={dateLabel}
+                    value={filters.period ?? ''}
+                    options={[{ value: '', label: 'الكل' }, { value: 'today', label: 'اليوم' }, { value: 'week', label: 'آخر 7 أيام' }, { value: 'month', label: 'آخر 30 يومًا' }]}
+                    onChange={(v) => go({ period: v || undefined })}
+                />
+                <PenFilterMenu
+                    label={productLabel}
+                    value={filters.product ?? ''}
+                    options={[{ value: '', label: 'الكل' }, ...products]}
+                    onChange={(v) => go({ product: v || undefined })}
+                />
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        router.get('/designer/tasks', { tab, q: q || undefined });
+                        go({ q: q || undefined });
                     }}
                     className="flex h-[46px] min-w-[200px] flex-1 items-center justify-end gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px]"
                 >

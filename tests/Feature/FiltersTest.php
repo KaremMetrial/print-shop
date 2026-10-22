@@ -112,6 +112,9 @@ it('filters order requests by tab, search and reviewer', function () {
     expect(totalOf('/order-requests?tab=IN_REVIEW', 'requests.total'))->toBe(1);
     expect(totalOf("/order-requests?tab=IN_REVIEW&reviewer={$u->id}", 'requests.total'))->toBe(1);
     expect(totalOf('/order-requests?tab=ACCEPTED', 'requests.total'))->toBe(0);
+
+    OrderRequest::factory()->create(['submitted_at' => now()->subDays(40)]);
+    expect(totalOf('/order-requests?period=month', 'requests.total'))->toBe(1);
 });
 
 it('paginates every list at 15 per page, keeps filters in links, and handles out-of-range pages', function () {

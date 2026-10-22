@@ -99,7 +99,7 @@ export default function OrderEdit({ order: o, items, approval, can }: Props) {
                 <div className={`${panel} gap-[14px] p-[18px]`}>
                     <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
                         {can.items && (
-                            <Link href={`/orders/${o.id}/items/create`} className={btn34}>
+                            <Link href={`/orders/${o.id}?tab=items`} className={btn34}>
                                 إضافة بند
                             </Link>
                         )}

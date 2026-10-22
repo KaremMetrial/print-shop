@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +24,7 @@ class Idempotent
 
         $key = $request->header('Idempotency-Key');
         if (! $key || strlen($key) > 100) {
-            return $this->error('IDEMPOTENCY_KEY_REQUIRED', 'مفتاح منع التكرار مطلوب.', 400);
+            return $this->error($request, 'IDEMPOTENCY_KEY_REQUIRED', 'مفتاح منع التكرار مطلوب.', 400);
         }
 
         $scope = $this->scope($request);
@@ -41,7 +40,7 @@ class Idempotent
                 throw $e;
             }
 
-            return $this->replay($scope, $key, $hash);
+            return $this->replay($request, $scope, $key, $hash);
         }
 
         try {
@@ -66,17 +65,17 @@ class Idempotent
         return $response;
     }
 
-    private function replay(string $scope, string $key, string $hash): Response
+    private function replay(Request $request, string $scope, string $key, string $hash): Response
     {
         $r = DB::table('idempotency_keys')->where('scope', $scope)->where('key', $key)->first();
         if (! $r) {
-            return $this->error('IDEMPOTENCY_IN_PROGRESS', 'العملية قيد التنفيذ، حاول بعد لحظات.', 409);
+            return $this->error($request, 'IDEMPOTENCY_IN_PROGRESS', 'العملية قيد التنفيذ، حاول بعد لحظات.', 409);
         }
         if ($r->request_hash !== $hash) {
-            return $this->error('IDEMPOTENCY_KEY_REUSED', 'تم استخدام مفتاح منع التكرار مع طلب مختلف.', 422);
+            return $this->error($request, 'IDEMPOTENCY_KEY_REUSED', 'تم استخدام مفتاح منع التكرار مع طلب مختلف.', 422);
         }
         if (! $r->completed_at) {
-            return $this->error('IDEMPOTENCY_IN_PROGRESS', 'العملية قيد التنفيذ، حاول بعد لحظات.', 409);
+            return $this->error($request, 'IDEMPOTENCY_IN_PROGRESS', 'العملية قيد التنفيذ، حاول بعد لحظات.', 409);
         }
 
         $resp = new Response($r->response_body ?? '', (int) $r->response_status);
@@ -102,8 +101,11 @@ class Idempotent
         return 'ip:'.$request->ip();
     }
 
-    private function error(string $code, string $message, int $status): JsonResponse
+    private function error(Request $request, string $code, string $message, int $status): Response
     {
+        if ($request->header('X-Inertia')) {
+            return back()->with('error', $message);
+        }
         return response()->json(['success' => false, 'error' => ['code' => $code, 'message' => $message]], $status);
     }
 }

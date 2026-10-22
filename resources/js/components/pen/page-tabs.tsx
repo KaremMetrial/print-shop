@@ -9,7 +9,7 @@ export interface PageTab {
 
 /**
  * شريط التبويبات الموحّد لكل الشاشات (ملف العميل/المنتج/الأوردر/البند/المصمم/القوائم).
- * الترتيب = ترتيب العرض كما في الـpen (DOM LTR). تبويب نشط: خلفية #EFF6FF + حد سفلي 2px بلون primary.
+ * ترتيب عناصر tabs يبدأ من اليمين ليتوافق مع اتجاه الواجهة العربية. تبويب نشط: خلفية #EFF6FF + حد سفلي 2px بلون primary.
  * مع href يعمل كرابط (Inertia)، وبدونه كزر يستدعي onChange.
  */
 export function PageTabs({
@@ -24,16 +24,17 @@ export function PageTabs({
     label?: string;
 }) {
     const nav = useRef<HTMLElement>(null);
-    // على الشاشات الضيقة: التبويبات تتمرر أفقيًا ويُظهَر النشط (البداية من اليمين كالعربية)
+    // على الشاشات الضيقة: مرّر التبويب النشط إلى الظهور مع الحفاظ على موضع الصفحة عموديًا.
     useEffect(() => {
         const el = nav.current;
         const on = el?.querySelector('[aria-current="page"]') as HTMLElement | null;
-        if (el && on) el.scrollLeft = Math.max(0, on.offsetLeft - el.clientWidth / 2 + on.offsetWidth / 2);
+        if (el && on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
     }, [value]);
     return (
         <nav
             ref={nav}
             aria-label={label}
+            dir="rtl"
             className="flex h-[43.5px] w-full shrink-0 items-center gap-[2px] overflow-x-auto [border-bottom:1px_solid_var(--border)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
             {tabs.map((t) => {

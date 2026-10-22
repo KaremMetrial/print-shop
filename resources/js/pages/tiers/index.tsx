@@ -27,11 +27,6 @@ export default function TiersIndex({ tiers: tierPage, filters, activeCount, can 
             <Head title="شرائح الأسعار" />
             <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, 'التسعير', 'شرائح الأسعار']} />
             <div className="flex w-full shrink-0 items-center justify-between gap-[12px]">
-                {can.manage && (
-                    <div className="flex w-fit shrink-0 items-center gap-[12px]">
-                        <PenButton href="/pricing/create">إضافة شريحة سعر</PenButton>
-                    </div>
-                )}
                 <div className="flex flex-1 flex-col gap-[3px]">
                     <h1 className="w-full text-right text-[28px] leading-[39px] font-[700] text-[var(--ink)]">شرائح الأسعار</h1>
                     <div className="w-full text-right text-[14px] leading-[22px] font-[400] text-[var(--muted-foreground)]">{activeCount} شرائح أسعار نشطة</div>
@@ -89,6 +84,11 @@ export default function TiersIndex({ tiers: tierPage, filters, activeCount, can 
                 ))}
             </div>
             {tierPage.last_page > 1 && <PenPagination page={tierPage.current_page} pages={tierPage.last_page} summary={`عرض ${tierPage.from ?? 0}–${tierPage.to ?? 0} من ${tierPage.total} شريحة`} onPage={(p) => go({ page: String(p) })} />}
+            {can.manage && (
+                <div className="flex w-full shrink-0 justify-start">
+                    <PenButton href="/pricing/create">إضافة شريحة سعر</PenButton>
+                </div>
+            )}
         </AppLayout>
     );
 }

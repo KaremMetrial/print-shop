@@ -41,6 +41,14 @@ export default function Reports({ from, to, ops, fin }: Props) {
                     subtitle="أرقام الفترة المحددة من بيانات النظام مباشرة."
                 />
                 <div className="flex w-full justify-end gap-[8px]">
+                    {(ops || fin) && (
+                        <a
+                            href={`/reports/export?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`}
+                            className="flex h-[46px] w-fit shrink-0 items-center justify-center rounded-[10px] bg-[var(--surface)] p-[0px_16px] text-[14px] font-[600] text-[var(--ink)] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px]"
+                        >
+                            تنزيل CSV
+                        </a>
+                    )}
                     <input type="date" aria-label="إلى" value={to} onChange={(e) => go({ to: e.target.value })} className={fld} />
                     <input type="date" aria-label="من" value={from} onChange={(e) => go({ from: e.target.value })} className={fld} />
                 </div>

@@ -1,4 +1,5 @@
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Pen44, PenInput, PenSelect, penNote } from '@/components/pen/form';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/money';
@@ -42,6 +43,7 @@ export default function EmployeesIndex({ employees, filters, roles, can, selecte
     const [dlg, setDlg] = useState<{ emp: Emp; kind: 'deactivate' | 'reset' } | null>(null);
     const go = (next: Record<string, string | undefined>) => router.get('/employees', { ...filters, selected: undefined, ...next }, { preserveState: true, preserveScroll: true, replace: true });
     const open = (id: number) => router.get('/employees', { ...filters, selected: id }, { preserveState: true, preserveScroll: true, only: ['selected'], replace: true });
+    const closeDetails = () => go({});
     const fmt = (d: string | null, time = false) => (d ? formatDate(d) + (time ? '' : '') : NA);
     const statusText = (s: Emp['status']) => (s === 'ACTIVE' ? 'نشط' : s === 'INACTIVE' ? 'معطّل' : null);
 
@@ -125,43 +127,45 @@ export default function EmployeesIndex({ employees, filters, roles, can, selecte
                 ))}
             </div>
 
-            {selected && (
-                <div className="flex w-full shrink-0 flex-col gap-[14px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]">
-                    <div className="w-full text-right text-[20px] leading-[normal] font-[700] text-[var(--ink)]">تفاصيل الموظف</div>
-                    <div className="w-full text-right text-[16px] leading-[normal] font-[400] text-[var(--ink)]">
-                        {selected.name} · {selected.role_label}
-                    </div>
-                    <div className="w-full text-right text-[13px] leading-[normal] font-[400] text-[var(--text-secondary)]">
-                        <div>البريد الإلكتروني: {selected.email ? <bdi dir="ltr">{selected.email}</bdi> : '—'}</div>
-                        <div>رقم الهاتف: {selected.phone ? <bdi dir="ltr">{selected.phone}</bdi> : '—'}</div>
-                        <div>حالة الحساب: {statusText(selected.status) ?? '—'}</div>
-                        {selected.role === 'DESIGNER' && <div>حالة التوفر: {selected.availability ?? '—'}</div>}
-                        {selected.role === 'DESIGNER' && <div>التخصصات: {selected.specialties?.length ? selected.specialties.join('، ') : 'لم تُحدَّد تخصصات'}</div>}
-                        <div>تاريخ الإنشاء: {selected.created_at ? fmt(selected.created_at) : '—'}</div>
-                        <div>آخر دخول: {selected.last_login_at ? fmt(selected.last_login_at) : 'لم يسجّل الدخول بعد'}</div>
-                        <div>الصلاحيات الإضافية: {selected.extra_permissions ? `${selected.extra_permissions} صلاحية` : 'لا توجد صلاحيات إضافية'}</div>
-                    </div>
-                    <div className="flex w-full shrink-0 flex-wrap justify-end gap-[14px]">
-                        <Pen44 href="/employees">العودة إلى الموظفين</Pen44>
-                        {selected.can_permissions && <Pen44 href={`/employees/${selected.id}/permissions`}>إدارة الصلاحيات</Pen44>}
-                        {selected.can_edit && (
-                            <Pen44 href={`/employees/${selected.id}/edit`} variant="primary">
-                                تعديل البيانات
-                            </Pen44>
-                        )}
-                    </div>
-                    {selected.can_edit && (
-                        <div className="flex w-full shrink-0 flex-wrap justify-end gap-[14px]">
-                            <Pen44 variant="small" onClick={() => setDlg({ emp: selected, kind: 'reset' })}>
-                                إعادة تعيين كلمة المرور
-                            </Pen44>
-                            <Pen44 variant="smallDanger" onClick={() => setDlg({ emp: selected, kind: 'deactivate' })}>
-                                تعطيل الحساب
-                            </Pen44>
+            <Dialog open={!!selected} onOpenChange={(open) => !open && closeDetails()}>
+                {selected && (
+                    <DialogContent className="max-h-[calc(100dvh-2rem)] w-[640px] max-w-[95vw] gap-[18px] overflow-y-auto rounded-[12px] p-[24px]" dir="ltr">
+                        <DialogTitle className="w-full text-right text-[20px] leading-[normal] font-[700] text-[var(--ink)]">تفاصيل الموظف</DialogTitle>
+                        <DialogDescription className="sr-only">بيانات حساب الموظف وصلاحياته.</DialogDescription>
+                        <div className="w-full text-right text-[16px] leading-[normal] font-[600] text-[var(--ink)]">
+                            {selected.name} · {selected.role_label}
                         </div>
-                    )}
-                </div>
-            )}
+                        <div className="grid w-full grid-cols-1 gap-[12px] text-right text-[13px] leading-[21px] text-[var(--text-secondary)] sm:grid-cols-2">
+                            <div>البريد الإلكتروني: {selected.email ? <bdi dir="ltr">{selected.email}</bdi> : '—'}</div>
+                            <div>رقم الهاتف: {selected.phone ? <bdi dir="ltr">{selected.phone}</bdi> : '—'}</div>
+                            <div>حالة الحساب: {statusText(selected.status) ?? '—'}</div>
+                            {selected.role === 'DESIGNER' && <div>حالة التوفر: {selected.availability ?? '—'}</div>}
+                            {selected.role === 'DESIGNER' && <div className="sm:col-span-2">التخصصات: {selected.specialties?.length ? selected.specialties.join('، ') : 'لم تُحدَّد تخصصات'}</div>}
+                            <div>تاريخ الإنشاء: {selected.created_at ? fmt(selected.created_at) : '—'}</div>
+                            <div>آخر دخول: {selected.last_login_at ? fmt(selected.last_login_at) : 'لم يسجّل الدخول بعد'}</div>
+                            <div>الصلاحيات الإضافية: {selected.extra_permissions ? `${selected.extra_permissions} صلاحية` : 'لا توجد صلاحيات إضافية'}</div>
+                        </div>
+                        <div className="flex w-full shrink-0 flex-wrap justify-end gap-[10px]">
+                            {selected.can_permissions && <Pen44 href={`/employees/${selected.id}/permissions`}>إدارة الصلاحيات</Pen44>}
+                            {selected.can_edit && (
+                                <Pen44 href={`/employees/${selected.id}/edit`} variant="primary">
+                                    تعديل البيانات
+                                </Pen44>
+                            )}
+                        </div>
+                        {selected.can_edit && (
+                            <div className="flex w-full shrink-0 flex-wrap justify-end gap-[10px]">
+                                <Pen44 variant="small" onClick={() => setDlg({ emp: selected, kind: 'reset' })}>
+                                    إعادة تعيين كلمة المرور
+                                </Pen44>
+                                <Pen44 variant="smallDanger" onClick={() => setDlg({ emp: selected, kind: 'deactivate' })}>
+                                    تعطيل الحساب
+                                </Pen44>
+                            </div>
+                        )}
+                    </DialogContent>
+                )}
+            </Dialog>
 
             {dlg && (
                 <ConfirmDialog

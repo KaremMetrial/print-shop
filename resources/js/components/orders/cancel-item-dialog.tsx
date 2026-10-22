@@ -3,8 +3,10 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
-const btn =
-    'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap [outline-offset:-0.5px] disabled:opacity-60';
+const actionBtn =
+    'flex h-[46px] w-fit shrink-0 items-center justify-center rounded-[10px] px-[16px] text-left text-[14px] leading-[22px] font-[600] whitespace-nowrap transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-60';
+const secondaryBtn = `${actionBtn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--control-border)] hover:bg-[var(--surface-subtle)]`;
+const dangerSolidBtn = `${actionBtn} bg-[var(--danger)] text-white hover:bg-[#B91C1C]`;
 
 /** إلغاء بند (Soft Cancel قبل الطباعة — 6.6): السبب إلزامي، يُعاد حساب إجمالي الأوردر بالسيرفر. */
 export function CancelItemDialog({ orderId, item, onClose }: { orderId: number; item: { id: number; label: string }; onClose: () => void }) {
@@ -18,7 +20,7 @@ export function CancelItemDialog({ orderId, item, onClose }: { orderId: number; 
         router.post(
             `/orders/${orderId}/items/${item.id}/cancel`,
             { reason },
-            { headers: { 'Idempotency-Key': key.current }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
+            { headers: { 'Idempotency-Key': crypto.randomUUID() }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
         );
     };
     return (
@@ -43,11 +45,11 @@ export function CancelItemDialog({ orderId, item, onClose }: { orderId: number; 
                     <button
                         type="button"
                         onClick={onClose}
-                        className={`${btn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--border)]`}
+                        className={secondaryBtn}
                     >
                         الرجوع
                     </button>
-                    <button type="button" disabled={busy} onClick={submit} className={`${btn} bg-[#DC2626] text-white`}>
+                    <button type="button" disabled={busy} onClick={submit} className={dangerSolidBtn}>
                         تأكيد إلغاء البند
                     </button>
                 </div>

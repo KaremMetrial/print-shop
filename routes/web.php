@@ -138,6 +138,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('search/image', [ImageSearchController::class, 'search'])->name('search.image.run')->middleware('throttle:20,1');
     Route::get('search/image/compare', [ImageSearchController::class, 'compare'])->name('search.image.compare');
     Route::get('search/image/query/{token}', [ImageSearchController::class, 'query'])->name('search.image.query');
+    Route::get('reports/export', [ReportsController::class, 'export'])->name('reports.export');
     Route::get('reports', ReportsController::class)->name('reports');
     Route::get('settings/system', [SettingsController::class, 'index'])->name('settings.system');
     Route::patch('settings/system', [SettingsController::class, 'update'])->name('settings.system.update');

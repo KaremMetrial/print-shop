@@ -75,7 +75,7 @@ export function PaymentDialog({
                             order_id: order?.id ?? null,
                             reference: ref || null,
                         } as never,
-                        { headers: { 'Idempotency-Key': key.current }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
+                        { headers: { 'Idempotency-Key': crypto.randomUUID() }, preserveScroll: true, onFinish: () => setBusy(false), onSuccess: onClose },
                     );
                 }}
                 className="flex flex-col gap-[12px]"
@@ -158,7 +158,7 @@ export function ReasonDialog({
                     const body: Record<string, unknown> = withMethod ? { notes: reason || null, method } : { reason };
                     if (withAmount) body.amount_minor = toMinor(amount);
                     router.post(url, body as never, {
-                        headers: { 'Idempotency-Key': key.current },
+                        headers: { 'Idempotency-Key': crypto.randomUUID() },
                         preserveScroll: true,
                         onFinish: () => setBusy(false),
                         onSuccess: onClose,

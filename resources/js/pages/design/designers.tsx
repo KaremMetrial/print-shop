@@ -15,16 +15,16 @@ interface D {
 }
 interface Props {
     designers: D[];
+    specialties: { id: number; name: string }[];
     filters: Record<string, string>;
     can: { availability: boolean };
 }
 const AV: Record<string, [string, string]> = { AVAILABLE: ['#E8F1FF', '#1D5FB8'], ON_LEAVE: ['#FFF3D9', '#895A0D'], UNAVAILABLE: ['#FFF0EF', '#B42318'] };
-const filt = 'flex h-[46px] w-fit shrink-0 items-center justify-between gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px] text-[14px] leading-[normal] text-[var(--ink)]';
 const btn = 'flex h-[36px] w-fit shrink-0 items-center rounded-[7px] bg-[var(--surface)] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap text-[var(--primary)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
 export const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('-');
 
 /** S-040 — المصممون (pendev: eM5xP). */
-export default function Designers({ designers, filters, can }: Props) {
+export default function Designers({ designers, specialties, filters, can }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
     const go = (n: Record<string, string | undefined>) => router.get('/design/designers', { ...filters, ...n }, { preserveState: true, preserveScroll: true });
     const cycle = (d: D) => router.post(`/design/designers/${d.id}/availability`, { status: d.availability_value === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE' } as never, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
@@ -51,14 +51,18 @@ export default function Designers({ designers, filters, can }: Props) {
                     <input dir="rtl" value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث باسم المصمم" aria-label="بحث" className="min-w-0 flex-1 bg-transparent text-right text-[14px] leading-[21px] outline-hidden placeholder:text-[var(--muted-foreground)]" />
                 </form>
                 <div className="flex w-full shrink-0 justify-end gap-[8px]">
-                    <div className={filt}>
-                        <Icon name="chevron-down" className="h-[16px] w-[16px]" color="var(--muted-foreground)" />
-                        التخصص
-                    </div>
-                    <div className={filt}>
-                        <Icon name="chevron-down" className="h-[16px] w-[16px]" color="var(--muted-foreground)" />
-                        الحالة الوظيفية
-                    </div>
+                    <PenFilterMenu
+                        label="التخصص"
+                        value={filters.specialty ?? ''}
+                        options={[{ value: '', label: 'الكل' }, ...specialties.map((s) => ({ value: String(s.id), label: s.name }))]}
+                        onChange={(v) => go({ specialty: v || undefined })}
+                    />
+                    <PenFilterMenu
+                        label="الحالة الوظيفية"
+                        value={filters.status ?? ''}
+                        options={[{ value: '', label: 'الكل' }, { value: 'ACTIVE', label: 'نشط' }, { value: 'INACTIVE', label: 'معطّل' }]}
+                        onChange={(v) => go({ status: v || undefined })}
+                    />
                     <PenFilterMenu
                         label="حالة التوفر"
                         value={filters.availability ?? ''}

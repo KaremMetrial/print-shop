@@ -24,12 +24,12 @@ interface Props {
     availabilityOptions: { value: string; label: string }[];
 }
 const TABS: [Tab, string][] = [
+    ['overview', 'نظرة عامة'],
     ['availability', 'حالة التوفر'],
     ['history', 'سجل الإسناد'],
     ['done', 'المهام المكتملة'],
     ['awaiting', 'بانتظار الاعتماد'],
     ['active', 'المهام النشطة'],
-    ['overview', 'نظرة عامة'],
 ];
 const PILL: Record<string, [string, string]> = { NEW: ['#EEF2F6', '#475569'], IN_DESIGN: ['#E8F1FF', '#1D5FB8'], REVISION_REQUESTED: ['#FFF0EF', '#B42318'], AWAITING_APPROVAL: ['#FFF3D9', '#895A0D'], APPROVED: ['#E6F5EA', '#237A4B'] };
 const box = 'flex flex-col gap-[10px] rounded-[10px] bg-[var(--surface)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';

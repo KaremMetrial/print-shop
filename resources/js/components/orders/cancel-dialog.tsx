@@ -19,8 +19,11 @@ interface Props {
     reasons: string[];
 }
 
-const btn =
-    'flex h-[34px] w-fit shrink-0 items-center justify-center rounded-[8px] p-[0px_12px] text-left text-[12px] leading-[normal] font-[600] whitespace-nowrap [outline-offset:-0.5px] disabled:opacity-60';
+const actionBtn =
+    'flex h-[46px] w-fit shrink-0 items-center justify-center rounded-[10px] px-[16px] text-left text-[14px] leading-[22px] font-[600] whitespace-nowrap transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-60';
+const secondaryBtn = `${actionBtn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--control-border)] hover:bg-[var(--surface-subtle)]`;
+const dangerBtn = `${actionBtn} bg-[var(--danger-soft)] text-[var(--danger-text)] [outline:1px_solid_#FECACA] hover:bg-[#FEE2E2]`;
+const dangerSolidBtn = `${actionBtn} bg-[var(--danger)] text-white hover:bg-[#B91C1C]`;
 const Row = ({ k, v, c }: { k: string; v: string; c: string }) => (
     <div className="flex h-[32.5px] w-full shrink-0 items-center gap-[12px] p-[6px_0px] [border-bottom:1px_solid_var(--border)]">
         <div className="flex-1 text-right text-[13px] leading-[21px] font-[700]" style={{ color: c }}>
@@ -51,7 +54,7 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
         router.post(
             `/orders/${order.id}/cancel`,
             { reason, notes },
-            { headers: { 'Idempotency-Key': key.current }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
+            { headers: { 'Idempotency-Key': crypto.randomUUID() }, onFinish: () => setBusy(false), onSuccess: () => onOpenChange(false) },
         );
     };
 
@@ -117,14 +120,14 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
                             <button
                                 type="button"
                                 onClick={() => onOpenChange(false)}
-                                className={`${btn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--border)]`}
+                                className={secondaryBtn}
                             >
                                 الرجوع
                             </button>
                             <button
                                 type="button"
                                 onClick={next}
-                                className={`${btn} bg-[var(--primary)] text-white [outline:1px_solid_var(--primary)]`}
+                                className={dangerBtn}
                             >
                                 تأكيد الإلغاء
                             </button>
@@ -143,7 +146,7 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
                             <button
                                 type="button"
                                 onClick={() => setStep('form')}
-                                className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-left text-[14px] leading-[normal] font-[400] text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]"
+                                className={secondaryBtn}
                             >
                                 الرجوع
                             </button>
@@ -151,7 +154,7 @@ export function CancelOrderDialog({ open, onOpenChange, order, reasons }: Props)
                                 type="button"
                                 onClick={submit}
                                 disabled={busy}
-                                className="flex h-[40px] w-fit shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-left text-[14px] leading-[normal] font-[400] text-[var(--ink)] [outline:1px_solid_var(--border)] [outline-offset:-0.5px] disabled:opacity-60"
+                                className={dangerSolidBtn}
                             >
                                 تأكيد الإلغاء
                             </button>

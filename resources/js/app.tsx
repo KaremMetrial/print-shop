@@ -11,6 +11,11 @@ configureEcho({
     broadcaster: 'reverb',
 });
 
+// Keep the current scroll position for all Inertia visits (links, filters, and form actions).
+router.on('before', (event) => {
+    event.detail.visit.preserveScroll = true;
+});
+
 declare global {
     const route: typeof routeFn;
 }

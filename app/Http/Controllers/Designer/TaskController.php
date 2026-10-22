@@ -35,13 +35,31 @@ class TaskController extends Controller
         foreach (self::TABS as $k => $states) {
             $counts[$k] = (clone $base)->whereIn('design_state', $states)->count();
         }
-        $rows = (clone $base)->whereIn('design_state', self::TABS[$tab])->with('order.customer:id,name')
+        $period = in_array($request->query('period'), ['today', 'week', 'month'], true) ? $request->query('period') : null;
+        $updatedAfter = match ($period) {
+            'today' => now()->startOfDay(),
+            'week' => now()->subDays(6)->startOfDay(),
+            'month' => now()->subDays(29)->startOfDay(),
+            default => null,
+        };
+        $query = (clone $base)->whereIn('design_state', self::TABS[$tab])
             ->when($request->query('q'), fn ($b, $q) => $b->where(fn ($w) => $w->whereHas('order', fn ($o) => $o->where('order_number', 'like', "%{$q}%"))->orWhere('product_snapshot->name', 'like', "%{$q}%")))
-            ->oldest('updated_at')->get()->map(fn (OrderItem $i) => $this->card($i));
+            ->when($request->query('product'), fn ($b, $name) => $b->where('product_snapshot->name', $name));
+        if ($updatedAfter) {
+            if (in_array($tab, ['new', 'in_progress'], true)) {
+                $query->whereIn('id', DB::table('item_assignment_history')->where('designer_id', $user->id)->where('created_at', '>=', $updatedAfter)->select('order_item_id'));
+            } else {
+                $query->where('updated_at', '>=', $updatedAfter);
+            }
+        }
+        $rows = $query->with('order.customer:id,name')->oldest('updated_at')->get()->map(fn (OrderItem $i) => $this->card($i));
+        $products = (clone $base)->whereIn('design_state', self::TABS[$tab])->get(['product_snapshot'])
+            ->map(fn (OrderItem $i) => $i->product_snapshot['name'] ?? null)->filter()->unique()->sort()
+            ->map(fn (string $name) => ['value' => $name, 'label' => $name])->values()->all();
 
         $props = [
             'tab' => $tab, 'counts' => $counts, 'tasks' => $rows, 'workload' => $counts['in_progress'] + $counts['revision'],
-            'designer' => ['name' => $user->name], 'filters' => $request->only(['q']),
+            'designer' => ['name' => $user->name], 'products' => $products, 'filters' => $request->only(['q', 'period', 'product']),
         ];
         if (app()->environment('local') && $request->query('fixture') === 'pen') {
             $props = array_replace($props, PenFixtures::designerTasks($tab));

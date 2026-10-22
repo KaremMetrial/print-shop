@@ -22,7 +22,7 @@ export function ProofDialog({ url, remainingMinor, onClose }: { url: string; rem
         setBusy(true);
         router.post(url, { file, amount_minor: Math.round(Number(amount) * 100), method, reference: ref || null } as never, {
             forceFormData: true,
-            headers: { 'Idempotency-Key': key.current },
+            headers: { 'Idempotency-Key': crypto.randomUUID() },
             preserveScroll: true,
             onFinish: () => setBusy(false),
             onSuccess: onClose,

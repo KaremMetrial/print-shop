@@ -73,7 +73,7 @@ export default function OrderItemPage(p: Props) {
                         <div className="text-right text-[13px] leading-[21px] text-[var(--muted-foreground)]">{`المصمم: ${i.designer ?? 'غير معيّن'}`}</div>
                     </div>
                 </div>
-                <PageTabs label="أقسام البند" value={tab} tabs={[...TABS].reverse().filter(([k]) => k !== 'chat' || can.chat).map(([key, label]) => ({ key, label, href: `/orders/${o.id}/items/${i.id}?tab=${key}` }))} />
+                <PageTabs label="أقسام البند" value={tab} tabs={TABS.filter(([k]) => k !== 'chat' || can.chat).map(([key, label]) => ({ key, label, href: `/orders/${o.id}/items/${i.id}?tab=${key}` }))} />
 
                 {tab === 'specs' && (
                     <>

@@ -28,15 +28,14 @@ interface Props {
 }
 
 const TABS: [Tab, string, number][] = [
-    ['REJECTED', 'المرفوضة', 107],
-    ['ACCEPTED', 'المقبولة', 100],
-    ['IN_REVIEW', 'قيد المراجعة', 122],
     ['PENDING', 'بانتظار المراجعة', 146],
+    ['IN_REVIEW', 'قيد المراجعة', 122],
+    ['ACCEPTED', 'المقبولة', 100],
+    ['REJECTED', 'المرفوضة', 107],
 ];
 const pill: Record<string, [string, string]> = { PENDING: ['#FFF3D9', '#895A0D'], IN_REVIEW: ['#E8F1FF', '#2563EB'], ACCEPTED: ['#E7F6EC', '#15803D'], REJECTED: ['#FDECEC', '#B42318'] };
 const th = 'flex h-[48px] shrink-0 items-center text-right text-[12px] leading-[normal] font-[600] text-[#475569]';
 const td = 'flex h-[68px] shrink-0 items-center text-right text-[12px] leading-[17px] font-[400] text-[var(--ink)]';
-const filt = 'flex h-[46px] w-fit shrink-0 items-center justify-between gap-[12px] rounded-[10px] bg-[var(--background)] p-[0px_14px] [outline:1px_solid_var(--control-border)] [outline-offset:-0.5px] text-[14px] leading-[normal]';
 
 /** S-019 — طلبات الأوردرات (pendev: QBHwi). أقدم طلب أولًا (BR-067). */
 export default function OrderRequestsIndex({ requests, tab, filters, counts, reviewers, customers }: Props) {
@@ -67,10 +66,12 @@ export default function OrderRequestsIndex({ requests, tab, filters, counts, rev
                 </form>
                 <PageTabs label="حالات الطلبات" value={tab} onChange={(k) => go({ tab: k })} tabs={TABS.map(([key, label]) => ({ key, label: `${label} (${counts[key]})` }))} />
                 <div className="flex w-full shrink-0 justify-end gap-[8px]">
-                    <div className={filt} style={{ color: '#64748B' }}>
-                        <Icon name="chevron-down" className="h-[16px] w-[16px] shrink-0" color="var(--muted-foreground)" />
-                        الفترة الزمنية
-                    </div>
+                    <PenFilterMenu
+                        label="الفترة الزمنية"
+                        value={filters.period ?? ''}
+                        options={[{ value: '', label: 'الكل' }, { value: 'today', label: 'اليوم' }, { value: 'week', label: 'آخر 7 أيام' }, { value: 'month', label: 'آخر 30 يومًا' }]}
+                        onChange={(v) => go({ period: v || undefined })}
+                    />
                     <PenFilterMenu
                         label="العميل"
                         value={filters.customer ?? ''}

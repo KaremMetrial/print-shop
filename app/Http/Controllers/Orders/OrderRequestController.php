@@ -29,11 +29,19 @@ class OrderRequestController extends Controller
     {
         Gate::authorize('order_requests.view');
         $tab = OrderRequestStatus::tryFrom((string) $request->query('tab')) ?? OrderRequestStatus::PENDING;
+        $period = in_array($request->query('period'), ['today', 'week', 'month'], true) ? $request->query('period') : null;
+        $submittedAfter = match ($period) {
+            'today' => now()->startOfDay(),
+            'week' => now()->subDays(6)->startOfDay(),
+            'month' => now()->subDays(29)->startOfDay(),
+            default => null,
+        };
         $q = OrderRequest::query()->with('customer:id,name', 'reviewer:id,name')->withCount('items')
             ->where('status', $tab)
             ->when($request->query('q'), fn ($b, $t) => $b->where(fn ($w) => $w->where('request_number', 'like', "%{$t}%")->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$t}%"))))
             ->when($request->query('reviewer'), fn ($b, $id) => $b->where('reviewer_id', $id))
             ->when($request->query('customer'), fn ($b, $id) => $b->where('customer_id', $id))
+            ->when($submittedAfter, fn ($b) => $b->where('submitted_at', '>=', $submittedAfter))
             ->oldest('submitted_at');
 
         $rows = $q->paginate(15)->withQueryString()->through(function (OrderRequest $r) {
@@ -48,7 +56,7 @@ class OrderRequestController extends Controller
         $counts = OrderRequest::selectRaw('status, count(*) c')->groupBy('status')->pluck('c', 'status');
 
         $props = [
-            'requests' => $rows, 'tab' => $tab->value, 'filters' => $request->only(['q', 'reviewer', 'customer']),
+            'requests' => $rows, 'tab' => $tab->value, 'filters' => $request->only(['q', 'reviewer', 'customer', 'period']),
             'counts' => collect(OrderRequestStatus::cases())->mapWithKeys(fn ($s) => [$s->value => (int) ($counts[$s->value] ?? 0)])->all(),
             'reviewers' => User::whereIn('id', OrderRequest::whereNotNull('reviewer_id')->select('reviewer_id'))->get(['id', 'name']),
             'customers' => OrderRequest::with('customer:id,name')->get()->pluck('customer')->unique('id')->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values(),

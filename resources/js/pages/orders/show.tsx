@@ -347,7 +347,7 @@ function Items({ p }: { p: Props }) {
                                     <button
                                         type="button"
                                         onClick={() => setCancelItem(i)}
-                                        className="text-left text-[12px] font-[600] text-[#DC2626]"
+                                        className="flex h-[40px] w-[120px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--danger-soft)] px-[12px] text-left text-[14px] leading-[22px] font-[600] text-[var(--danger-text)] [outline:1px_solid_#FECACA] transition-colors hover:bg-[#FEE2E2] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
                                     >
                                         إلغاء البند
                                     </button>

@@ -63,7 +63,7 @@ export default function Actions({ actions: p, filters, counts }: Props) {
                         </div>
                     ))}
                 </div>
-                <PageTabs label="نوع الإجراء" value={filters.type ?? ''} onChange={(k) => go({ type: k || undefined })} tabs={[...TYPES].reverse().map(([key, label]) => ({ key, label }))} />
+                <PageTabs label="نوع الإجراء" value={filters.type ?? ''} onChange={(k) => go({ type: k || undefined })} tabs={TYPES.map(([key, label]) => ({ key, label }))} />
                 <div className="flex w-full shrink-0 items-center gap-[12px]">
                     <button type="button" onClick={() => router.get('/actions')} className={`${btn} h-[46px]`}>
                         مسح

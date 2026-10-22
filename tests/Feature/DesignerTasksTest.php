@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 function dItem(User $d): OrderItem
@@ -33,6 +34,31 @@ it('shows a designer only their own tasks with counts and no prices (BR-071)', f
     dItem(User::factory()->designer()->create());
     $this->actingAs($d)->get('/designer/tasks')->assertOk()->assertInertia(fn ($p) => $p->component('designer/tasks')->where('counts.new', 1)->has('tasks', 1)->missing('tasks.0.total_minor')->missing('tasks.0.price'));
     $this->get("/designer/tasks/{$mine->id}")->assertOk()->assertInertia(fn ($p) => $p->component('designer/task')->missing('task.item_total'));
+});
+
+it('filters designer tasks by product and the correct date field', function () {
+    $designer = User::factory()->designer()->create();
+    $recent = dItem($designer);
+    $recent->update(['product_snapshot' => ['id' => $recent->product_id, 'name' => 'مطابق'], 'created_at' => now()->subDay(), 'updated_at' => now()->subDay()]);
+    $otherProduct = dItem($designer);
+    $otherProduct->update(['product_snapshot' => ['id' => $otherProduct->product_id, 'name' => 'منتج آخر'], 'created_at' => now()->subDay(), 'updated_at' => now()->subDay()]);
+    $old = dItem($designer);
+    $old->update(['product_snapshot' => ['id' => $old->product_id, 'name' => 'مطابق'], 'created_at' => now()->subDays(40), 'updated_at' => now()->subDays(40)]);
+
+    foreach ([[$recent, now()->subDay()], [$otherProduct, now()->subDay()], [$old, now()->subDays(40)]] as [$item, $assignedAt]) {
+        DB::table('item_assignment_history')->insert([
+            'order_item_id' => $item->id, 'designer_id' => $designer->id, 'mode' => 'AUTO', 'created_at' => $assignedAt,
+        ]);
+    }
+
+    $this->actingAs($designer)->get('/designer/tasks?tab=new&period=month&product='.urlencode('مطابق'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.period', 'month')
+            ->where('filters.product', 'مطابق')
+            ->has('tasks', 1)
+            ->where('tasks.0.product', 'مطابق')
+            ->has('products', 2));
 });
 
 it('hides other designers tasks with 404 (BOLA)', function () {
