@@ -95,7 +95,6 @@ export default function LinkShow({ token, order: o }: Props) {
                         <div className="text-left text-[12px] leading-[normal] font-[400] text-[var(--muted-foreground)]">{sub}</div>
                     </div>
                 </div>
-                {proof && <ProofDialog url={`/l/${token}/proofs`} remainingMinor={o.remaining_minor} onClose={() => setProof(false)} />}
                 <div className="flex w-full shrink-0 flex-col items-stretch gap-[16px] lg:flex-row lg:items-start">
                     <div className="flex w-full shrink-0 lg:w-[426px] flex-col items-end gap-[14px]">
                         <div className={card}>

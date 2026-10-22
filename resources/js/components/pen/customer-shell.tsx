@@ -26,13 +26,13 @@ const SUBTITLES: Record<string, string> = {
 };
 
 const TABS: [string, string, string][] = [
-    ['activity', 'النشاط', '/activity'],
-    ['access', 'دخول المنصة', '/access'],
-    ['refunds', 'الاستردادات', '/refunds'],
-    ['payments', 'المدفوعات', '/payments'],
-    ['financial', 'الملخص المالي', '/financial'],
-    ['orders', 'الأوردرات', '/orders'],
     ['overview', 'نظرة عامة', ''],
+    ['orders', 'الأوردرات', '/orders'],
+    ['financial', 'الملخص المالي', '/financial'],
+    ['payments', 'المدفوعات', '/payments'],
+    ['refunds', 'الاستردادات', '/refunds'],
+    ['access', 'دخول المنصة', '/access'],
+    ['activity', 'النشاط', '/activity'],
 ];
 
 /** رأس ملف العميل + تبويباته (pen: Customer profile header / tabs — S-024…S-032) */

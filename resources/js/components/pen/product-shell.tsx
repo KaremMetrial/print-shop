@@ -10,11 +10,11 @@ export interface ProductHead {
 }
 
 const TABS: [string, string, string][] = [
-    ['activity', 'سجل النشاط', '/activity'],
-    ['routing', 'توزيع التصميم', '/routing'],
-    ['pricing', 'التسعير', '/pricing'],
-    ['specs', 'المواصفات', '/specs'],
     ['basic', 'البيانات الأساسية', '/edit'],
+    ['specs', 'المواصفات', '/specs'],
+    ['pricing', 'التسعير', '/pricing'],
+    ['routing', 'توزيع التصميم', '/routing'],
+    ['activity', 'سجل النشاط', '/activity'],
 ];
 const TITLES: Record<string, string> = { basic: 'البيانات الأساسية', specs: 'المواصفات', pricing: 'التسعير', routing: 'توزيع التصميم', activity: 'سجل النشاط' };
 

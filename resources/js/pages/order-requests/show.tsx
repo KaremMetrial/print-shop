@@ -236,7 +236,6 @@ export default function OrderRequestShow(p: Props) {
 
                         {r.status === 'IN_REVIEW' && (
                             <>
-                                <CustomerCard c={c} sent={sent} />
                                 <div className={card}>
                                     <div className={h17}>مراجعة البنود</div>
                                     {items.map((i) =>

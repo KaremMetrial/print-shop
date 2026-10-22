@@ -31,7 +31,7 @@ export function ListHead({
 }
 
 export function TabsBar({ tabs, value, onChange }: { tabs: [string, string][]; value: string; onChange: (v: string) => void }) {
-    return <PageTabs tabs={[...tabs].reverse().map(([key, label]) => ({ key, label }))} value={value} onChange={onChange} />;
+    return <PageTabs tabs={tabs.map(([key, label]) => ({ key, label }))} value={value} onChange={onChange} />;
 }
 
 export function SearchBox({ value, onSubmit, placeholder }: { value: string; onSubmit: (q: string) => void; placeholder: string }) {
