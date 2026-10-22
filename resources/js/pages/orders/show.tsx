@@ -596,6 +596,11 @@ export default function OrderShow(props: Props) {
                                     <DropdownMenuItem asChild className="h-11 px-3">
                                         <Link href={`/orders/${o.id}/job-ticket`}>بطاقة تشغيل الطباعة</Link>
                                     </DropdownMenuItem>
+                                    {can.discount && o.subtotal_minor !== undefined && (
+                                        <DropdownMenuItem className="h-11 px-3" onSelect={() => setDiscOpen(true)}>
+                                            تطبيق خصم
+                                        </DropdownMenuItem>
+                                    )}
                                     {invoice && can.invoice_view && (
                                         <DropdownMenuItem asChild className="h-11 px-3">
                                             <Link href={`/invoices/${invoice.id}`}>عرض الفاتورة {invoice.number}</Link>
@@ -669,6 +674,9 @@ export default function OrderShow(props: Props) {
                 {tab === 'files' && <Files p={props} />}
                 {tab === 'activity' && <Activity p={props} />}
             </div>
+            {discOpen && o.subtotal_minor !== undefined && (
+                <DiscountDialog orderId={o.id} subtotalMinor={o.subtotal_minor} type={o.discount_type ?? 'NONE'} value={o.discount_value ?? ''} onClose={() => setDiscOpen(false)} />
+            )}
             {payOpen && (
                 <PaymentDialog
                     onClose={() => setPayOpen(false)}
