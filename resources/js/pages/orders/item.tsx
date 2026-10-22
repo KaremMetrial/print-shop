@@ -1,4 +1,5 @@
 import { idemHeaders } from '@/lib/idempotency';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { PageTabs } from '@/components/pen/page-tabs';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import { PenSelect } from '@/components/pen/form';
@@ -18,7 +19,7 @@ interface Props {
     activity: { id: number; action: string; at: string; note: string | null }[];
     audit: { id: number; action: string; at: string }[];
     designers: { id: number; name: string }[];
-    can: { assign: boolean; chat: boolean; price: boolean };
+    can: { reopen: boolean; assign: boolean; chat: boolean; price: boolean };
 }
 const TABS: [Tab, string][] = [['specs', 'المواصفات'], ['files', 'ملفات العميل'], ['versions', 'نسخ التصميم'], ['chat', 'المحادثة'], ['activity', 'سجل النشاط']];
 const dt = (iso: string) => `${formatDate(iso)}، ${formatTime(iso)}`;
@@ -53,11 +54,28 @@ function AssignDialog({ p, onClose }: { p: Props; onClose: () => void }) {
 export default function OrderItemPage(p: Props) {
     const { order: o, item: i, tab, can } = p;
     const [assign, setAssign] = useState(false);
+    const [reopen, setReopen] = useState(false);
+    const [busy, setBusy] = useState(false);
     const [first, ...rest] = i.options;
     return (
         <AppLayout active="/orders">
             <Head title={`تفاصيل البند ${i.code}`} />
             {assign && <AssignDialog p={p} onClose={() => setAssign(false)} />}
+            <ConfirmDialog
+                open={reopen}
+                onOpenChange={setReopen}
+                title="إعادة فتح التصميم"
+                description="سيعود البند إلى «مطلوب تعديل» وتُلغى حالة الاعتماد. يُسمح بذلك قبل الطباعة فقط، ويُسجَّل السبب."
+                confirmLabel="إعادة الفتح"
+                danger
+                reasonLabel="سبب إعادة الفتح"
+                reasonRequired
+                processing={busy}
+                onConfirm={(reason) => {
+                    setBusy(true);
+                    router.post(`/orders/${o.id}/items/${i.id}/reopen`, { reason }, { headers: idemHeaders(), preserveScroll: true, onFinish: () => { setBusy(false); setReopen(false); } });
+                }}
+            />
             <div className="flex w-full shrink-0 flex-col gap-[18px]">
                 <PenBreadcrumb items={[{ label: 'الرئيسية', href: '/dashboard' }, { label: 'الأوردرات', href: '/orders' }, { label: o.number, href: `/orders/${o.id}?tab=items` }, i.code]} />
                 <div className="flex w-full shrink-0 justify-between gap-[12px]">
@@ -106,6 +124,9 @@ export default function OrderItemPage(p: Props) {
                         <div className="flex w-full shrink-0 items-center justify-end gap-[12px]">
                             {can.assign && (
                                 <button type="button" onClick={() => setAssign(true)} className={btn34}>تغيير المصمم</button>
+                            )}
+                            {can.reopen && (
+                                <button type="button" onClick={() => setReopen(true)} className={btn34}>إعادة فتح التصميم</button>
                             )}
                             <Link href={`/orders/${o.id}?tab=items`} className="flex h-[34px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_12px] text-[12px] font-[600] text-white">العودة لبنود الأوردر</Link>
                         </div>

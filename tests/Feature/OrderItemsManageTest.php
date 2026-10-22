@@ -76,3 +76,16 @@ it('applies and removes a discount through the dedicated endpoint with validatio
     expect($o->refresh()->grand_total->minor)->toBe($total);
     $this->actingAs(User::factory()->designer()->create())->patch("/orders/{$o->id}/discount", ['discount_type' => 'FIXED', 'discount_value' => 100], ['Idempotency-Key' => 'x4'])->assertForbidden();
 });
+
+it('reopens an approved design with a mandatory reason before printing only', function () {
+    [$o] = mkOrder($this->admin, 1);
+    $it = $o->items[0];
+    $it->update(['design_state' => 'APPROVED', 'approved_at' => now()]);
+    $this->actingAs($this->admin)->postJson("/orders/{$o->id}/items/{$it->id}/reopen", ['reason' => ''], ['Idempotency-Key' => 'r1'])->assertStatus(422);
+    $this->post("/orders/{$o->id}/items/{$it->id}/reopen", ['reason' => 'تعديل مطلوب'], ['Idempotency-Key' => 'r2'])->assertRedirect();
+    expect($it->refresh()->design_state)->toBe('REVISION_REQUESTED')->and($it->approved_at)->toBeNull();
+    $it->update(['design_state' => 'APPROVED', 'approved_at' => now()]);
+    $o->update(['status' => OrderStatus::IN_PRINTING]);
+    $this->postJson("/orders/{$o->id}/items/{$it->id}/reopen", ['reason' => 'x'], ['Idempotency-Key' => 'r3'])->assertForbidden();
+    $this->actingAs(User::factory()->designer()->create())->postJson("/orders/{$o->id}/items/{$it->id}/reopen", ['reason' => 'x'], ['Idempotency-Key' => 'r4'])->assertForbidden();
+});

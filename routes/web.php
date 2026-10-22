@@ -110,6 +110,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('{order}/discount', 'discount')->name('discount')->middleware('idempotent');
         Route::post('{order}/items', 'addItem')->name('items.add')->middleware('idempotent');
         Route::patch('{order}/items/{item}', 'updateItem')->name('items.update')->middleware('idempotent');
+        Route::post('{order}/items/{item}/reopen', [OrderItemController::class, 'reopen'])->name('items.reopen')->middleware('idempotent');
         Route::post('{order}/items/{item}/cancel', 'cancelItem')->name('items.cancel')->middleware('idempotent');
         Route::post('{order}/cancel', 'cancel')->name('cancel')->middleware('idempotent');
     });

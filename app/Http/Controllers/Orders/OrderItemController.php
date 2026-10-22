@@ -12,7 +12,10 @@ use App\Models\DesignVersion;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Services\Design\DesignService;
+use App\Services\Orders\OrderStatusLabels;
 use App\Services\Settings\Settings;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Carbon;
@@ -56,8 +59,19 @@ class OrderItemController extends Controller
                 + [],
             'audit' => AuditLog::where('entity_type', $item->getMorphClass())->where('entity_id', $item->id)->oldest('id')->get()->map(fn (AuditLog $l) => ['id' => $l->id, 'action' => $l->action, 'at' => $l->created_at->toIso8601String()])->all(),
             'designers' => User::whereHas('role', fn ($r) => $r->where('code', RoleEnum::Designer->value))->orderBy('name')->get(['id', 'name']),
-            'can' => ['assign' => (bool) $u->hasPermission('designers.assignment.manage') && ! $item->cancelled_at && $order->status === OrderStatus::DESIGN_STAGE, 'chat' => (bool) $u->hasPermission('design.chat.read'), 'price' => $showPrice],
+            'can' => ['assign' => (bool) $u->hasPermission('designers.assignment.manage') && ! $item->cancelled_at && $order->status === OrderStatus::DESIGN_STAGE, 'chat' => (bool) $u->hasPermission('design.chat.read'), 'reopen' => (bool) $u->hasPermission('design.approval.reopen') && $item->design_state === 'APPROVED' && ! $item->cancelled_at && $order->status === OrderStatus::DESIGN_STAGE, 'price' => $showPrice],
         ]);
+    }
+
+    /** إعادة فتح تصميم معتمد قبل الطباعة (BR: صلاحية design.approval.reopen + سبب إلزامي). */
+    public function reopen(Request $request, Order $order, OrderItem $item, DesignService $design): RedirectResponse
+    {
+        Gate::authorize('design.approval.reopen');
+        abort_unless($item->order_id === $order->id, 404);
+        $d = $request->validate(['reason' => ['required', 'string', 'max:500']], ['reason.required' => 'سبب إعادة الفتح إلزامي.']);
+        $design->reopen($request->user(), $item, $d['reason']);
+
+        return back()->with('success', 'أُعيد فتح التصميم وعاد البند إلى «مطلوب تعديل».');
     }
 
     public function jobTicket(Request $request, Order $order): Response
@@ -89,7 +103,7 @@ class OrderItemController extends Controller
 
         return [
             'order' => [
-                'number' => $order->order_number, 'customer' => $order->customer->name, 'status_label' => $order->status->label(), 'created_at' => $order->created_at?->toIso8601String(),
+                'number' => $order->order_number, 'customer' => $order->customer->name, 'status_label' => app(OrderStatusLabels::class)->label($order->status), 'created_at' => $order->created_at?->toIso8601String(),
                 'printing_started_at' => $order->printing_started_at ? Carbon::parse($order->printing_started_at)->toIso8601String() : null, 'eta_days' => $order->printing_eta_days, 'delivery_label' => $order->delivery_method === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة',
                 'notes' => $order->notes,
             ],
