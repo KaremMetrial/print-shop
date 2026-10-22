@@ -255,7 +255,8 @@
     --sidebar-ring: #2563eb;
 }
 
-html { font-family: var(--font-sans); scrollbar-gutter: stable; overflow-y: scroll; }
+html { font-family: var(--font-sans); }
+@media (min-width: 768px) { html { scrollbar-gutter: stable; overflow-y: scroll; } }
 /* النافذة تحجب تمرير body لكن شريط html يظل محجوزًا أعلاه؛ لا تضف هامش التعويض مرة ثانية. */
 html body[data-scroll-locked] { margin-right: 0 !important; padding-right: 0 !important; }
 /* قائمة الشريط الجانبي تتمرر بدون إظهار شريط تمرير يزيح التخطيط */

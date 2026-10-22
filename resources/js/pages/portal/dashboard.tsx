@@ -1,20 +1,76 @@
 import { CustomerLayout } from '@/components/shell/customer-layout';
+import { CustomerMobileShell, mBtnOutline, mBtnPrimary, mCard, mH2 } from '@/components/shell/customer-mobile';
+import { Icon } from '@/pen/icon';
 import { formatMoneyFixed } from '@/lib/money';
 import { Head, Link } from '@inertiajs/react';
 
 interface Props {
     due_minor: number;
-    active: { id: number; number: string; status: string; remaining_minor: number }[];
-    awaiting: { order_id: number; item_id: number; name: string }[];
+    active: { id: number; number: string; status: string; remaining_minor: number; total_minor?: number }[];
+    awaiting: { order_id: number; item_id: number; name: string; order_number?: string | null }[];
     requests: number;
+    recent_requests?: { id: number; number: string; status: string }[];
+    greeting_name?: string;
 }
+const iso = (v: string | number | null | undefined) => `\u2066${v ?? ''}\u2069`;
 const card = 'flex w-full shrink-0 flex-col gap-[10px] rounded-[12px] bg-[var(--surface)] p-[20px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
 const btn = 'flex h-[40px] w-fit items-center rounded-[8px] bg-[var(--surface)] p-[0px_16px] text-[13px] font-[600] text-[var(--primary)] [outline:1px_solid_var(--border)]';
 
 /** S-081 — لوحة تحكم العميل (pendev: lnLjF): المطلوب منه، أرقامه، أوردراته الحالية. */
-export default function PortalDashboard({ due_minor, active, awaiting, requests }: Props) {
+export default function PortalDashboard({ due_minor, active, awaiting, requests, recent_requests = [], greeting_name }: Props) {
+    const first = awaiting[0];
+    const act = active[0];
+    const mobile = (
+        <CustomerMobileShell title="الرئيسية" tab="home" lead={<Icon name="bell" className="h-[21px] w-[21px]" color="#334155" />}>
+            <div className="w-full text-right text-[22px] leading-[normal] font-[700] text-[#0F172A]">أهلًا، {greeting_name}</div>
+            <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#64748B]">
+                {requests === 0 ? 'لا توجد طلبات بانتظار المراجعة' : requests === 1 ? 'طلب واحد بانتظار المراجعة' : `${requests} طلبات بانتظار المراجعة`}
+            </div>
+            {first && (
+                <div className={mCard}>
+                    <div className={mH2}>مطلوب منك</div>
+                    <div className="flex w-fit rounded-[20px] bg-[#EFF6FF] p-[6px_11px] text-[12px] leading-[normal] font-[700] whitespace-nowrap text-[#1D4ED8]">بانتظار اعتمادك</div>
+                    <div className="w-full text-right text-[16px] leading-[normal] font-[700] text-[#0F172A]">
+                        {first.name} · {iso(first.order_number)}
+                    </div>
+                    <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">التصميم جاهز لمراجعتك.</div>
+                    <Link href={`/portal/orders/${first.order_id}/items/${first.item_id}`} className={mBtnPrimary}>
+                        راجع التصميم
+                    </Link>
+                </div>
+            )}
+            {act && (
+                <div className={mCard}>
+                    <div className={mH2}>أوردر نشط</div>
+                    <div className="w-full text-right text-[16px] leading-[normal] font-[700] text-[#0F172A]">
+                        {iso(act.number)} · {act.status}
+                    </div>
+                    <div className="w-full text-right text-[15px] leading-[normal] font-[700] text-[#334155]">{`الإجمالي ${iso(formatMoneyFixed(act.total_minor ?? 0).replace(' ج.م', ''))} ج.م`}</div>
+                    <Link href={`/portal/orders/${act.id}`} className={mBtnOutline}>
+                        عرض الأوردر
+                    </Link>
+                </div>
+            )}
+            {recent_requests.length > 0 && (
+                <div className={mCard}>
+                    <div className={mH2}>آخر الطلبات</div>
+                    {recent_requests.map((r) => (
+                        <div key={r.id} className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#334155]">
+                            {iso(r.number)} · {r.status}
+                        </div>
+                    ))}
+                    <Link href="/portal/requests" className="flex h-[46px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[600] text-[#2563EB]">
+                        عرض الطلب
+                    </Link>
+                </div>
+            )}
+            <Link href="/portal/requests/new" className={`${mBtnOutline} font-[600]`}>
+                طلب أوردر جديد
+            </Link>
+        </CustomerMobileShell>
+    );
     return (
-        <CustomerLayout>
+        <CustomerLayout mobile={mobile}>
             <Head title="لوحة التحكم" />
             <div className="flex w-full items-center justify-between">
                 <Link href="/portal/requests/new" className="flex h-[44px] items-center rounded-[8px] bg-[var(--primary)] p-[0px_18px] text-[14px] font-[600] text-white">

@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Support\PenFixtures;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -52,12 +53,20 @@ class PortalController extends Controller
         $active = Order::where('customer_id', $c->id)->whereNotIn('status', ['COMPLETED', 'CANCELLED'])->latest('id')->get();
         $needs = OrderItem::whereIn('order_id', $active->pluck('id'))->where('design_state', 'AWAITING_APPROVAL')->whereNull('cancelled_at')->get();
 
-        return Inertia::render('portal/dashboard', [
+        $props = [
             'due_minor' => $pay->customerDue($c),
-            'active' => $active->take(5)->map(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => app(OrderStatusLabels::class)->label($o->status), 'remaining_minor' => $pay->due($o)])->values(),
-            'awaiting' => $needs->map(fn (OrderItem $i) => ['order_id' => $i->order_id, 'item_id' => $i->id, 'name' => $i->product_snapshot['name']])->values(),
+            'active' => $active->take(5)->map(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => app(OrderStatusLabels::class)->label($o->status), 'remaining_minor' => $pay->due($o), 'total_minor' => $o->grand_total->minor])->values(),
+            'awaiting' => $needs->map(fn (OrderItem $i) => ['order_id' => $i->order_id, 'item_id' => $i->id, 'name' => $i->product_snapshot['name'], 'order_number' => $active->firstWhere('id', $i->order_id)?->order_number])->values(),
             'requests' => OrderRequest::where('customer_id', $c->id)->where('status', 'PENDING')->count(),
-        ]);
+            'recent_requests' => OrderRequest::where('customer_id', $c->id)->latest('id')->limit(2)->get()
+                ->map(fn (OrderRequest $r) => ['id' => $r->id, 'number' => $r->request_number, 'status' => $r->status->label()])->values(),
+            'greeting_name' => $c->name,
+        ];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props = array_replace($props, PenFixtures::portalDashboard());
+        }
+
+        return Inertia::render('portal/dashboard', $props);
     }
 
     public function requests(Request $request): Response
@@ -68,7 +77,12 @@ class PortalController extends Controller
             ->through(fn (OrderRequest $r) => ['id' => $r->id, 'number' => $r->request_number, 'at' => $r->submitted_at->toIso8601String(), 'items' => $r->items_count, 'status' => $r->status->label(), 'order_id' => $r->order_id]);
         $counts = OrderRequest::where('customer_id', $c->id)->selectRaw('status, count(*) n')->groupBy('status')->pluck('n', 'status');
 
-        return Inertia::render('portal/requests', ['requests' => $rows, 'tab' => $tab, 'counts' => $counts]);
+        $props = ['requests' => $rows, 'tab' => $tab, 'counts' => $counts, 'cards' => $this->requestCards($c)];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props = array_replace($props, PenFixtures::portalRequests());
+        }
+
+        return Inertia::render('portal/requests', $props);
     }
 
     public function createRequest(Request $request): Response
@@ -123,7 +137,12 @@ class PortalController extends Controller
         $q = Order::where('customer_id', $c->id)->when($tab === 'active', fn ($b) => $b->whereNotIn('status', ['COMPLETED', 'CANCELLED']))->when($tab === 'done', fn ($b) => $b->where('status', 'COMPLETED'))->when($tab === 'cancelled', fn ($b) => $b->where('status', 'CANCELLED'));
         $rows = $q->latest('id')->paginate(10)->withQueryString()->through(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => app(OrderStatusLabels::class)->label($o->status), 'at' => $o->created_at?->toIso8601String(), 'total_minor' => $o->grand_total->minor]);
 
-        return Inertia::render('portal/orders', ['orders' => $rows, 'tab' => $tab]);
+        $props = ['orders' => $rows, 'tab' => $tab, 'cards' => $this->orderCards($c), 'summary' => $this->orderSummary($c)];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props = array_replace($props, PenFixtures::portalOrders());
+        }
+
+        return Inertia::render('portal/orders', $props);
     }
 
     public function showOrder(Request $request, Order $order, PaymentService $pay): Response
@@ -219,5 +238,46 @@ class PortalController extends Controller
         $inv = Invoice::where('active_order_id', $order->id)->firstOrFail();
 
         return response(app(InvoiceService::class)->pdf($inv), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'inline; filename="invoice-'.$inv->number.'.pdf"', 'Cache-Control' => 'private, no-store']);
+    }
+
+    /**
+     * بطاقات «طلباتي» للموبايل (M-A08): كل الحالات، الأحدث أولًا. السعر = إجمالي الأوردر المرتبط، وإلا عرض سعر مبدئي بشريحة العميل.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function requestCards(Customer $c): array
+    {
+        $pricing = app(PricingService::class);
+
+        return OrderRequest::where('customer_id', $c->id)->with(['items.product', 'order'])->latest('id')->limit(10)->get()->map(function (OrderRequest $r) use ($pricing, $c) {
+            $total = $r->order?->grand_total->minor;
+            if ($total === null) {
+                try {
+                    $quotes = $r->items->map(fn ($i) => $pricing->quoteItem($i->product, $i->options ?? [], (int) $i->quantity, $c->pricingTier))->all();
+                    $total = $pricing->quoteOrder($quotes, 'NONE', 0, Money::zero())->grandTotal->minor;
+                } catch (\Throwable) {
+                    $total = null;
+                }
+            }
+
+            return ['id' => $r->id, 'number' => $r->request_number, 'status' => $r->status->label(), 'status_key' => $r->status->value, 'items' => $r->items->count(),
+                'total_minor' => $total, 'at' => $r->submitted_at->toIso8601String(), 'order_number' => $r->order?->order_number];
+        })->all();
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function orderCards(Customer $c): array
+    {
+        return Order::where('customer_id', $c->id)->with('items')->orderByRaw("status IN ('COMPLETED','CANCELLED')")->latest('id')->limit(10)->get()
+            ->map(fn (Order $o) => ['id' => $o->id, 'number' => $o->order_number, 'status' => app(OrderStatusLabels::class)->label($o->status), 'status_key' => $o->status,
+                'products' => $o->items->whereNull('cancelled_at')->map(fn (OrderItem $i) => $i->product_snapshot['name'] ?? '')->filter()->unique()->values()->all(), 'total_minor' => $o->grand_total->minor])->all();
+    }
+
+    /** @return array{active: int, done: int, cancelled: int} */
+    private function orderSummary(Customer $c): array
+    {
+        $n = Order::where('customer_id', $c->id)->selectRaw('status, count(*) n')->groupBy('status')->pluck('n', 'status');
+
+        return ['active' => (int) $n->except(['COMPLETED', 'CANCELLED'])->sum(), 'done' => (int) ($n['COMPLETED'] ?? 0), 'cancelled' => (int) ($n['CANCELLED'] ?? 0)];
     }
 }

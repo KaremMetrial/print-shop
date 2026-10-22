@@ -5,6 +5,36 @@ namespace App\Support;
 /** بيانات عينة مطابقة لما هو مرسوم في pendev/untitled.pen — للمقارنة البصرية في بيئة local فقط (?fixture=pen). */
 final class PenFixtures
 {
+    /** M-A08 — طلباتي على الموبايل. @return array<string, mixed> */
+    public static function portalRequests(): array
+    {
+        return ['cards' => [
+            ['id' => 187, 'number' => 'REQ-0187', 'status' => 'بانتظار المراجعة', 'status_key' => 'PENDING', 'items' => 2, 'total_minor' => 248000, 'at' => '2026-10-17T10:00:00+03:00', 'order_number' => null],
+            ['id' => 186, 'number' => 'REQ-0186', 'status' => 'مقبول', 'status_key' => 'ACCEPTED', 'items' => 2, 'total_minor' => 260000, 'at' => '2026-10-14T10:00:00+03:00', 'order_number' => 'ORD-0153'],
+        ]];
+    }
+
+    /** M-A10 — أوردراتي على الموبايل. @return array<string, mixed> */
+    public static function portalOrders(): array
+    {
+        return [
+            'summary' => ['active' => 1, 'done' => 0, 'cancelled' => 0],
+            'cards' => [['id' => 153, 'number' => 'ORD-0153', 'status' => 'مرحلة التصميم', 'status_key' => 'IN_DESIGN', 'products' => ['كروت شخصية', 'فلاير'], 'total_minor' => 260000]],
+        ];
+    }
+
+    /** M-A02 — لوحة العميل على الموبايل. @return array<string, mixed> */
+    public static function portalDashboard(): array
+    {
+        return [
+            'greeting_name' => 'شركة الأفق للإعلان',
+            'requests' => 1,
+            'awaiting' => [['order_id' => 153, 'item_id' => 1, 'name' => 'كروت شخصية', 'order_number' => 'ORD-0153']],
+            'active' => [['id' => 153, 'number' => 'ORD-0153', 'status' => 'مرحلة التصميم', 'remaining_minor' => 260000, 'total_minor' => 260000]],
+            'recent_requests' => [['id' => 187, 'number' => 'REQ-0187', 'status' => 'بانتظار المراجعة'], ['id' => 186, 'number' => 'REQ-0186', 'status' => 'مقبول']],
+        ];
+    }
+
     /** @return array<string, mixed> */
     public static function dashboard(): array
     {

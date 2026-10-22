@@ -21,12 +21,14 @@ const portalNav: ShellNavGroup[] = [
 ];
 
 /** بوابة العميل المسجّل: نفس الشيل المشترك (شريط جانبي + علوي) بقائمة العميل. جلسة منفصلة عن الموظفين. */
-export function CustomerLayout({ children }: { children: ReactNode }) {
+export function CustomerLayout({ children, mobile }: { children: ReactNode; mobile?: ReactNode }) {
     const portal = (usePage<SharedData & { portal?: { name: string; phone: string } | null }>().props as { portal?: { name: string; phone: string } | null }).portal;
     const [open, setOpen] = useState(false);
     const side = <StaffSidebar nav={portalNav} subtitle="بوابة العملاء" footer={{ a: portal?.name ?? '', b: portal?.phone ?? '' }} onNavigate={() => setOpen(false)} />;
     return (
-        <div dir="ltr" className="flex min-h-screen w-full bg-[var(--background)]">
+        <>
+            {mobile}
+        <div dir="ltr" className={`min-h-screen w-full bg-[var(--background)] ${mobile ? 'hidden md:flex' : 'flex'}`}>
             <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex h-[66px] w-full shrink-0 items-center gap-[16px] border-solid bg-[var(--surface)] p-[0px_24px] [border-color:var(--border)] [border-width:0px_0px_1px_0px]">
                     <button type="button" onClick={() => setOpen(true)} aria-label="فتح القائمة" className="text-[var(--muted-foreground)] lg:hidden">
@@ -53,5 +55,6 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
                 </SheetContent>
             </Sheet>
         </div>
+        </>
     );
 }
