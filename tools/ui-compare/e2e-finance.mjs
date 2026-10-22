@@ -7,7 +7,7 @@ await page.goto(`${BASE}/accounting`); await waitIdle(page);
 await step('المحاسبة: تسجيل دفعة جديدة من النافذة', async () => {
   const before = Number(sql('select count(*) from payments'));
   await page.getByRole('button', { name: 'تسجيل دفعة' }).click();
-  await pickSelect(page, 'العميل', 'شركة النور'); await page.locator('input[inputmode=decimal]').first().fill('50');
+  await page.getByRole('dialog').getByLabel('العميل').selectOption('104'); await page.getByLabel('المبلغ (ج.م)').fill('50');
   await page.getByRole('button', { name: /^تسجيل/ }).last().click(); await waitIdle(page); await closeFlash(page);
   return Number(sql('select count(*) from payments')) === before + 1 && sql('select amount from payments order by id desc limit 1') === '5000';
 });
@@ -16,7 +16,7 @@ await step('تفاصيل الدفعة تفتح من الرقم', async () => { a
 await step('إيصال الدفعة: صفحة + PDF', async () => { await page.goto(`${BASE}/accounting/payments/${PID()}/receipt`); await waitIdle(page); const pdf = await page.request.get(`${BASE}/accounting/payments/${PID()}/receipt/pdf`); return (await page.getByText('إيصال دفع').count()) > 0 && pdf.ok() && (await pdf.body()).slice(0, 4).toString() === '%PDF'; });
 await step('تصحيح مبلغ الدفعة بسبب', async () => {
   await page.goto(`${BASE}/accounting`); await waitIdle(page);
-  await page.getByRole('button', { name: 'تصحيح' }).first().click(); await page.locator('input[inputmode=decimal]').first().fill('40'); await page.getByRole('dialog').locator('textarea,input[type=text]').last().fill('تصحيح E2E');
+  await page.getByRole('button', { name: 'تصحيح' }).first().click(); await page.getByRole('dialog').locator('input').first().fill('40'); await page.getByRole('dialog').locator('textarea,input').last().fill('تصحيح E2E');
   await page.getByRole('button', { name: 'حفظ التصحيح' }).click(); await waitIdle(page); await closeFlash(page);
   return sql(`select amount from payments where id=${PID()}`) === '4000';
 });
