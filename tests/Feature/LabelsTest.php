@@ -42,7 +42,7 @@ it('every permission and permission group has an Arabic label', function () {
             expect(preg_match('/[A-Za-z]/', $label))->toBe(0, "صلاحية غير معرّبة: {$code} = {$label}");
         }
     }
-})->skip(fn () => ! defined(Permissions::class.'::GROUPS'), 'بنية الصلاحيات مختلفة');
+});
 
 it('shares the shop name from settings and applies it everywhere after a change', function () {
     $a = User::factory()->superAdmin()->create();
