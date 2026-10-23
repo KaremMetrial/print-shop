@@ -1,0 +1,10 @@
+# TLS تلقائي (Let's Encrypt) أمام حاوية التطبيق. انسخه إلى Caddyfile وغيّر الدومين، ثم: caddy run --config Caddyfile
+# (أو ضعه في حاوية caddy على الشبكة نفسها؛ وغيّر `app` إلى اسم الخدمة في docker-compose.prod.yml)
+pbms.example.com {
+	encode zstd gzip
+	# Reverb (WebSocket) على نفس الدومين تحت المسار /app و/apps
+	@ws path /app/* /apps/*
+	reverse_proxy @ws app:8080
+	reverse_proxy app:80
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
