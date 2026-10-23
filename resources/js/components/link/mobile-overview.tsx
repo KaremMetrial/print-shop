@@ -19,8 +19,8 @@ export interface LinkOrder {
 
 const ORD = ['', 'الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة'];
 const STAGES = ['DESIGN_STAGE', 'IN_PRINTING', 'READY_FOR_DELIVERY', 'OUT_FOR_DELIVERY', 'COMPLETED'];
-const mTitle = 'w-full text-right text-[17px] leading-[normal] font-[700] text-[#0F172A]';
-const mMuted = 'w-full text-right text-[14px] leading-[normal] font-[400] text-[#64748B]';
+const mTitle = 'w-full text-right text-[17px] leading-[1.874] font-[700] text-[#0F172A]';
+const mMuted = 'w-full text-right text-[14px] leading-[1.874] font-[400] text-[#64748B]';
 
 /** رسالة الحالة بعد مرحلة التصميم (M-B05..B07): العنوان + سطران + «ما التالي؟» (إن وُجد). */
 function statusMessage(o: LinkOrder): { title: string; lines: [string, string]; next: string | null } {
@@ -55,7 +55,7 @@ function Tracking({ o, bare }: { o: LinkOrder; bare?: boolean }) {
                     {STAGES.map((k, n) => ({ k, n }))
                         .reverse()
                         .map(({ k, n }) => (
-                            <div key={k} className="text-right text-[14px] leading-[normal]" style={{ color: n <= idx ? '#2563EB' : '#64748B', fontWeight: n === idx ? 700 : 400 }}>{`${n <= idx ? '●' : '○'} ${o.status_labels[k] ?? k}`}</div>
+                            <div key={k} className="text-right text-[14px] leading-[1.874]" style={{ color: n <= idx ? '#2563EB' : '#64748B', fontWeight: n === idx ? 700 : 400 }}>{`${n <= idx ? '●' : '○'} ${o.status_labels[k] ?? k}`}</div>
                         ))}
                 </div>
             )}
@@ -76,7 +76,7 @@ export function LinkMobileOverview({ token, o, onProof, sheet }: { token: string
     const msg = statusMessage(o);
     const addr = o.delivery_method === 'DELIVERY' ? o.delivery_address : null;
     const remainBtn = o.remaining_minor > 0 && (
-        <button type="button" onClick={onProof} className={designStage ? `${mBtnPrimary} font-[600]` : 'flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[700] text-[#2563EB]'}>
+        <button type="button" onClick={onProof} className={designStage ? `${mBtnPrimary} font-[600]` : 'flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[700] text-[#2563EB]'}>
             إرسال إثبات دفع
         </button>
     );
@@ -92,56 +92,56 @@ export function LinkMobileOverview({ token, o, onProof, sheet }: { token: string
     if (designStage) {
         return (
             <div dir="ltr" className="flex w-full flex-col items-end gap-[16px] p-[20px_16px_28px_16px] lg:hidden">
-                <div className="w-full text-right text-[23px] leading-[normal] font-[700] text-[#0F172A]">{`أوردر #${iso(o.number)}`}</div>
-                <div className="w-full text-right text-[15px] leading-[normal] font-[700] text-[#2563EB]">{o.status_label}</div>
+                <div className="w-full text-right text-[23px] leading-[1.874] font-[700] text-[#0F172A]">{`أوردر #${iso(o.number)}`}</div>
+                <div className="w-full text-right text-[15px] leading-[1.874] font-[700] text-[#2563EB]">{o.status_label}</div>
                 {pending ? (
                     <div className="flex w-full flex-col items-end gap-[10px] rounded-[14px] bg-[#EFF6FF] p-[16px] [outline:1px_solid_#BFDBFE] [outline-offset:-0.5px]">
                         <div className={mH2}>عندك تصميم محتاج مراجعتك.</div>
-                        <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">{`${pending.name} · النسخة ${ORD[pending.version_no ?? 1] ?? iso(pending.version_no)} · بانتظار اعتمادك`}</div>
+                        <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#475569]">{`${pending.name} · النسخة ${ORD[pending.version_no ?? 1] ?? iso(pending.version_no)} · بانتظار اعتمادك`}</div>
                         <Link href={`/l/${token}/items/${pending.id}`} className={`${mBtnPrimary} font-[600]`}>{`راجع تصميم ${pending.name}`}</Link>
-                        <Link href={`/l/${token}/items/${pending.id}?tab=chat`} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[700] text-[#2563EB]">{`محادثة ${pending.name}`}</Link>
+                        <Link href={`/l/${token}/items/${pending.id}?tab=chat`} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[700] text-[#2563EB]">{`محادثة ${pending.name}`}</Link>
                     </div>
                 ) : (
                     <div className={mCard}>
                         <div className={mH2}>حالة الأوردر: {o.status_label}</div>
-                        <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">تبدأ الطباعة بعد اعتماد جميع التصميمات.</div>
+                        <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#475569]">تبدأ الطباعة بعد اعتماد جميع التصميمات.</div>
                     </div>
                 )}
                 <div className={mCard}>
-                    <div className="w-full text-right text-[15px] leading-[normal] font-[700] text-[#15803D]">{`تم اعتماد ${approved.length === 2 ? 'تصميمين' : `${iso(approved.length)} تصميم`} من ${iso(o.items.length)}.`}</div>
-                    <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">{approved.map((i) => i.name).join(' · ') || '—'}</div>
-                    <button type="button" onClick={() => setMore((v) => !v)} className="flex h-[44px] w-full items-center text-right text-[14px] leading-[normal] font-[400] text-[#2563EB]">
+                    <div className="w-full text-right text-[15px] leading-[1.874] font-[700] text-[#15803D]">{`تم اعتماد ${approved.length === 2 ? 'تصميمين' : `${iso(approved.length)} تصميم`} من ${iso(o.items.length)}.`}</div>
+                    <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#475569]">{approved.map((i) => i.name).join(' · ') || '—'}</div>
+                    <button type="button" onClick={() => setMore((v) => !v)} className="flex h-[44px] w-full items-center text-right text-[14px] leading-[1.874] font-[400] text-[#2563EB]">
                         <span className="flex-1">{approved.length === 2 ? 'عرض التصميمين' : 'عرض التصاميم'} ⌄</span>
                     </button>
                     {more && (
                         <div className="flex w-full flex-col gap-[8px]">
                             {approved.map((i) => (
-                                <Link key={i.id} href={`/l/${token}/items/${i.id}`} className="w-full text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">{`${i.name} · عرض التصميم المعتمد`}</Link>
+                                <Link key={i.id} href={`/l/${token}/items/${i.id}`} className="w-full text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">{`${i.name} · عرض التصميم المعتمد`}</Link>
                             ))}
                         </div>
                     )}
                 </div>
                 <div className={mCard}>
                     <div className={mMuted}>المتبقي عليك</div>
-                    <div className="w-full text-right text-[30px] leading-[normal] font-[700] text-[#0F172A]">{mMoney(o.remaining_minor)}</div>
-                    <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#334155]">
+                    <div className="w-full text-right text-[30px] leading-[1.874] font-[700] text-[#0F172A]">{mMoney(o.remaining_minor)}</div>
+                    <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#334155]">
                         {`إجمالي الأوردر ${mMoney(o.grand_total_minor)}`}
                         <br />
                         {`المدفوع المؤكد ${mMoney(o.paid_minor)}`}
                     </div>
                     {remainBtn}
                     {o.has_invoice && (
-                        <Link href={`/l/${token}/invoice`} className="flex h-[44px] w-full items-center text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">
+                        <Link href={`/l/${token}/invoice`} className="flex h-[44px] w-full items-center text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">
                             عرض الفاتورة
                         </Link>
                     )}
-                    <button type="button" onClick={() => setDet((v) => !v)} className="flex h-[44px] w-full items-center text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">
+                    <button type="button" onClick={() => setDet((v) => !v)} className="flex h-[44px] w-full items-center text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">
                         <span className="flex-1">تفاصيل المدفوعات ⌄</span>
                     </button>
                     {det && <div className={mMuted}>{o.paid_minor > 0 ? `المدفوع المؤكد ${mMoney(o.paid_minor)}` : 'لا توجد دفعات مؤكدة بعد.'}</div>}
                 </div>
                 <div className={mCard}>
-                    <div className="w-full text-right text-[15px] leading-[normal] font-[700] text-[#0F172A]">{`طريقة الاستلام: ${o.delivery_method === 'DELIVERY' ? 'توصيل' : 'من المطبعة'}`}</div>
+                    <div className="w-full text-right text-[15px] leading-[1.874] font-[700] text-[#0F172A]">{`طريقة الاستلام: ${o.delivery_method === 'DELIVERY' ? 'توصيل' : 'من المطبعة'}`}</div>
                     {addr && <div className={mMuted}>{addr}</div>}
                     <Tracking o={o} bare />
                 </div>
@@ -151,11 +151,11 @@ export function LinkMobileOverview({ token, o, onProof, sheet }: { token: string
 
     return (
         <div dir="ltr" className="flex w-full flex-col items-end gap-[16px] p-[20px_16px_28px_16px] lg:hidden">
-            <div className="w-full text-right text-[20px] leading-[normal] font-[700] text-[#0F172A]">{`أوردر #${iso(o.number)}`}</div>
-            <div className="w-full text-right text-[15px] leading-[normal] font-[700] text-[#2563EB]">{o.status_label}</div>
+            <div className="w-full text-right text-[20px] leading-[1.874] font-[700] text-[#0F172A]">{`أوردر #${iso(o.number)}`}</div>
+            <div className="w-full text-right text-[15px] leading-[1.874] font-[700] text-[#2563EB]">{o.status_label}</div>
             <div className={mCard}>
                 <div className="w-full text-right text-[22px] leading-[normal] font-[700] text-[#0F172A]">{msg.title}</div>
-                <div className="w-full text-right text-[16px] leading-[normal] font-[400] text-[#475569]">
+                <div className="w-full text-right text-[16px] leading-[1.874] font-[400] text-[#475569]">
                     {msg.lines[0]}
                     <br />
                     {msg.lines[1]}
@@ -165,21 +165,21 @@ export function LinkMobileOverview({ token, o, onProof, sheet }: { token: string
             {msg.next && (
                 <div className={mCard}>
                     <div className={mTitle}>ما التالي؟</div>
-                    <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">{msg.next}</div>
+                    <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#475569]">{msg.next}</div>
                 </div>
             )}
             <div className={mCard}>
-                <div className="w-full text-right text-[16px] leading-[normal] font-[700] text-[#0F172A]">{`طريقة الاستلام: ${o.delivery_method === 'DELIVERY' ? 'توصيل' : 'من المطبعة'}`}</div>
+                <div className="w-full text-right text-[16px] leading-[1.874] font-[700] text-[#0F172A]">{`طريقة الاستلام: ${o.delivery_method === 'DELIVERY' ? 'توصيل' : 'من المطبعة'}`}</div>
                 {addr && <div className={mMuted}>{addr}</div>}
             </div>
             {o.remaining_minor > 0 && (
                 <div className={mCard}>
                     <div className={mMuted}>المتبقي عليك</div>
-                    <div className="w-full text-right text-[30px] leading-[normal] font-[700] text-[#0F172A]">{mMoney(o.remaining_minor)}</div>
+                    <div className="w-full text-right text-[30px] leading-[1.874] font-[700] text-[#0F172A]">{mMoney(o.remaining_minor)}</div>
                     {remainBtn}
                 </div>
             )}
-            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[700] text-[#2563EB]">
+            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[700] text-[#2563EB]">
                 العودة إلى الأوردر
             </button>
         </div>

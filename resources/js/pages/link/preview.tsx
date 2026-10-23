@@ -34,12 +34,12 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
     const canApprove = !!v && !approved && !broken;
     const iconBtn = 'flex h-[48px] flex-1 items-center justify-center rounded-[8px] bg-[#F8FAFC]';
     const goto = (n: number) => v && setCur((c) => Math.min(v.files.length - 1, Math.max(0, c + n)));
-    const grayBtn = 'flex h-[48px] w-full items-center justify-center rounded-[10px] bg-[#E2E8F0] text-[15px] leading-[normal] font-[700] text-[#64748B]';
-    const whiteBtn = 'flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[700] text-[#2563EB]';
+    const grayBtn = 'flex h-[48px] w-full items-center justify-center rounded-[10px] bg-[#E2E8F0] text-[15px] leading-[1.874] font-[700] text-[#64748B]';
+    const whiteBtn = 'flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[700] text-[#2563EB]';
     const mobile =
         tab === 'chat' ? (
             <div dir="ltr" className="flex min-h-[calc(100vh-61.5px)] w-full flex-col items-end gap-[12px] p-[16px_16px_12px_16px] lg:hidden">
-                <div className="w-full text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">{`${approved ? 'معتمد' : 'بانتظار اعتمادك'} · ${iso(order.number)}`}</div>
+                <div className="w-full text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">{`${approved ? 'معتمد' : 'بانتظار اعتمادك'} · ${iso(order.number)}`}</div>
                 <button type="button" onClick={() => setTab('preview')} className={whiteBtn}>
                     العودة إلى التصميم
                 </button>
@@ -51,16 +51,16 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
             <div dir="ltr" className="flex min-h-[calc(100vh-61.5px)] w-full flex-col items-end lg:hidden">
                 <div className="flex w-full flex-1 flex-col items-end gap-[8px] p-[12px_16px_0px_16px]">
                     <div className="w-full text-right text-[22px] leading-[normal] font-[700] text-[#0F172A]">{item.name}</div>
-                    <div className="w-full text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">{v ? `النسخة ${ORD[v.no] ?? v.no} · ${approved ? 'معتمد' : 'بانتظار اعتمادك'}` : 'لا توجد نسخة بعد'}</div>
+                    <div className="w-full text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">{v ? `النسخة ${ORD[v.no] ?? v.no} · ${approved ? 'معتمد' : 'بانتظار اعتمادك'}` : 'لا توجد نسخة بعد'}</div>
                     <div className="flex w-full flex-col items-end gap-[8px] rounded-[14px] bg-[#F6F8FC] [outline:1px_solid_#F6F8FC]">
-                        <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">{v ? `الملف ${iso(cur + 1)} من ${iso(v.files.length)}` : ''}</div>
+                        <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#475569]">{v ? `الملف ${iso(cur + 1)} من ${iso(v.files.length)}` : ''}</div>
                         <div className="flex h-[350px] w-full flex-col items-center justify-center gap-[10px] overflow-hidden rounded-[10px] bg-[#EDF2F7] p-[20px]">
                             {broken ? (
                                 <>
                                     <Icon name="file-image" className="h-[48px] w-[48px]" color="#94A3B8" />
-                                    <div className="w-full text-center text-[14px] leading-[normal] font-[400] text-[#64748B]">{v ? 'تعذّر تحميل المعاينة.' : 'لا توجد معاينة متاحة بعد.'}</div>
+                                    <div className="w-full text-center text-[14px] leading-[1.874] font-[400] text-[#64748B]">{v ? 'تعذّر تحميل المعاينة.' : 'لا توجد معاينة متاحة بعد.'}</div>
                                     {v && f && (
-                                        <button type="button" onClick={() => setFailed((x) => ({ ...x, [f.id]: -1 }))} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[600] text-[#2563EB]">
+                                        <button type="button" onClick={() => setFailed((x) => ({ ...x, [f.id]: -1 }))} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[600] text-[#2563EB]">
                                             إعادة المحاولة
                                         </button>
                                     )}
@@ -103,22 +103,22 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
             <Head title="معاينة التصميم" />
             {mobile}
             <div className="hidden w-full flex-col items-end gap-[14px] p-[16px] lg:flex lg:p-[24px_48px]">
-                <div className="text-left text-[11px] leading-[normal] font-[400] whitespace-pre text-[var(--muted-foreground)]">{`تفاصيل الأوردر ‹ ${item.name} ‹ معاينة التصميم`}</div>
+                <div className="text-left text-[11px] leading-[1.874] font-[400] whitespace-pre text-[var(--muted-foreground)]">{`تفاصيل الأوردر ‹ ${item.name} ‹ معاينة التصميم`}</div>
                 <div className="flex w-full shrink-0 items-start justify-between">
-                    <Link href={`/l/${token}`} className="flex h-[40px] w-fit items-center rounded-[8px] bg-[var(--surface)] p-[0px_13px] text-left text-[12px] leading-[normal] font-[700] text-[var(--primary)]">
+                    <Link href={`/l/${token}`} className="flex h-[40px] w-fit items-center rounded-[8px] bg-[var(--surface)] p-[0px_13px] text-left text-[12px] leading-[1.874] font-[700] text-[var(--primary)]">
                         العودة إلى الأوردر
                     </Link>
                     <div className="flex w-fit shrink-0 flex-col items-end gap-[4px]">
-                        <h1 className="text-left text-[24px] leading-[normal] font-[700] text-[var(--ink)]">معاينة التصميم</h1>
-                        <div className="text-left text-[13px] leading-[normal] whitespace-pre text-[#475569]">{`${item.name} • الكمية ⁦${item.quantity}⁩ • ⁦${order.number}⁩`}</div>
+                        <h1 className="text-left text-[24px] leading-[1.874] font-[700] text-[var(--ink)]">معاينة التصميم</h1>
+                        <div className="text-left text-[13px] leading-[1.874] whitespace-pre text-[#475569]">{`${item.name} • الكمية ⁦${item.quantity}⁩ • ⁦${order.number}⁩`}</div>
                         <div className="flex w-fit items-center rounded-[13px] bg-[#FFF4DD] p-[3px_9px]">
-                            <div className="text-left text-[11px] leading-[normal] font-[700] whitespace-nowrap text-[#925B10]">{label}</div>
+                            <div className="text-left text-[11px] leading-[1.874] font-[700] whitespace-nowrap text-[#925B10]">{label}</div>
                         </div>
                     </div>
                 </div>
                 <div className="flex h-[47.5px] w-full shrink-0 rounded-[8px] bg-[var(--surface)] [border-bottom:1px_solid_var(--border)]">
                     {[['المرفقات', false, null], ['المحادثة', tab === 'chat', 'chat'], ['معاينة التصميم', tab === 'preview', 'preview']].map(([l, on, k]) => (
-                        <div key={l as string} onClick={() => k && setTab(k as 'chat' | 'preview')} className="flex flex-1 items-center justify-center cursor-pointer text-left text-[13px] leading-[normal]" style={{ color: on ? '#2563EB' : '#475569', fontWeight: on ? 700 : 600, borderBottom: on ? '3px solid #2563EB' : undefined }}>
+                        <div key={l as string} onClick={() => k && setTab(k as 'chat' | 'preview')} className="flex flex-1 items-center justify-center cursor-pointer text-left text-[13px] leading-[1.874]" style={{ color: on ? '#2563EB' : '#475569', fontWeight: on ? 700 : 600, borderBottom: on ? '3px solid #2563EB' : undefined }}>
                             {l as string}
                         </div>
                     ))}
@@ -127,21 +127,21 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
                 <div className={`flex w-full shrink-0 flex-col items-stretch gap-[18px] lg:flex-row lg:items-start ${tab === 'chat' ? 'hidden' : ''}`}>
                     <div className="flex w-full shrink-0 lg:w-[350px] flex-col items-end gap-[12px]">
                         <div className={`${box} gap-[12px] rounded-[9px] p-[18px]`}>
-                            <div className="text-left text-[15px] leading-[normal] font-[700] text-[var(--ink)]">معلومات النسخة</div>
+                            <div className="text-left text-[15px] leading-[1.874] font-[700] text-[var(--ink)]">معلومات النسخة</div>
                             {v &&
                                 [['النسخة', `النسخة ${ORD[v.no] ?? v.no}`], ['الحالة', approved ? 'معتمد' : 'بانتظار اعتماد العميل'], ['عدد الملفات', `⁦${v.files.length}⁩ ملفات`], ['تاريخ الإرسال', v.sent_at ? `${formatDate(v.sent_at)}، ${formatTime(v.sent_at)}` : '—']].map(([k, val]) => (
                                     <div key={k} className="flex w-full justify-between">
-                                        <div className="text-left text-[12px] leading-[normal] font-[700] text-[var(--ink)]">{val}</div>
-                                        <div className="text-left text-[12px] leading-[normal] text-[var(--muted-foreground)]">{k}</div>
+                                        <div className="text-left text-[12px] leading-[1.874] font-[700] text-[var(--ink)]">{val}</div>
+                                        <div className="text-left text-[12px] leading-[1.874] text-[var(--muted-foreground)]">{k}</div>
                                     </div>
                                 ))}
                         </div>
                         {v && !approved && (
                             <div className="flex w-full flex-col items-end gap-[8px]">
-                                <button type="button" onClick={() => setConfirm(true)} className="flex h-[38px] w-fit items-center rounded-[8px] bg-[var(--primary)] p-[0px_13px] text-left text-[12px] leading-[normal] font-[700] text-white">
+                                <button type="button" onClick={() => setConfirm(true)} className="flex h-[38px] w-fit items-center rounded-[8px] bg-[var(--primary)] p-[0px_13px] text-left text-[12px] leading-[1.874] font-[700] text-white">
                                     اعتماد التصميم
                                 </button>
-                                <div className="flex h-[38px] w-fit items-center rounded-[8px] bg-[var(--surface)] p-[0px_13px] text-left text-[12px] leading-[normal] font-[700] text-[var(--primary)]">مراسلة المصمم</div>
+                                <div className="flex h-[38px] w-fit items-center rounded-[8px] bg-[var(--surface)] p-[0px_13px] text-left text-[12px] leading-[1.874] font-[700] text-[var(--primary)]">مراسلة المصمم</div>
                             </div>
                         )}
                     </div>
@@ -150,14 +150,14 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
                             <div className="flex h-[36px] w-full shrink-0 items-center justify-between">
                                 <div className="flex gap-[8px]">
                                     {[['تكبير +', () => setZoom((z) => Math.min(3, z + 0.25))], ['ملاءمة', () => setZoom(1)], ['تصغير −', () => setZoom((z) => Math.max(0.5, z - 0.25))]].map(([l, fn]) => (
-                                        <button key={l as string} type="button" onClick={fn as () => void} className="flex h-[30px] items-center rounded-[6px] bg-[var(--background)] p-[0px_8px] text-left text-[11px] leading-[normal] font-[600] text-[var(--ink)]">
+                                        <button key={l as string} type="button" onClick={fn as () => void} className="flex h-[30px] items-center rounded-[6px] bg-[var(--background)] p-[0px_8px] text-left text-[11px] leading-[1.874] font-[600] text-[var(--ink)]">
                                             {l as string}
                                         </button>
                                     ))}
                                 </div>
                                 <div className="flex items-center gap-[10px]">
-                                    <div className="text-left text-[12px] leading-[normal] font-[700] whitespace-pre text-[var(--muted-foreground)]">{v ? `الملف ⁦${cur + 1}⁩ من ⁦${v.files.length}⁩ • صفحات PDF حسب الملف` : ''}</div>
-                                    <div className="text-left text-[13px] leading-[normal] font-[700] text-[var(--ink)]">{v ? `النسخة ${ORD[v.no] ?? v.no}` : ''}</div>
+                                    <div className="text-left text-[12px] leading-[1.874] font-[700] whitespace-pre text-[var(--muted-foreground)]">{v ? `الملف ⁦${cur + 1}⁩ من ⁦${v.files.length}⁩ • صفحات PDF حسب الملف` : ''}</div>
+                                    <div className="text-left text-[13px] leading-[1.874] font-[700] text-[var(--ink)]">{v ? `النسخة ${ORD[v.no] ?? v.no}` : ''}</div>
                                 </div>
                             </div>
                             <div className="flex h-[395px] w-full shrink-0 items-center justify-center overflow-auto rounded-[8px] bg-[#E7EDF5]">
@@ -178,11 +178,11 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
                                 {(v?.files ?? []).map((x, i) => (
                                     <button key={x.id} type="button" onClick={() => setCur(i)} className="flex h-full w-[120px] flex-col items-center justify-center rounded-[7px] bg-[var(--background)]" style={{ outline: i === cur ? '2px solid #2563EB' : undefined }}>
                                         <Icon name="files" className="h-[20px] w-[20px]" color="var(--muted-foreground)" />
-                                        <div className="text-left text-[10px] leading-[normal] text-[var(--muted-foreground)]">{`ملف ⁦${i + 1}⁩`}</div>
+                                        <div className="text-left text-[10px] leading-[1.874] text-[var(--muted-foreground)]">{`ملف ⁦${i + 1}⁩`}</div>
                                     </button>
                                 ))}
                             </div>
-                            <div className="text-left text-[12px] leading-[normal] text-[var(--muted-foreground)]">معاينة رسمية للعرض فقط</div>
+                            <div className="text-left text-[12px] leading-[1.874] text-[var(--muted-foreground)]">معاينة رسمية للعرض فقط</div>
                         </div>
                     </div>
                 </div>

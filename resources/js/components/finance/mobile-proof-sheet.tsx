@@ -33,10 +33,10 @@ export function MobileProofSheetBody({ url, order, remaining, onClose, colon }: 
     };
     return (
         <>
-            <div className="w-full text-right text-[15px] leading-[normal] font-[400] text-[#64748B]">{`${iso(order)} · المتبقي ${mMoney(remaining)}`}</div>
+            <div className="w-full text-right text-[15px] leading-[1.874] font-[400] text-[#64748B]">{`${iso(order)} · المتبقي ${mMoney(remaining)}`}</div>
             <div className="flex w-full flex-col items-end gap-[14px] rounded-[20px] bg-white p-[20px_16px_24px_16px]">
-                <div className="w-full text-right text-[22px] leading-[normal] font-[700] text-[#0F172A]">إرسال إثبات دفع</div>
-                <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#475569]">{`المتبقي الآن${colon ? ':' : ''} ${mMoney(remaining)}`}</div>
+                <div className="w-full text-right text-[22px] leading-[1.874] font-[700] text-[#0F172A]">إرسال إثبات دفع</div>
+                <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#475569]">{`المتبقي الآن${colon ? ':' : ''} ${mMoney(remaining)}`}</div>
                 <label className="flex w-full flex-col gap-[6px]">
                     <span className={lbl}>المبلغ المدفوع</span>
                     <div className={ctl}>
@@ -65,7 +65,7 @@ export function MobileProofSheetBody({ url, order, remaining, onClose, colon }: 
                         <input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" aria-label="ملف الإثبات" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
                     </div>
                 </label>
-                <button type="button" onClick={() => setNoteOpen((o) => !o)} className="w-full text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">
+                <button type="button" onClick={() => setNoteOpen((o) => !o)} className="w-full text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">
                     إضافة ملاحظة ⌄
                 </button>
                 {noteOpen && <input dir="rtl" placeholder="رقم العملية / ملاحظة (اختياري)" value={note} onChange={(e) => setNote(e.target.value)} className="h-[46px] w-full rounded-[10px] bg-[#F8FAFC] p-[0px_14px] text-right text-[15px] outline-none [outline:1px_solid_#CBD5E1]" />}
@@ -73,7 +73,7 @@ export function MobileProofSheetBody({ url, order, remaining, onClose, colon }: 
                 <button type="button" disabled={busy} onClick={submit} className={`${mBtnPrimary} disabled:opacity-60`}>
                     إرسال الإثبات
                 </button>
-                <button type="button" onClick={onClose} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[700] text-[#2563EB]">
+                <button type="button" onClick={onClose} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[700] text-[#2563EB]">
                     إلغاء
                 </button>
             </div>

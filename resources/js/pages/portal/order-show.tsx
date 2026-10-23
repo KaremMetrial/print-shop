@@ -48,47 +48,47 @@ export default function PortalOrderShow({ order: o, pen }: Props & { pen?: { pro
     ) : (
         <CustomerMobileShell title="تفاصيل الأوردر" tab="orders" lead={mArrowBack} leadSide="right">
             <div className="w-full text-right text-[22px] leading-[normal] font-[700] text-[#0F172A]">{iso(o.number)}</div>
-            <div className="w-full text-right text-[15px] leading-[normal] font-[700] text-[#2563EB]">{o.status}</div>
+            <div className="w-full text-right text-[15px] leading-[1.874] font-[700] text-[#2563EB]">{o.status}</div>
             {first && (
                 <div className={mCard}>
-                    <div className="w-full text-right text-[17px] leading-[normal] font-[700] text-[#0F172A]">تصميم بانتظار موافقتك</div>
-                    <div className="w-full text-right text-[15px] leading-[normal] font-[400] text-[#334155]">{`${first.name} · النسخة ${ORD[(first.version_no ?? 1) - 1] ?? iso(first.version_no)}`}</div>
+                    <div className="w-full text-right text-[17px] leading-[1.874] font-[700] text-[#0F172A]">تصميم بانتظار موافقتك</div>
+                    <div className="w-full text-right text-[15px] leading-[1.874] font-[400] text-[#334155]">{`${first.name} · النسخة ${ORD[(first.version_no ?? 1) - 1] ?? iso(first.version_no)}`}</div>
                     <Link href={`/portal/orders/${o.id}/items/${first.id}`} className={mBtnPrimary}>
                         راجع التصميم
                     </Link>
                 </div>
             )}
             <div className={mCard}>
-                <div className="w-full text-right text-[17px] leading-[normal] font-[700] text-[#0F172A]">بنود الأوردر</div>
+                <div className="w-full text-right text-[17px] leading-[1.874] font-[700] text-[#0F172A]">بنود الأوردر</div>
                 {o.items.map((i) => (
-                    <Link key={i.id} href={`/portal/orders/${o.id}/items/${i.id}`} className={`w-full text-right text-[14px] leading-[normal] font-[400] ${i.state === 'AWAITING_APPROVAL' ? 'text-[#334155]' : 'text-[#64748B]'}`}>
+                    <Link key={i.id} href={`/portal/orders/${o.id}/items/${i.id}`} className={`w-full text-right text-[14px] leading-[1.874] font-[400] ${i.state === 'AWAITING_APPROVAL' ? 'text-[#334155]' : 'text-[#64748B]'}`}>
                         {`${i.name} · ${stateText(i)}`}
                     </Link>
                 ))}
             </div>
             <div className={mCard}>
-                <div className="w-full text-right text-[17px] leading-[normal] font-[700] text-[#0F172A]">ملخص المبلغ</div>
-                <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#334155]">{`الإجمالي ${mMoney(o.grand_total_minor)} · المدفوع ${mMoney(o.paid_minor)}`}</div>
-                <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#64748B]">المتبقي عليك</div>
-                <div className="w-full text-right text-[30px] leading-[normal] font-[700] text-[#0F172A]">{mMoney(o.remaining_minor)}</div>
+                <div className="w-full text-right text-[17px] leading-[1.874] font-[700] text-[#0F172A]">ملخص المبلغ</div>
+                <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#334155]">{`الإجمالي ${mMoney(o.grand_total_minor)} · المدفوع ${mMoney(o.paid_minor)}`}</div>
+                <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#64748B]">المتبقي عليك</div>
+                <div className="w-full text-right text-[30px] leading-[1.874] font-[700] text-[#0F172A]">{mMoney(o.remaining_minor)}</div>
                 {o.remaining_minor > 0 && (
-                    <button type="button" onClick={() => setProof(true)} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[normal] font-[700] text-[#2563EB]">
+                    <button type="button" onClick={() => setProof(true)} className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[15px] leading-[1.874] font-[700] text-[#2563EB]">
                         إرسال إثبات دفع
                     </button>
                 )}
             </div>
             <div className={mCard}>
-                <div className="w-full text-right text-[16px] leading-[normal] font-[700] text-[#0F172A]">{o.delivery_method === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة'}</div>
-                <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#64748B]">
+                <div className="w-full text-right text-[16px] leading-[1.874] font-[700] text-[#0F172A]">{o.delivery_method === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة'}</div>
+                <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#64748B]">
                     {o.delivery_method === 'DELIVERY' ? `${o.delivery_address ?? ''} · الرسوم ${mMoney(o.delivery_fee_minor)}` : 'سنخبرك عندما يصبح الأوردر جاهزًا.'}
                 </div>
             </div>
             {o.has_invoice ? (
-                <Link href={`/portal/orders/${o.id}/invoice`} className="w-full text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">
+                <Link href={`/portal/orders/${o.id}/invoice`} className="w-full text-right text-[14px] leading-[1.874] font-[700] text-[#2563EB]">
                     عرض الفاتورة
                 </Link>
             ) : (
-                <div className="w-full text-right text-[14px] leading-[normal] font-[400] text-[#64748B]">الفاتورة غير متاحة بعد.</div>
+                <div className="w-full text-right text-[14px] leading-[1.874] font-[400] text-[#64748B]">الفاتورة غير متاحة بعد.</div>
             )}
         </CustomerMobileShell>
     );

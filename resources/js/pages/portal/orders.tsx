@@ -20,7 +20,7 @@ export default function PortalOrders({ orders, tab, cards = [], summary = { acti
             {cards.length === 0 && <div className={`${mCard} text-right text-[14px] text-[#64748B]`}>لا توجد أوردرات بعد.</div>}
             {cards.map((o) => (
                 <div key={o.id} className={mCard}>
-                    <div className="w-full text-right text-[19px] leading-[normal] font-[700] text-[#0F172A]">{iso(o.number)}</div>
+                    <div className="w-full text-right text-[19px] leading-[35px] font-[700] text-[#0F172A]">{iso(o.number)}</div>
                     <div className="w-full text-right text-[14px] leading-[normal] font-[700] text-[#2563EB]">{o.status}</div>
                     <div className="w-full text-right text-[15px] leading-[normal] font-[400] text-[#334155]">{o.products.join(' · ')}</div>
                     <div className="w-full text-right text-[17px] leading-[normal] font-[700] text-[#0F172A]">{`الإجمالي ${mMoney(o.total_minor)}`}</div>
