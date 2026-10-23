@@ -81,9 +81,11 @@ class EmployeeController extends Controller
         $data['role'] = Role::from($data['role']);
         Gate::authorize('create', [User::class, $data['role']]);
 
-        $user = $action->handle($request->user(), $data);
+        $action->handle($request->user(), $data);
 
-        return redirect()->route('employees.index', ['selected' => $user->id])->with('success', 'تم إنشاء الموظف.');
+        // Keep the success dialog as the only open dialog after returning from the form.
+        // Opening the employee details dialog at the same time stacks two modal backdrops.
+        return redirect()->route('employees.index')->with('success', 'تم إنشاء الموظف.');
     }
 
     /** لا توجد شاشة تفاصيل مستقلة في التصميم: التفاصيل drawer داخل S-065. */
@@ -153,7 +155,7 @@ class EmployeeController extends Controller
         }
         $action->handle($request->user(), $employee, $data);
 
-        return redirect()->route('employees.index', ['selected' => $employee->id])->with('success', 'تم حفظ التعديلات.');
+        return redirect()->route('employees.index')->with('success', 'تم حفظ التعديلات.');
     }
 
     public function deactivate(Request $request, User $employee, SetEmployeeStatus $action): RedirectResponse
@@ -161,7 +163,7 @@ class EmployeeController extends Controller
         Gate::authorize('update', $employee);
         $action->handle($employee, false, $request->input('reason'));
 
-        return back()->with('success', 'تم تعطيل الحساب وإنهاء جلساته.');
+        return redirect()->route('employees.index')->with('success', 'تم تعطيل الحساب وإنهاء جلساته.');
     }
 
     public function activate(User $employee, SetEmployeeStatus $action): RedirectResponse
@@ -169,14 +171,14 @@ class EmployeeController extends Controller
         Gate::authorize('update', $employee);
         $action->handle($employee, true);
 
-        return back()->with('success', 'تم تفعيل الحساب.');
+        return redirect()->route('employees.index')->with('success', 'تم تفعيل الحساب.');
     }
 
     public function resetPassword(User $employee, ResetEmployeePassword $action): RedirectResponse
     {
         Gate::authorize('update', $employee);
 
-        return back()->with('generated_password', $action->handle($employee))->with('success', 'تم توليد كلمة مرور مؤقتة. تُعرض مرة واحدة فقط.');
+        return redirect()->route('employees.index')->with('generated_password', $action->handle($employee))->with('success', 'تم توليد كلمة مرور مؤقتة. تُعرض مرة واحدة فقط.');
     }
 
     public function permissions(PermissionsRequest $request, User $employee, SyncEmployeePermissions $action): RedirectResponse
@@ -184,7 +186,7 @@ class EmployeeController extends Controller
         Gate::authorize('managePermissions', $employee);
         $action->handle($request->user(), $employee, $request->validated('grant'), $request->validated('revoke'));
 
-        return back()->with('success', 'تم حفظ الصلاحيات.');
+        return redirect()->route('employees.index')->with('success', 'تم حفظ الصلاحيات.');
     }
 
     /** @return array<string, mixed> */

@@ -20,7 +20,7 @@ function payload(array $o = []): array
 // ── منع التصعيد الإداري (TC-003/004/005، BR-072/073) ─────────────────────────
 it('lets super admin create an admin (TC-004) and audits it without the password', function () {
     $sa = User::factory()->superAdmin()->create();
-    $this->actingAs($sa)->post('/employees', payload(['role' => 'ADMIN', 'email' => 'a2@pbms.test']))->assertRedirect();
+    $this->actingAs($sa)->post('/employees', payload(['role' => 'ADMIN', 'email' => 'a2@pbms.test']))->assertRedirect(route('employees.index'));
     $new = User::where('email', 'a2@pbms.test')->first();
     expect($new->roleEnum()->value)->toBe('ADMIN')->and($new->created_by)->toBe($sa->id);
     $log = AuditLog::where('action', 'employee.created')->first();
@@ -69,6 +69,25 @@ it('ignores privileged fields smuggled into the payload', function () {
     ])->assertRedirect();
     $staff->refresh();
     expect($staff->name)->toBe('اسم جديد')->and($staff->roleEnum()->value)->toBe('DATA_ENTRY')->and($staff->session_version)->toBe(1);
+});
+
+it('loads and saves the employee phone field on the edit form', function () {
+    $actor = User::factory()->admin()->create();
+    $employee = User::factory()->dataEntry()->create(['phone' => '01011112222']);
+    $this->actingAs($actor);
+
+    $this->get("/employees/{$employee->id}/edit")
+        ->assertInertia(fn ($page) => $page->where('employee.phone', '01011112222'));
+
+    $this->patch("/employees/{$employee->id}", [
+        'name' => 'اسم بعد التعديل',
+        'email' => $employee->email,
+        'phone' => '01033334444',
+        'role' => 'DATA_ENTRY',
+    ])->assertRedirect(route('employees.index'));
+
+    expect($employee->fresh()->name)->toBe('اسم بعد التعديل')
+        ->and($employee->fresh()->phone)->toBe('01033334444');
 });
 
 it('forbids non-managers entirely (data entry, designer, accountant)', function () {
