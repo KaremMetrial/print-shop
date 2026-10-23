@@ -22,13 +22,13 @@ use App\Services\Finance\PaymentService;
 use App\Services\Orders\OrderStatusLabels;
 use App\Services\Pricing\PricingService;
 use App\Support\Money;
+use App\Support\PenFixtures;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Support\PenFixtures;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -186,7 +186,6 @@ class PortalController extends Controller
         return Inertia::render('portal/order-show', $props);
     }
 
-
     public function item(Request $request, Order $order, OrderItem $item): Response
     {
         $this->orderOf($request, $order);
@@ -219,6 +218,7 @@ class PortalController extends Controller
     {
         $c = $this->me($request);
         $ok = $file->parent_type === 'design_version' && DesignVersion::whereKey($file->parent_id)->whereIn('status', ['SUBMITTED', 'APPROVED'])->whereHas('item.order', fn ($q) => $q->where('customer_id', $c->id))->exists();
+        $ok = $ok || ($file->parent_type === 'item_chat_message' && DB::table('item_chat_messages')->join('order_items', 'order_items.id', '=', 'item_chat_messages.order_item_id')->join('orders', 'orders.id', '=', 'order_items.order_id')->where('item_chat_messages.id', $file->parent_id)->where('orders.customer_id', $c->id)->exists());
         abort_unless($ok, 404);
 
         return Storage::disk($file->disk)->response($file->storage_key, $file->original_filename, ['Content-Type' => $file->mime_type, 'X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'private, no-store', 'Content-Security-Policy' => "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox"], 'inline');
@@ -246,9 +246,9 @@ class PortalController extends Controller
         abort_unless($item->order_id === $order->id && ! $item->cancelled_at, 404);
         $chat = app(ChatService::class);
         if ($request->isMethod('post')) {
-            $d = $request->validate(['body' => ['required', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64']]);
+            $d = $request->validate(['body' => ['nullable', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64'], 'file' => ['nullable', 'file']]);
 
-            return response()->json(['data' => $chat->send($item, 'customer', $this->me($request)->id, 'العميل', $d['body'], $d['client_id'])], 201);
+            return response()->json(['data' => $chat->send($item, 'customer', $this->me($request)->id, 'العميل', (string) ($d['body'] ?? ''), $d['client_id'], $request->file('file'))], 201);
         }
 
         return response()->json(['data' => $chat->list($item, (int) $request->query('after', 0)), 'meta' => ['locked' => $chat->isLocked($item), 'can_send' => ! $chat->isLocked($item), 'label' => 'العميل']]);

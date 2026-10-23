@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Customers\ManagePlatformAccess;
 use App\Models\Customer;
 use App\Models\File;
 use App\Models\OrderRequest;
@@ -14,7 +15,7 @@ beforeEach(fn () => Storage::fake(config('files.disk')));
 function loggedPortalCustomer($t, string $phone = '01011112222'): array
 {
     $c = Customer::factory()->create(['phone_normalized' => $phone, 'phone_display' => $phone]);
-    $pw = app(App\Actions\Customers\ManagePlatformAccess::class)->enable($c);
+    $pw = app(ManagePlatformAccess::class)->enable($c);
     $t->post('/portal/login', ['phone' => $phone, 'password' => $pw])->assertRedirect('/portal');
 
     return [$c->refresh(), $pw];

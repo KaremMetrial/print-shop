@@ -78,7 +78,7 @@ export default function PortalItemPreview({ order, item, version: v }: Props) {
             </button>
             {chat && (
                 <div className="w-full">
-                    <ChatPanel url={`/portal/orders/${order.id}/items/${item.id}/chat`} mine={['customer']} />
+                    <ChatPanel url={`/portal/orders/${order.id}/items/${item.id}/chat`} mine={['customer']} fileUrl={(id) => `/portal/files/${id}`} />
                 </div>
             )}
             {full && f && (

@@ -1,8 +1,9 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Icon } from '@/pen/icon';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { type ReactNode } from 'react';
 
 /** رابط خاص (pendev: S-086…093): هوية المطبعة + مرجع الأوردر فقط، بلا قائمة أو حساب (BR-005). noindex + no-referrer. DOM LTR-literal. */
-export function LinkLayout({ orderRef, children }: { orderRef?: { number: string; customer: string }; children: ReactNode }) {
+export function LinkLayout({ orderRef, backHref, children }: { orderRef?: { number: string; customer: string }; backHref?: string; children: ReactNode }) {
     const shop = usePage<{ name: string } & Record<string, unknown>>().props.name;
     return (
         <div dir="ltr" className="flex min-h-screen w-full flex-col items-end bg-[#F6F8FC]">
@@ -25,10 +26,15 @@ export function LinkLayout({ orderRef, children }: { orderRef?: { number: string
                 </div>
             </header>
             <div className="flex h-[61.5px] w-full shrink-0 items-center justify-end gap-[12px] bg-[var(--surface)] p-[0px_16px] [border-bottom:1px_solid_var(--border)] lg:hidden">
-                <div className="flex flex-1 flex-col items-end">
+                <div className="flex flex-1 flex-col items-end pt-[4px]">
                     <div className="text-[15px] leading-[normal] font-[700] text-[var(--ink)]">{shop}</div>
-                    {orderRef && <div className="text-[12px] leading-[normal] text-[var(--muted-foreground)]">{orderRef.number}</div>}
+                    {orderRef && <div className="text-left text-[12px] leading-[normal] whitespace-nowrap text-[#64748B]">{orderRef.number}</div>}
                 </div>
+                {backHref && (
+                    <Link href={backHref} aria-label="رجوع" className="flex h-[44px] w-[44px] items-center justify-center">
+                        <Icon name="arrow-right" className="h-[21px] w-[21px]" color="#334155" />
+                    </Link>
+                )}
             </div>
             {children}
         </div>

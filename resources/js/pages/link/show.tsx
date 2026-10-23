@@ -1,4 +1,6 @@
 import { ProofDialog } from '@/components/finance/proof-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { LinkMobileOverview } from '@/components/link/mobile-overview';
 import { LinkLayout } from '@/components/shell/link-layout';
 import { formatDate, formatMoneyFixed } from '@/lib/money';
 import { Icon } from '@/pen/icon';
@@ -51,15 +53,16 @@ const MSG: Record<string, string> = {
 const itemBadge = (s: string, a: boolean): [string, string, string] => (a ? ['معتمد', '#E9F7EE', '#207A44'] : s === 'AWAITING_APPROVAL' ? ['بانتظار اعتماد العميل', '#FFF4DD', '#925B10'] : s === 'REVISION_REQUESTED' ? ['مطلوب تعديل', '#FEF2F2', '#B42318'] : ['قيد التصميم', '#EFF6FF', '#2563EB']);
 
 /** S-086 (مرحلة التصميم) + S-089..092 (حالات التنفيذ) — تجربة الأوردر عبر الرابط. */
-export default function LinkShow({ token, order: o }: Props) {
+export default function LinkShow({ token, order: o, pen }: Props & { pen?: { proof: boolean } }) {
     const [open, setOpen] = useState(false);
-    const [proof, setProof] = useState(false);
+    const [proof, setProof] = useState(pen?.proof ?? false);
+    const isMobile = useIsMobile();
     const idx = ORDER.indexOf(o.status === 'READY_FOR_PICKUP' ? 'READY_FOR_DELIVERY' : o.status);
     const title = `حالة الأوردر: ${o.status_label}`;
     const sub = MSG[o.status] ?? '';
     const designStage = o.status === 'DESIGN_STAGE';
     return (
-        <LinkLayout orderRef={{ number: o.number, customer: o.customer }}>
+        <LinkLayout orderRef={{ number: o.number, customer: o.customer }} backHref={`/l/${token}`}>
             <Head title={`تفاصيل الأوردر ${o.number}`} />
             <div className="hidden w-full flex-col items-end gap-[16px] p-[24px_48px] lg:flex">
                 <div className="text-left text-[11px] leading-[normal] font-[400] whitespace-pre text-[var(--muted-foreground)]">{`تفاصيل الأوردر / ⁦${o.number}⁩`}</div>
@@ -174,68 +177,8 @@ export default function LinkShow({ token, order: o }: Props) {
                 </div>
                 {open && <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">لا توجد دفعات مسجلة بعد.</div>}
             </div>
-            <MobileShow token={token} o={o} title={title} sub={sub} onProof={() => setProof(true)} />
-            {proof && <ProofDialog url={`/l/${token}/proofs`} remainingMinor={o.remaining_minor} onClose={() => setProof(false)} />}
+            <LinkMobileOverview token={token} o={o} onProof={() => setProof(true)} sheet={proof ? { onClose: () => setProof(false) } : undefined} />
+            {proof && isMobile === false && <ProofDialog url={`/l/${token}/proofs`} remainingMinor={o.remaining_minor} onClose={() => setProof(false)} />}
         </LinkLayout>
-    );
-}
-
-const mCard = 'flex w-full flex-col items-end gap-[10px] rounded-[14px] bg-[var(--surface)] p-[16px] [outline:1px_solid_var(--border)] [outline-offset:-0.5px]';
-const mBtn = 'flex h-[48px] w-full items-center justify-center rounded-[10px] text-[15px]';
-
-/** M-B01 + M-B05..07 — نظرة عامة على رابط الأوردر للموبايل (390px). pendev: PAnfZ / ADDWE / Dzum7 / qdGNq */
-function MobileShow({ token, o, title, sub, onProof }: { token: string; o: Props['order']; title: string; sub: string; onProof: () => void }) {
-    const [det, setDet] = useState(false);
-    const [track, setTrack] = useState(false);
-    const pending = o.items.find((i) => i.state === 'AWAITING_APPROVAL' && !i.approved);
-    const approved = o.items.filter((i) => i.approved);
-    const idx = ORDER.indexOf(o.status === 'READY_FOR_PICKUP' ? 'READY_FOR_DELIVERY' : o.status);
-    return (
-        <div dir="ltr" className="flex w-full flex-col items-end gap-[16px] p-[20px_16px_28px_16px] lg:hidden">
-            <div className="w-full text-right text-[23px] font-[700] text-[var(--ink)]">{`أوردر #${o.number}`}</div>
-            <div className="w-full text-right text-[15px] font-[700] text-[var(--primary)]">{o.status_label}</div>
-            {pending ? (
-                <div className="flex w-full flex-col items-end gap-[10px] rounded-[14px] bg-[#EFF6FF] p-[16px] [outline:1px_solid_#BFDBFE] [outline-offset:-0.5px]">
-                    <div className="w-full text-right text-[18px] font-[700] text-[var(--ink)]">عندك تصميم محتاج مراجعتك.</div>
-                    <div className="w-full text-right text-[14px] text-[#475569]">{`${pending.name} · النسخة ${ORD[pending.version_no ?? 1] ?? pending.version_no} · بانتظار اعتمادك`}</div>
-                    <Link href={`/l/${token}/items/${pending.id}`} className={`${mBtn} bg-[var(--primary)] font-[600] text-white`}>{`راجع تصميم ${pending.name}`}</Link>
-                    <Link href={`/l/${token}/items/${pending.id}?tab=chat`} className={`${mBtn} bg-[var(--surface)] font-[700] text-[var(--primary)]`}>{`محادثة ${pending.name}`}</Link>
-                </div>
-            ) : (
-                <div className={mCard}>
-                    <div className="w-full text-right text-[18px] font-[700] text-[var(--ink)]">{title}</div>
-                    <div className="w-full text-right text-[14px] text-[#475569]">{sub}</div>
-                </div>
-            )}
-            <div className={mCard}>
-                <div className="w-full text-right text-[15px] font-[700] text-[#15803D]">{`تم اعتماد ${approved.length} من ${o.items.length}.`}</div>
-                <div className="w-full text-right text-[14px] text-[#475569]">{approved.map((i) => i.name).join(' · ') || '—'}</div>
-            </div>
-            <div className={mCard}>
-                <div className="w-full text-right text-[14px] text-[var(--muted-foreground)]">المتبقي عليك</div>
-                <div className="w-full text-right text-[30px] font-[700] text-[var(--ink)]">{formatMoneyFixed(o.remaining_minor)}</div>
-                <div className="w-full text-right text-[14px] text-[#334155]">{`إجمالي الأوردر ${formatMoneyFixed(o.grand_total_minor)} · المدفوع المؤكد ${formatMoneyFixed(o.paid_minor)}`}</div>
-                {o.remaining_minor > 0 && (
-                    <button type="button" onClick={onProof} className={`${mBtn} bg-[var(--primary)] font-[600] text-white`}>إرسال إثبات دفع</button>
-                )}
-                {o.has_invoice && (
-                    <Link href={`/l/${token}/invoice`} className="flex h-[44px] w-full items-center text-right text-[14px] font-[700] text-[var(--primary)]">عرض الفاتورة</Link>
-                )}
-                <button type="button" onClick={() => setDet((v) => !v)} className="h-[44px] w-full text-right text-[14px] font-[700] text-[var(--primary)]">تفاصيل المدفوعات ⌄</button>
-                {det && <div className="w-full text-right text-[12px] text-[var(--muted-foreground)]">لا توجد دفعات مسجلة بعد.</div>}
-            </div>
-            <div className={mCard}>
-                <div className="w-full text-right text-[15px] font-[700] text-[var(--ink)]">{`طريقة الاستلام: ${o.delivery_method === 'DELIVERY' ? 'توصيل' : 'استلام من المطبعة'}`}</div>
-                {o.delivery_address && <div className="w-full text-right text-[14px] text-[var(--muted-foreground)]">{o.delivery_address}</div>}
-                <button type="button" onClick={() => setTrack((v) => !v)} className="w-full text-right text-[17px] font-[700] text-[var(--ink)]">تتبع مراحل الأوردر ⌄</button>
-                {track && (
-                    <div className="flex w-full flex-col gap-[6px]">
-                        {[...STAGES].reverse().map(([k, l], n) => (
-                            <div key={k} className="text-right text-[13px]" style={{ color: n <= idx ? 'var(--primary)' : 'var(--muted-foreground)', fontWeight: n === idx ? 700 : 400 }}>{`${n <= idx ? '●' : '○'} ${l}`}</div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
     );
 }

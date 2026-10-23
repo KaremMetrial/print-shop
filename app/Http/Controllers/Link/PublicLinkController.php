@@ -16,9 +16,11 @@ use App\Services\Finance\InvoiceService;
 use App\Services\Finance\PaymentProofService;
 use App\Services\Orders\OrderLinkService;
 use App\Services\Orders\OrderStatusLabels;
+use App\Support\PenFixtures;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,6 +82,7 @@ class PublicLinkController extends Controller
             return $this->unavailable();
         }
         $ok = $file->parent_type === 'design_version' && DesignVersion::whereKey($file->parent_id)->whereHas('item', fn ($q) => $q->where('order_id', $link->order_id))->whereIn('status', ['SUBMITTED', 'APPROVED'])->exists();
+        $ok = $ok || ($file->parent_type === 'item_chat_message' && DB::table('item_chat_messages')->join('order_items', 'order_items.id', '=', 'item_chat_messages.order_item_id')->where('item_chat_messages.id', $file->parent_id)->where('order_items.order_id', $link->order_id)->exists());
         abort_unless($ok, 404);
 
         return Storage::disk($file->disk)->response($file->storage_key, $file->original_filename, [
@@ -96,6 +99,16 @@ class PublicLinkController extends Controller
     /** @param array<string, mixed> $props */
     private function render(string $component, OrderLink $link, array $props): \Inertia\Response
     {
+        if (app()->environment('local') && request()->query('fixture') === 'pen' && isset($props['order'])) {
+            $props['order'] = array_replace($props['order'], PenFixtures::linkOrder((string) request()->query('state', 'design')));
+            if ($component === 'link/show') {
+                $props['pen'] = ['proof' => request()->query('sheet') === 'proof'];
+            }
+            if ($component === 'link/preview') {
+                $props = array_replace($props, PenFixtures::linkPreview());
+            }
+        }
+
         return Inertia::render($component, ['token' => $this->tokenOf($link)] + $props);
     }
 
@@ -136,9 +149,9 @@ class PublicLinkController extends Controller
         abort_unless($item->order_id === $link->order_id && ! $item->cancelled_at, 404);
         $chat = app(ChatService::class);
         if ($request->isMethod('post')) {
-            $d = $request->validate(['body' => ['required', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64']]);
+            $d = $request->validate(['body' => ['nullable', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64'], 'file' => ['nullable', 'file']]);
 
-            return response()->json(['data' => $chat->send($item, 'link', $link->id, 'العميل', $d['body'], $d['client_id'])], 201);
+            return response()->json(['data' => $chat->send($item, 'link', $link->id, 'العميل', (string) ($d['body'] ?? ''), $d['client_id'], $request->file('file'))], 201);
         }
 
         return response()->json(['data' => $chat->list($item, (int) $request->query('after', 0)), 'meta' => ['locked' => $chat->isLocked($item), 'can_send' => ! $chat->isLocked($item), 'label' => 'العميل']]);

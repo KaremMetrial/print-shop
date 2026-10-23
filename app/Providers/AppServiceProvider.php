@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Policies\CatalogPolicy;
 use App\Policies\EmployeePolicy;
+use App\Services\Chat\ChatService;
 use App\Services\Files\FileAccessRegistry;
 use App\Services\Settings\Settings;
 use App\Support\Shop;
@@ -37,6 +39,16 @@ class AppServiceProvider extends ServiceProvider
             });
             // ملفات العميل المرجعية على بنود طلبات الأوردر: من يراجع الطلبات
             $r->register('order_request_item', fn ($file, $actor) => $actor instanceof User && $actor->hasPermission('order_requests.view'));
+            // مرفقات شات البند: من يحق له قراءة شات البند نفسه (المصمم المسند/الإدارة بصلاحية)
+            $r->register('item_chat_message', function ($file, $actor) {
+                if (! $actor instanceof User) {
+                    return false;
+                }
+                $itemId = DB::table('item_chat_messages')->where('id', $file->parent_id)->value('order_item_id');
+                $item = $itemId ? OrderItem::find($itemId) : null;
+
+                return $item && app(ChatService::class)->staffAccess($actor, $item)[0];
+            });
             // إثبات الدفع: المراجع المالي فقط (العميل لا يعيد تنزيله)
             $r->register('payment_proof', fn ($file, $actor) => $actor instanceof User && $actor->hasPermission('payments.proofs.review'));
         });

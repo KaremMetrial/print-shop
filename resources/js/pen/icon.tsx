@@ -1,4 +1,12 @@
 import {
+    ChevronRight,
+    ChevronLeft,
+    Scan,
+    Minus,
+    Plus,
+    Maximize,
+    Mic,
+    Paperclip,
     ArrowRight,
     Bell,
     ChartNoAxesCombined,
@@ -47,6 +55,14 @@ import {
 const toPascal = (s: string) => s.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());
 
 const ICONS: Record<string, LucideIcon> = {
+    'chevron-right': ChevronRight,
+    'chevron-left': ChevronLeft,
+    scan: Scan,
+    minus: Minus,
+    plus: Plus,
+    maximize: Maximize,
+    mic: Mic,
+    paperclip: Paperclip,
     'arrow-right': ArrowRight,
     bell: Bell,
     'chart-no-axes-combined': ChartNoAxesCombined,

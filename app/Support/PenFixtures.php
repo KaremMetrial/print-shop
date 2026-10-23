@@ -76,6 +76,39 @@ final class PenFixtures
         ];
     }
 
+    /** M-B01/B05..B07 — الرابط الخاص على الموبايل (state: design|printing|ready|out). @return array<string, mixed> */
+    public static function linkOrder(string $state): array
+    {
+        $status = ['design' => 'DESIGN_STAGE', 'printing' => 'IN_PRINTING', 'ready' => 'READY_FOR_DELIVERY', 'out' => 'OUT_FOR_DELIVERY'][$state] ?? 'DESIGN_STAGE';
+        $labels = ['DESIGN_STAGE' => 'مرحلة التصميم', 'IN_PRINTING' => 'قيد الطباعة', 'READY_FOR_DELIVERY' => 'جاهز للتوصيل', 'OUT_FOR_DELIVERY' => 'خرج للتوصيل', 'COMPLETED' => 'مكتمل'];
+        $design = $status === 'DESIGN_STAGE';
+
+        return [
+            'number' => 'ORD-0152', 'status' => $status, 'status_label' => $labels[$status], 'status_labels' => $labels, 'delivery_method' => 'DELIVERY', 'delivery_address' => '12 شارع الطيران، مدينة نصر، القاهرة',
+            'grand_total_minor' => 272800, 'paid_minor' => 100000, 'remaining_minor' => 172800, 'has_invoice' => false,
+            'items' => $design
+                ? [['id' => 1, 'name' => 'بروشور', 'quantity' => 500, 'state' => 'AWAITING_APPROVAL', 'approved' => false, 'version_no' => 2], ['id' => 2, 'name' => 'كروت شخصية', 'quantity' => 1000, 'state' => 'APPROVED', 'approved' => true, 'version_no' => 1], ['id' => 3, 'name' => 'فلاير', 'quantity' => 400, 'state' => 'APPROVED', 'approved' => true, 'version_no' => 1]]
+                : [['id' => 1, 'name' => 'بروشور', 'quantity' => 500, 'state' => 'APPROVED', 'approved' => true, 'version_no' => 2], ['id' => 2, 'name' => 'كروت شخصية', 'quantity' => 1000, 'state' => 'APPROVED', 'approved' => true, 'version_no' => 1], ['id' => 3, 'name' => 'فلاير', 'quantity' => 400, 'state' => 'APPROVED', 'approved' => true, 'version_no' => 1]],
+        ];
+    }
+
+    /** M-B02/B03 — معاينة تصميم البروشور + محادثته على الموبايل (ملفات المعاينة غير متاحة = حالة «تعذّر التحميل»). @return array<string, mixed> */
+    public static function linkPreview(): array
+    {
+        $msg = fn (int $id, string $sender, string $label, string $body, string $at) => ['id' => $id, 'sender' => $sender, 'label' => $label, 'body' => $body, 'at' => $at, 'client_id' => "pen{$id}", 'file' => null];
+
+        return [
+            'item' => ['id' => 1, 'name' => 'بروشور', 'quantity' => 500, 'state' => 'AWAITING_APPROVAL'],
+            'version' => ['id' => 2, 'no' => 2, 'status' => 'SUBMITTED', 'revision' => 1, 'sent_at' => '2025-06-19T11:30:00+03:00',
+                'files' => array_map(fn ($n) => ['id' => 0, 'name' => "brochure-{$n}.png", 'mime' => 'image/png'], [1, 2, 3, 4])],
+            'pen' => ['seed' => ['meta' => ['locked' => false, 'can_send' => true, 'label' => 'العميل'], 'msgs' => [
+                $msg(1, 'link', 'شركة النور للدعاية', 'يرجى مراعاة ترتيب الصور في البروشور.', '2025-06-18T15:00:00+03:00'),
+                $msg(2, 'staff', 'محمود أحمد — المصمم', 'تمام، هنراجع ترتيب الصور قبل إرسال النسخة الجديدة.', '2025-06-18T15:15:00+03:00'),
+                $msg(3, 'system', '', '19 يونيو 2025، 11:30 ص · تم إرسال النسخة الثانية للمراجعة.', '2025-06-19T11:30:00+03:00'),
+            ]]],
+        ];
+    }
+
     /** M-A02 — لوحة العميل على الموبايل. @return array<string, mixed> */
     public static function portalDashboard(): array
     {

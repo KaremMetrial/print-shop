@@ -269,7 +269,7 @@ export default function DesignerTask({ tab, designer, task: t, versions, can }: 
                     })}
                 </div>
             )}
-            {tab === 'chat' && <ChatPanel url={`/chat/items/${t.id}`} mine={['staff']} itemId={t.id} />}
+            {tab === 'chat' && <ChatPanel url={`/chat/items/${t.id}`} mine={['staff']} itemId={t.id} fileUrl={(id) => `/files/${id}/preview`} />}
             {(tab === 'files' || tab === 'activity') && <ReactPlaceholder tab={tab} />}
         </DesignerLayout>
     );

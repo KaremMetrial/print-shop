@@ -43,7 +43,8 @@ class HandleInertiaRequests extends Middleware
 
         return array_merge(parent::share($request), [
             ...parent::share($request),
-            'name' => $this->shop('shop.name'),
+            // وضع مقارنة الـpen المحلي فقط: اسم المطبعة كما في التصميم بدل ما غيّره المستخدم في بيئة التطوير
+            'name' => app()->environment('local') && $request->query('fixture') === 'pen' ? 'مطبعة الإتقان' : $this->shop('shop.name'),
             'branch' => $this->shop('shop.branch'),
             'paymentMethods' => fn () => PaymentMethod::enabled(),
             'paymentMethodLabels' => PaymentMethod::labels(),

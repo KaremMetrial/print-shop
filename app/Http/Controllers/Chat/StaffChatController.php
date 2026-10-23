@@ -29,8 +29,8 @@ class StaffChatController extends Controller
         if (! $send) {
             throw new BusinessException(ErrorCode::INSUFFICIENT_PERMISSION);
         }
-        $d = $request->validate(['body' => ['required', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64']]);
+        $d = $request->validate(['body' => ['nullable', 'string', 'max:2000'], 'client_id' => ['required', 'string', 'max:64'], 'file' => ['nullable', 'file']]);
 
-        return response()->json(['data' => $chat->send($item, 'staff', $request->user()->id, $label, $d['body'], $d['client_id'])], 201);
+        return response()->json(['data' => $chat->send($item, 'staff', $request->user()->id, $label, (string) ($d['body'] ?? ''), $d['client_id'], $request->file('file'))], 201);
     }
 }

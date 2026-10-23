@@ -6,7 +6,9 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Chat\ChatService;
 use App\Services\Orders\OrderLinkService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 function chatItem(string $state = 'IN_DESIGN'): array
 {
@@ -72,4 +74,28 @@ it('rejects empty or oversized messages and authorizes the channel only for the 
     $this->actingAs($d)->postJson("/chat/items/{$it->id}", ['body' => '   ', 'client_id' => 'e1'])->assertStatus(422);
     $cs = app(ChatService::class);
     expect($cs->staffAccess($d, $it)[0])->toBeTrue()->and($cs->staffAccess(User::factory()->designer()->create(), $it)[0])->toBeFalse();
+});
+
+it('supports image and voice attachments in the item chat for both sides', function () {
+    Storage::fake(config('files.disk'));
+    [$it, $d, , $token] = chatItem();
+    $img = UploadedFile::fake()->image('ref.png', 20, 20);
+    // WAV صغير حقيقي (رأس RIFF) ليمر فحص المحتوى
+    $wav = UploadedFile::fake()->createWithContent('voice.wav', 'RIFF'.pack('V', 36).'WAVEfmt '.pack('VvvVVvv', 16, 1, 1, 8000, 8000, 1, 8).'data'.pack('V', 0));
+
+    $this->post("/l/{$token}/items/{$it->id}/chat", ['client_id' => 'f1', 'file' => $img], ['Accept' => 'application/json'])->assertCreated();
+    $this->post("/l/{$token}/items/{$it->id}/chat", ['client_id' => 'f2', 'file' => $wav, 'body' => 'رسالة صوتية'], ['Accept' => 'application/json'])->assertCreated();
+    $this->post("/l/{$token}/items/{$it->id}/chat", ['client_id' => 'f3'], ['Accept' => 'application/json'])->assertStatus(422); // لا نص ولا ملف
+
+    $list = $this->actingAs($d)->getJson("/chat/items/{$it->id}")->assertOk()->json('data');
+    expect($list[0]['file']['kind'])->toBe('image')->and($list[1]['file']['kind'])->toBe('audio');
+    $this->get("/files/{$list[0]['file']['id']}/preview")->assertOk();
+
+    auth('web')->logout();
+    $this->get("/l/{$token}/files/{$list[0]['file']['id']}")->assertOk();
+    // رابط أوردر آخر لا يصل لمرفق هذا الأوردر
+    [, , , $other] = chatItem();
+    $this->get("/l/{$other}/files/{$list[0]['file']['id']}")->assertNotFound();
+    // مصمم غير مسند لا يرى المرفق
+    $this->actingAs(User::factory()->designer()->create())->get("/files/{$list[0]['file']['id']}/preview")->assertForbidden();
 });
