@@ -1,4 +1,5 @@
 import { iso, mBtnPrimary } from '@/components/shell/customer-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { idemHeaders } from '@/lib/idempotency';
 import { LinkLayout } from '@/components/shell/link-layout';
 import { formatDate, formatTime } from '@/lib/money';
@@ -25,6 +26,7 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
     const [tab, setTab] = useState<'preview' | 'chat'>(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'chat' ? 'chat' : 'preview'));
     const [failed, setFailed] = useState<Record<number, number>>({});
     const [full, setFull] = useState(false);
+    const isMobile = useIsMobile();
     const approved = v?.status === 'APPROVED';
     const label = v ? `${approved ? 'معتمد' : 'بانتظار اعتماد العميل'} • النسخة ${ORD[v.no] ?? v.no}` : 'لا توجد نسخة بعد';
     const f = v?.files[cur];
@@ -42,7 +44,7 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
                     العودة إلى التصميم
                 </button>
                 <div className="flex w-full flex-1 flex-col items-end gap-[12px]">
-                    <ChatPanel variant="mobile" url={`/l/${token}/items/${item.id}/chat`} mine={['link']} fileUrl={(id) => `/l/${token}/files/${id}`} seed={pen?.seed} />
+                    {(isMobile === true || !!pen) && <ChatPanel variant="mobile" url={`/l/${token}/items/${item.id}/chat`} mine={['link']} fileUrl={(id) => `/l/${token}/files/${id}`} seed={pen?.seed} />}
                 </div>
             </div>
         ) : (
@@ -121,7 +123,7 @@ export default function LinkPreview({ token, order, item, version: v, pen }: Pro
                         </div>
                     ))}
                 </div>
-                {tab === 'chat' && <ChatPanel url={`/l/${token}/items/${item.id}/chat`} mine={['link']} fileUrl={(id) => `/l/${token}/files/${id}`} />}
+                {tab === 'chat' && isMobile === false && !pen && <ChatPanel url={`/l/${token}/items/${item.id}/chat`} mine={['link']} fileUrl={(id) => `/l/${token}/files/${id}`} />}
                 <div className={`flex w-full shrink-0 flex-col items-stretch gap-[18px] lg:flex-row lg:items-start ${tab === 'chat' ? 'hidden' : ''}`}>
                     <div className="flex w-full shrink-0 lg:w-[350px] flex-col items-end gap-[12px]">
                         <div className={`${box} gap-[12px] rounded-[9px] p-[18px]`}>

@@ -12,7 +12,7 @@ for (const n of [1, 2]) {
     return Number(sql('select count(*) from order_requests')) === before + 1;
   });
 }
-await step('البوابة: قائمة الطلبات تعرض الطلب وتفتح تفاصيله', async () => { await page.goto(`${BASE}/portal/requests`); await waitIdle(page); const id = sql('select max(id) from order_requests'); await page.locator(`a[href="/portal/requests/${id}"]`).first().click(); await waitIdle(page); return page.url().endsWith(`/portal/requests/${id}`); });
+await step('البوابة: قائمة الطلبات تعرض الطلب وتفتح تفاصيله', async () => { await page.goto(`${BASE}/portal/requests`); await waitIdle(page); const id = sql('select max(id) from order_requests'); await page.locator(`a[href="/portal/requests/${id}"]:visible`).first().click(); await waitIdle(page); return page.url().endsWith(`/portal/requests/${id}`); });
 await step('البوابة: رفع إثبات دفع من صفحة الأوردر', async () => {
   const o = sql("select id from orders where customer_id=104 and status='DESIGN_STAGE' order by id desc limit 1");
   await page.goto(`${BASE}/portal/orders/${o}`); await waitIdle(page);
