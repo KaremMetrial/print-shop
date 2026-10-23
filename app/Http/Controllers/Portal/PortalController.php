@@ -127,14 +127,24 @@ class PortalController extends Controller
 
     public function showRequest(Request $request, OrderRequest $orderRequest): Response
     {
-        abort_unless($orderRequest->customer_id === $this->me($request)->id, 404);
-        $orderRequest->load('items.product');
+        $c = $this->me($request);
+        abort_unless($orderRequest->customer_id === $c->id, 404);
+        $orderRequest->load('items.product', 'order');
 
-        return Inertia::render('portal/request-show', ['req' => [
+        $props = ['req' => [
             'number' => $orderRequest->request_number, 'status' => $orderRequest->status->label(), 'status_key' => $orderRequest->status->value, 'at' => $orderRequest->submitted_at->toIso8601String(),
-            'delivery_method' => $orderRequest->delivery_method, 'reject_reason' => $orderRequest->reject_reason, 'order_id' => $orderRequest->order_id,
-            'items' => $orderRequest->items->map(fn ($i) => ['name' => $i->product->name, 'quantity' => $i->quantity])->values(),
-        ]]);
+            'delivery_method' => $orderRequest->delivery_method, 'reject_reason' => $orderRequest->reject_reason, 'order_id' => $orderRequest->order_id, 'order_number' => $orderRequest->order?->order_number,
+            'total_minor' => $this->requestTotal($orderRequest, $c, app(PricingService::class)),
+            'items' => $orderRequest->items->map(fn ($i) => ['name' => $i->product->name, 'quantity' => $i->quantity,
+                'files' => File::where('parent_type', 'order_request_item')->where('parent_id', $i->id)->pluck('original_filename')->all()])->values(),
+            // تعديلات المطبعة على الكميات أثناء المراجعة (الكمية المطلوبة → النهائية)
+            'edits' => $orderRequest->items->filter(fn ($i) => $i->quantity !== $i->original_quantity)->map(fn ($i) => ['name' => $i->product->name, 'old' => $i->original_quantity, 'new' => $i->quantity])->values(),
+        ]];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props['req'] = array_replace($props['req'], PenFixtures::portalRequestShow());
+        }
+
+        return Inertia::render('portal/request-show', $props);
     }
 
     public function orders(Request $request): Response
@@ -157,17 +167,25 @@ class PortalController extends Controller
         $this->orderOf($request, $order);
         $order->load('items');
 
-        return Inertia::render('portal/order-show', [
+        $props = [
             'order' => [
                 'id' => $order->id, 'number' => $order->order_number, 'status' => app(OrderStatusLabels::class)->label($order->status), 'status_key' => $order->status->value, 'created_at' => $order->created_at?->toIso8601String(),
                 'delivery_method' => $order->delivery_method, 'delivery_address' => $order->delivery_address, 'delivery_fee_minor' => $order->delivery_fee->minor, 'grand_total_minor' => $order->grand_total->minor,
                 'has_invoice' => Invoice::where('active_order_id', $order->id)->exists(),
                 'paid_minor' => $pay->paid($order), 'remaining_minor' => $pay->due($order),
-                'items' => $order->items->whereNull('cancelled_at')->values()->map(fn (OrderItem $i) => ['id' => $i->id, 'name' => $i->product_snapshot['name'], 'quantity' => $i->quantity, 'state' => $i->design_state, 'approved' => (bool) $i->approved_at, 'total_minor' => $i->item_total->minor])->all(),
+                'items' => $order->items->whereNull('cancelled_at')->values()->map(fn (OrderItem $i) => ['id' => $i->id, 'name' => $i->product_snapshot['name'], 'quantity' => $i->quantity, 'state' => $i->design_state, 'approved' => (bool) $i->approved_at, 'total_minor' => $i->item_total->minor,
+                    'version_no' => DesignVersion::where('order_item_id', $i->id)->whereIn('status', ['SUBMITTED', 'APPROVED'])->max('version_no')])->all(),
                 'payments' => DB::table('payment_allocations')->join('payments', 'payments.id', '=', 'payment_allocations.payment_id')->where('payment_allocations.order_id', $order->id)->where('payments.status', 'CONFIRMED')->get(['payments.number', 'payments.received_at', 'payment_allocations.amount'])->map(fn ($p) => ['number' => $p->number, 'at' => Carbon::parse($p->received_at)->toIso8601String(), 'amount_minor' => (int) $p->amount])->all(),
             ],
-        ]);
+        ];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props['order'] = array_replace($props['order'], PenFixtures::portalOrderShow());
+            $props['pen'] = ['proof' => $request->query('sheet') === 'proof'];
+        }
+
+        return Inertia::render('portal/order-show', $props);
     }
+
 
     public function item(Request $request, Order $order, OrderItem $item): Response
     {
@@ -175,11 +193,16 @@ class PortalController extends Controller
         abort_unless($item->order_id === $order->id && ! $item->cancelled_at, 404);
         $v = DesignVersion::where('order_item_id', $item->id)->whereIn('status', ['SUBMITTED', 'APPROVED'])->latest('version_no')->with('files')->first();
 
-        return Inertia::render('portal/item-preview', [
+        $props = [
             'order' => ['id' => $order->id, 'number' => $order->order_number],
             'item' => ['id' => $item->id, 'name' => $item->product_snapshot['name'], 'quantity' => $item->quantity],
             'version' => $v ? ['id' => $v->id, 'no' => $v->version_no, 'status' => $v->status, 'revision' => $v->manifest_revision, 'files' => $v->files->map(fn (File $f) => ['id' => $f->id, 'name' => $f->original_filename, 'mime' => $f->mime_type])->all()] : null,
-        ]);
+        ];
+        if (app()->environment('local') && $request->query('fixture') === 'pen') {
+            $props = array_replace($props, PenFixtures::portalItem());
+        }
+
+        return Inertia::render('portal/item-preview', $props);
     }
 
     public function approve(Request $request, Order $order, OrderItem $item, DesignService $design): RedirectResponse
@@ -266,19 +289,26 @@ class PortalController extends Controller
         $pricing = app(PricingService::class);
 
         return OrderRequest::where('customer_id', $c->id)->with(['items.product', 'order'])->latest('id')->limit(10)->get()->map(function (OrderRequest $r) use ($pricing, $c) {
-            $total = $r->order?->grand_total->minor;
-            if ($total === null) {
-                try {
-                    $quotes = $r->items->map(fn ($i) => $pricing->quoteItem($i->product, $i->options ?? [], (int) $i->quantity, $c->pricingTier))->all();
-                    $total = $pricing->quoteOrder($quotes, 'NONE', 0, Money::zero())->grandTotal->minor;
-                } catch (\Throwable) {
-                    $total = null;
-                }
-            }
+            $total = $this->requestTotal($r, $c, $pricing);
 
             return ['id' => $r->id, 'number' => $r->request_number, 'status' => $r->status->label(), 'status_key' => $r->status->value, 'items' => $r->items->count(),
                 'total_minor' => $total, 'at' => $r->submitted_at->toIso8601String(), 'order_number' => $r->order?->order_number];
         })->all();
+    }
+
+    /** إجمالي الأوردر المرتبط إن وُجد، وإلا عرض سعر مبدئي بشريحة العميل (الخادم هو المرجع). */
+    private function requestTotal(OrderRequest $r, Customer $c, PricingService $pricing): ?int
+    {
+        if ($r->order) {
+            return $r->order->grand_total->minor;
+        }
+        try {
+            $quotes = $r->items->map(fn ($i) => $pricing->quoteItem($i->product, $i->options ?? [], (int) $i->quantity, $c->pricingTier))->all();
+
+            return $pricing->quoteOrder($quotes, 'NONE', 0, Money::zero())->grandTotal->minor;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** @return list<array<string, mixed>> */

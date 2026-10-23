@@ -43,6 +43,39 @@ final class PenFixtures
         ];
     }
 
+    /** M-A09 — تفاصيل الطلب المقبول على الموبايل. @return array<string, mixed> */
+    public static function portalRequestShow(): array
+    {
+        return [
+            'number' => 'REQ-0186', 'status' => 'مقبول', 'status_key' => 'ACCEPTED', 'order_id' => 153, 'order_number' => 'ORD-0153', 'total_minor' => 260000,
+            'items' => [['name' => 'كروت شخصية', 'quantity' => 1000, 'files' => ['logo-reference.png']], ['name' => 'فلاير', 'quantity' => 500, 'files' => ['flyer-text.pdf']]],
+            'edits' => [['name' => 'فلاير', 'old' => 300, 'new' => 500]],
+        ];
+    }
+
+    /** M-A11/A13 — تفاصيل الأوردر على الموبايل. @return array<string, mixed> */
+    public static function portalOrderShow(): array
+    {
+        return [
+            'number' => 'ORD-0153', 'status' => 'مرحلة التصميم', 'status_key' => 'IN_DESIGN', 'delivery_method' => 'PICKUP', 'grand_total_minor' => 260000, 'paid_minor' => 0, 'remaining_minor' => 260000,
+            'has_invoice' => false, 'payments' => [],
+            'items' => [
+                ['id' => 1, 'name' => 'كروت شخصية', 'quantity' => 1000, 'state' => 'AWAITING_APPROVAL', 'approved' => false, 'total_minor' => 180000, 'version_no' => 1],
+                ['id' => 2, 'name' => 'فلاير', 'quantity' => 500, 'state' => 'IN_DESIGN', 'approved' => false, 'total_minor' => 80000, 'version_no' => null],
+            ],
+        ];
+    }
+
+    /** M-A12 — معاينة التصميم على الموبايل (ملف المعاينة غير متاح = حالة «تعذّر تحميل المعاينة»). @return array<string, mixed> */
+    public static function portalItem(): array
+    {
+        return [
+            'order' => ['id' => 153, 'number' => 'ORD-0153'],
+            'item' => ['id' => 1, 'name' => 'كروت شخصية', 'quantity' => 1000],
+            'version' => ['id' => 1, 'no' => 1, 'status' => 'SUBMITTED', 'revision' => 1, 'files' => [['id' => 0, 'name' => 'preview.png', 'mime' => 'image/png']]],
+        ];
+    }
+
     /** M-A02 — لوحة العميل على الموبايل. @return array<string, mixed> */
     public static function portalDashboard(): array
     {
