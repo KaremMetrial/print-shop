@@ -119,6 +119,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('{orderRequest}', 'show')->name('show');
         Route::post('{orderRequest}/start', 'start')->name('start')->middleware('idempotent');
+        Route::post('{orderRequest}/release', 'release')->name('release')->middleware('idempotent');
         Route::patch('{orderRequest}', 'save')->name('save')->middleware('idempotent');
         Route::post('{orderRequest}/accept', 'accept')->name('accept')->middleware('idempotent');
         Route::post('{orderRequest}/reject', 'reject')->name('reject')->middleware('idempotent');

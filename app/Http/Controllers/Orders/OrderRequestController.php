@@ -137,6 +137,13 @@ class OrderRequestController extends Controller
         return back()->with('success', 'بدأت مراجعة الطلب وأصبح محجوزًا لك.');
     }
 
+    public function release(Request $request, OrderRequest $orderRequest, ReviewOrderRequest $action): RedirectResponse
+    {
+        $action->release($request->user(), $orderRequest);
+
+        return back()->with('success', 'تم فكّ حجز المراجعة وعاد الطلب إلى «بانتظار المراجعة».');
+    }
+
     public function save(Request $request, OrderRequest $orderRequest, ReviewOrderRequest $action): RedirectResponse
     {
         $data = $request->validate(['items' => ['required', 'array', 'min:1'], 'items.*.id' => ['required', 'integer'], 'items.*.quantity' => ['required', 'integer', 'min:1', 'max:1000000'], 'items.*.options' => ['nullable', 'array']]);

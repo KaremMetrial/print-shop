@@ -70,7 +70,7 @@
 - [ ] **Exit 3:** عميل جديد + تفعيل دخوله + منع التكرار
 
 ## اليوم 4 — الأربعاء 21/10 — المنتجات والتسعير (Flow 03)
-- [ ] 4.00 قرار D1 (التقريب النقدي) — **قبل البدء**
+- [x] 4.00 قرار D1 (التقريب النقدي) — **قبل البدء** — حُسم (docs/09-decisions.md)
 - [ ] 4.01 migrations: categories/products/option groups+values/tiers/tier prices/specialties
 - [ ] 4.02 PricingService (Percentage + Fixed Base + MOQ) + `/pricing/quote`
 - [ ] 4.03 اختبارات TC-020..029 + property tests
@@ -91,7 +91,7 @@
 - [~] 6.01 FE: S-012 Overview ✅ · S-013 Items ✅ · S-014 Item details (يعتمد على وحدة التصميم)
 - [~] 6.02 UpdateOrder ✅ + S-015 ✅ + Audit ✅ · soft-cancel للبند + حوار الفروق (متبقٍ)
 - [~] 6.03 S-016 الإلغاء ✅ (CancelOrder + حوار) · قفل الروابط عند بناء order_links
-- [ ] 6.04 قرار D4 (مراجعة محجوزة) قبل البدء بالطلبات
+- [x] 6.04 قرار D4 (مراجعة محجوزة) قبل البدء بالطلبات — حُسم (docs/09-decisions.md)
 - [ ] 6.05 order_requests + Start Review (atomic) + Accept (مرة واحدة) + Reject (سبب)
 - [ ] 6.06 FE: S-019/020/021 مراجعة الطلب
 - [ ] 6.07 اختبارات TC-030..039 + تزامن (claim×2, accept×2)
@@ -108,7 +108,7 @@
 - [ ] **Exit 7:** أوردر جديد → مصمم مناسب تلقائيًا (أو Action لو مفيش)
 
 ## اليوم 8 — الثلاثاء 27/10 — التصميم والاعتماد (Flow 06)
-- [ ] 8.00 قرار D2 (حدود الملفات/الصوت)
+- [x] 8.00 قرار D2 (حدود الملفات/الصوت) — حُسم (docs/09-decisions.md)
 - [ ] 8.01 Files: prepare/complete + MIME/signature/size + preview بلا تنزيل
 - [ ] 8.02 design_versions + files + manifest revision + Submit
 - [ ] 8.03 ApprovalService (stale check) + Reopen (Admin/SA قبل الطباعة)

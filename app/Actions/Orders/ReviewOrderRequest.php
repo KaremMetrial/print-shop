@@ -38,6 +38,27 @@ class ReviewOrderRequest
         });
     }
 
+    /** D4: إدارة تفكّ حجز مراجعة موظف غائب (يعود الطلب «بانتظار المراجعة») ويُسجَّل في التدقيق. */
+    public function release(User $actor, OrderRequest $request): OrderRequest
+    {
+        Gate::forUser($actor)->authorize('order_requests.accept');
+
+        return DB::transaction(function () use ($actor, $request) {
+            $r = OrderRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            if ($r->status->isFinal()) {
+                throw new BusinessException(ErrorCode::REQUEST_ALREADY_DECIDED);
+            }
+            if ($r->status !== OrderRequestStatus::IN_REVIEW) {
+                throw new BusinessException(ErrorCode::REQUEST_ALREADY_CLAIMED);
+            }
+            $old = $r->reviewer_id;
+            $r->forceFill(['status' => OrderRequestStatus::PENDING, 'reviewer_id' => null, 'review_started_at' => null])->save();
+            $this->audit->record('order_request.review_released', $r, ['status' => 'IN_REVIEW', 'reviewer_id' => $old], ['status' => 'PENDING', 'released_by' => $actor->id]);
+
+            return $r;
+        });
+    }
+
     /**
      * @param  list<array{id: int, quantity: int, options?: array<int|string, list<int>>}>  $items  التعديلات (الكمية/المواصفات)
      */

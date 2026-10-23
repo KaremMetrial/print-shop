@@ -91,3 +91,13 @@ it('forbids designers from the requests area', function () {
     $this->get('/order-requests')->assertForbidden();
     rq($this, 'post', "/order-requests/{$r->id}/start")->assertForbidden();
 });
+
+it('lets an admin release a request held by an absent reviewer (D4) and audits it', function () {
+    $held = User::factory()->dataEntry()->create();
+    $req = OrderRequest::factory()->create(['status' => 'IN_REVIEW', 'reviewer_id' => $held->id, 'review_started_at' => now()->subDay()]);
+    $this->actingAs(User::factory()->designer()->create())->post("/order-requests/{$req->id}/release", [], ['Idempotency-Key' => 'rel-0'])->assertForbidden();
+    $this->actingAs(User::factory()->admin()->create())->post("/order-requests/{$req->id}/release", [], ['Idempotency-Key' => 'rel-1'])->assertRedirect();
+    $req->refresh();
+    expect($req->status->value)->toBe('PENDING')->and($req->reviewer_id)->toBeNull()
+        ->and(AuditLog::where('action', 'order_request.review_released')->exists())->toBeTrue();
+});

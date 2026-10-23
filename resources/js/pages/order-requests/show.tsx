@@ -148,6 +148,11 @@ export default function OrderRequestShow(p: Props) {
                                 بدء المراجعة
                             </button>
                         )}
+                        {r.status === 'IN_REVIEW' && !r.mine && can.accept && (
+                            <button type="button" onClick={() => router.post(`/order-requests/${r.id}/release`, {}, hdrs)} className={`${btn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--border)]`}>
+                                فكّ حجز المراجعة
+                            </button>
+                        )}
                         {live && (
                             <>
                                 <button type="button" onClick={save} className={`${btn} bg-[var(--surface)] text-[var(--ink)] [outline:1px_solid_var(--border)]`}>

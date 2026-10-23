@@ -3,6 +3,7 @@
 use App\Actions\Orders\AdvanceOrder;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,3 +23,6 @@ Schedule::call(function () {
         }
     }
 })->everyTenMinutes()->name('imgsearch:cleanup');
+
+// D5: مفاتيح Idempotency أقدم من 7 أيام تُحذف (لا تُستخدم بعد ذلك للتكرار)
+Schedule::call(fn () => DB::table('idempotency_keys')->where('created_at', '<', now()->subDays(7))->delete())->daily()->name('idempotency:prune');

@@ -41,7 +41,7 @@
 - [ ] T-2.4 QA: Unit/property tests للتسعير TC-020..027 — M
 - [ ] T-2.5 FE: S-033/034/035 Products + Option editor — L
 - [ ] T-2.6 FE: S-036/037 Tiers + preview — M
-- [ ] T-2.7 DECISION: D1 سياسة التقريب → تنفيذ — S
+- [x] T-2.7 DECISION: D1 سياسة التقريب → تنفيذ — S — حُسم (docs/09-decisions.md)
 - [ ] T-2.8 BE/FE: Designer specialties + availability admin (S-040/074 جزئي) — M
 
 ## Phase 3 — Orders & Requests
@@ -77,7 +77,7 @@
 - [ ] T-5.6 BE: OrderLinkService (generate/hash/suspend/reactivate/regenerate/close) + middleware — M
 - [ ] T-5.7 FE: S-017 Links mgmt + S-086/087/088/093 Link customer pages — L
 - [ ] T-5.8 FE: Design preview viewer (zoom/PDF nav) بلا تنزيل — M
-- [ ] T-5.9 DECISION: D2 حدود الملفات → Settings — S
+- [x] T-5.9 DECISION: D2 حدود الملفات → Settings — S — حُسم (docs/09-decisions.md)
 - [ ] T-5.10 QA: TC-051..054, 087..089 + IDOR/file tests + token tests — L
 
 ## Phase 6 — Fulfillment
@@ -98,7 +98,7 @@
 - [ ] T-7.8 FE: S-009 dashboard، S-027/028/029/051/052/053/054/055/056/057/058 — L×3
 - [ ] T-7.9 FE: Data Entry limited finance view (S-026/027 restricted) — M
 - [ ] T-7.10 QA: TC-071..086 + invariants + concurrency 40.21/40.22 — L
-- [ ] T-7.11 DECISION: D7 فواتير قانونية — S
+- [x] T-7.11 DECISION: D7 فواتير قانونية — S — حُسم (docs/09-decisions.md)
 
 ## Phase 8 — Actions, Search, WhatsApp
 - [ ] T-8.1 DB: notifications, actions (dedupe unique)

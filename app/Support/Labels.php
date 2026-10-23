@@ -25,7 +25,7 @@ class Labels
         'order.item_added' => 'إضافة بند للأوردر', 'order.item_updated' => 'تعديل بند في الأوردر', 'order.item_cancelled' => 'إلغاء بند من الأوردر',
         'invoice.issued' => 'إصدار فاتورة', 'invoice.voided' => 'إلغاء فاتورة',
         'order_link.regenerated' => 'إعادة توليد رابط الأوردر', 'order_link.suspended' => 'إيقاف رابط الأوردر', 'order_link.reactivated' => 'إعادة تفعيل رابط الأوردر',
-        'order_request.submitted' => 'إرسال طلب أوردر', 'order_request.review_started' => 'بدء مراجعة طلب', 'order_request.edited' => 'تعديل طلب أثناء المراجعة',
+        'order_request.submitted' => 'إرسال طلب أوردر', 'order_request.review_started' => 'بدء مراجعة طلب', 'order_request.review_released' => 'فكّ حجز مراجعة طلب', 'order_request.edited' => 'تعديل طلب أثناء المراجعة',
         'order_request.accepted' => 'قبول طلب أوردر', 'order_request.rejected' => 'رفض طلب أوردر',
         'payment.recorded' => 'تسجيل دفعة', 'payment.corrected' => 'تصحيح دفعة', 'payment.voided' => 'إلغاء دفعة',
         'payment_proof.approved' => 'اعتماد إثبات دفع', 'payment_proof.rejected' => 'رفض إثبات دفع',

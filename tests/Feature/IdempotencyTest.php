@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -55,4 +56,13 @@ it('scopes keys per user', function () {
     $this->actingAs(User::factory()->create());
     $this->postJson('/_test/pay', [], $h)->assertCreated();
     expect($GLOBALS['idem_calls'])->toBe(2);
+});
+
+it('prunes idempotency keys older than 7 days (D5 schedule)', function () {
+    DB::table('idempotency_keys')->insert([
+        ['scope' => 't', 'key' => 'old', 'method' => 'POST', 'path' => '/x', 'request_hash' => 'x', 'created_at' => now()->subDays(8)],
+        ['scope' => 't', 'key' => 'new', 'method' => 'POST', 'path' => '/x', 'request_hash' => 'x', 'created_at' => now()->subDay()],
+    ]);
+    collect(app(Schedule::class)->events())->first(fn ($e) => $e->description === 'idempotency:prune')->run(app());
+    expect(DB::table('idempotency_keys')->pluck('key')->all())->toBe(['new']);
 });
