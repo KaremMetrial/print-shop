@@ -38,5 +38,16 @@ await step('موبايل: شات الرابط — إرسال نص ثم مرفق 
   await page.locator('input[aria-label="مرفق المحادثة"]').last().setInputFiles('/tmp/claude-1000/e2e.png'); await page.getByRole('button', { name: 'إرسال الرسالة' }).click(); await waitIdle(page, 1500);
   return sql(`select count(*) from item_chat_messages where order_item_id=${item} and file_id is not null`) === '1' && sql(`select count(*) from item_chat_messages where order_item_id=${item} and body='رسالة من الموبايل'`) === '1';
 });
+
+await step('موبايل: رسالة صوتية (ميكروفون وهمي) تُسجَّل وتُرسل', async () => {
+  const { chromium } = await import('playwright-core');
+  const vb = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+  const vc = await vb.newContext({ viewport: { width: 390, height: 844 }, locale: 'ar', permissions: ['microphone'] }); const vp = await vc.newPage();
+  await vp.goto(`${BASE}/l/${token}/items/${item}?tab=chat`); await waitIdle(vp);
+  if ((await vp.getByText('المحادثة مغلقة').count()) > 0) { await vb.close(); return true; }
+  await vp.getByRole('button', { name: /^صوت$/ }).click(); await vp.waitForTimeout(1500); await vp.getByRole('button', { name: /^إيقاف$/ }).click(); await vp.getByText('رسالة صوتية').first().waitFor({ timeout: 5000 });
+  await vp.getByRole('button', { name: 'إرسال الرسالة' }).click(); await waitIdle(vp, 1500); await vb.close();
+  return sql(`select count(*) from files f join item_chat_messages m on m.file_id=f.id where m.order_item_id=${item} and (f.mime_type like 'audio/%' or f.mime_type='video/webm')`) === '1';
+});
 console.log('أخطاء JS:', errs.length, errs.slice(0, 3));
 summary(); await b.close();
